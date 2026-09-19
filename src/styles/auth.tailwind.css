@@ -13,6 +13,7 @@
 }
 .brand { @apply w-36 h-36 self-center }
 .title { @apply text-[20px] font-bold uppercase text-center tracking-[1px]; }
+.title.small { @apply text-[20px]; }
 .brand-title { @apply text-[#dfe2ee]; }
 .accent { @apply text-[#ffb95f] tracking-[2px] font-extrabold; }
 .label { @apply text-xs text-[#bfc7d2] uppercase tracking-wider font-semibold text-left block }
@@ -21,3 +22,103 @@
 .primary { @apply bg-[#3198dc] text-[#003351] px-4 py-3 rounded font-bold }
 .otp-group { @apply flex gap-2 justify-center my-2 }
 .otp-input { @apply w-12 h-12 bg-[#0a0e16] border border-[rgba(255,255,255,0.04)] text-[#dfe2ee] text-lg text-center rounded-md }
+
+/* ── OTP Verification Step (Figma-matched) ────────────────────────── */
+
+/* Context notice box */
+.otp-notice {
+  @apply bg-[rgba(9,14,24,0.9)] border border-[rgba(30,41,59,0.9)] rounded-lg p-[15px] w-full flex items-start gap-[10px];
+}
+.otp-notice-text {
+  @apply text-[#cbd5e1] text-[12px] leading-[1.625] font-normal;
+}
+.otp-notice-email {
+  @apply text-[#198ec8] font-medium;
+}
+
+/* Label row with countdown timer */
+.otp-label-row {
+  @apply flex items-center justify-between w-full;
+}
+.otp-label {
+  @apply text-[#cbd5e1] text-[11px] tracking-[0.55px] uppercase font-normal;
+  font-family: 'JetBrains Mono', 'Courier New', monospace;
+}
+.otp-timer {
+  @apply flex items-center gap-1;
+}
+.otp-timer-text {
+  @apply text-[#22d3ee] text-[10px] font-normal;
+  font-family: 'JetBrains Mono', 'Courier New', monospace;
+}
+.otp-timer-value {
+  @apply text-white text-[10px] font-bold;
+  font-family: 'JetBrains Mono', 'Courier New', monospace;
+}
+
+/* OTP digit slot grid */
+.otp-grid {
+  @apply flex gap-[10px] justify-center w-full;
+}
+
+/* Base digit slot */
+.otp-digit {
+  @apply flex flex-col items-center justify-center rounded-lg text-[20px] font-bold text-center
+         bg-[#080c14] border border-[rgba(21,94,117,0.8)] text-[#67e8f9]
+         w-[72px] h-[56px] shrink-0 outline-none;
+  font-family: 'JetBrains Mono', 'Courier New', monospace;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+/* Active (focused) digit slot — blue glow border matching Figma */
+.otp-digit:focus,
+.otp-digit-active {
+  @apply border-2 border-[#2563eb] bg-[#0b111d];
+  box-shadow: 0 0 0 1px #2563eb, 0 0 25px -4px rgba(0, 229, 255, 0.25);
+}
+
+/* Empty / placeholder dot color */
+.otp-digit.otp-empty {
+  @apply text-[#6b7280];
+}
+
+/* Resend row */
+.otp-resend-row {
+  @apply flex items-center justify-between w-full pt-[2px] px-[2px];
+}
+.otp-resend-hint {
+  @apply text-[#94a3b8] text-[11px] font-normal;
+}
+.otp-resend-btn {
+  @apply flex items-center gap-1 text-[#22d3ee] text-[11px] font-medium cursor-pointer bg-transparent border-0 p-0;
+}
+
+/* CTA verify button */
+.otp-cta-btn {
+  @apply w-full flex items-center justify-center gap-2 px-4 py-3 rounded-lg font-semibold text-[14px] text-white
+         bg-[#188ec8] cursor-pointer border-0;
+  box-shadow: 0 10px 15px -3px rgba(8, 51, 68, 0.4), 0 4px 6px -4px rgba(8, 51, 68, 0.4);
+  transition: opacity 0.2s ease, box-shadow 0.2s ease;
+}
+.otp-cta-btn:hover {
+  opacity: 0.92;
+  box-shadow: 0 12px 20px -3px rgba(8, 51, 68, 0.55), 0 4px 8px -4px rgba(8, 51, 68, 0.45);
+}
+.otp-cta-btn:disabled {
+  @apply opacity-60 cursor-not-allowed;
+}
+
+/* Back-to-login link */
+.otp-back-link {
+  @apply flex items-center justify-center gap-[6px] text-[#94a3b8] text-[12px] font-medium no-underline;
+  transition: color 0.15s ease;
+}
+.otp-back-link:hover {
+  @apply text-[#cbd5e1];
+}
+
+/* Security audit banner divider */
+.otp-security-banner {
+  @apply border-t border-[rgba(30,41,59,0.8)] w-full pt-4;
+}
+
