@@ -458,6 +458,7 @@ export default function Dashboard() {
             <div className="pt-6 w-full">
               <button
                 type="button"
+                onClick={() => nav('/support')}
                 className="flex items-center justify-between w-full rounded-lg bg-[#3198dc] hover:bg-[#43a4e5] text-[#002c47] font-bold text-xs px-4 py-2.5 transition-colors cursor-pointer border-0 shadow-md"
               >
                 <span>View Inquiries</span>
