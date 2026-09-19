@@ -1,0 +1,23 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.auth-outer {
+  @apply min-h-screen flex items-center justify-center bg-[#0f131c] px-10 py-10;
+}
+.auth-panel {
+  @apply w-full max-w-lg bg-[#1c2028] p-10 rounded-lg shadow-[0_25px_50px_-12px_rgba(0,0,0,0.6)] text-[#dfe2ee] flex flex-col gap-3;
+}
+.badge {
+  @apply self-center bg-[rgba(76,215,246,0.12)] text-[#4cd7f6] px-3 py-1 rounded-full font-semibold text-xs tracking-wider;
+}
+.brand { @apply w-36 h-36 self-center }
+.title { @apply text-[20px] font-bold uppercase text-center tracking-[1px]; }
+.brand-title { @apply text-[#dfe2ee]; }
+.accent { @apply text-[#ffb95f] tracking-[2px] font-extrabold; }
+.label { @apply text-xs text-[#bfc7d2] uppercase tracking-wider font-semibold text-left block }
+.input-field { @apply bg-[#0a0e16] px-4 py-3 rounded text-[#dfe2ee] w-full border border-[rgba(255,255,255,0.03)]; }
+.actions { @apply flex gap-3 items-center }
+.primary { @apply bg-[#3198dc] text-[#003351] px-4 py-3 rounded font-bold }
+.otp-group { @apply flex gap-2 justify-center my-2 }
+.otp-input { @apply w-12 h-12 bg-[#0a0e16] border border-[rgba(255,255,255,0.04)] text-[#dfe2ee] text-lg text-center rounded-md }

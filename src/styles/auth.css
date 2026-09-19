@@ -1,0 +1,29 @@
+:root{
+  --bg:#0f131c;
+  --panel:#1c2028;
+  --muted:#bfc7d2;
+  --accent:#4cd7f6;
+  --accent-cta:#3198dc;
+  --text:#dfe2ee;
+  --accent-warm:#ffb95f;
+}
+*{box-sizing:border-box}
+body,html,#root{height:100%}
+.auth-outer{
+  min-height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:linear-gradient(90deg,#0f131c,#0f131c);
+  padding:40px;
+}
+.auth-panel{
+  width:560px;
+  background:var(--panel);
+  padding:40px;
+  *{box-sizing:border-box}
+  body,html,#root{height:100%}
+
+  #legacy-auth {
+    /* fallback legacy styles kept for reference; prefer Tailwind file */
+  }
