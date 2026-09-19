@@ -365,6 +365,7 @@ export default function Dashboard() {
             <div className="pt-6 w-full">
               <button
                 type="button"
+                onClick={() => nav('/providers')}
                 className="flex items-center justify-between w-full rounded-lg bg-[#ca8100] hover:bg-[#e09100] text-[#3e2400] font-bold text-xs px-4 py-2.5 transition-colors cursor-pointer border-0 shadow-md"
               >
                 <span>Review Approvals</span>
@@ -593,6 +594,7 @@ export default function Dashboard() {
                       <td className="py-4 px-6 align-middle text-right">
                         <button
                           type="button"
+                          onClick={() => nav('/providers')}
                           className="inline-flex items-center justify-center px-3.5 py-1.5 rounded bg-[#93ccff] hover:bg-[#b0dcff] text-[#003351] font-bold text-xs tracking-wide transition-colors cursor-pointer border-0 shadow-sm"
                         >
                           Review &amp; Decide

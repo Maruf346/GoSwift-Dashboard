@@ -3,6 +3,7 @@ import Login from './pages/Login'
 import ForgotPassword from './pages/ForgotPassword'
 import Dashboard from './pages/Dashboard'
 import UserManagement from './pages/UserManagement'
+import ProviderManagement from './pages/ProviderManagement'
 import './App.css'
 
 function App() {
@@ -13,6 +14,7 @@ function App() {
         <Route path="/forgot" element={<ForgotPassword />} />
         <Route path="/" element={<Dashboard />} />
         <Route path="/users" element={<UserManagement />} />
+        <Route path="/providers" element={<ProviderManagement />} />
       </Routes>
     </BrowserRouter>
   )
