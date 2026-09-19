@@ -1,7 +1,8 @@
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 
-// ── Asset URLs (Figma-sourced, valid for 7 days) ──────────────────────────
+// ── Asset URLs (Figma-sourced) ─────────────────────────────────────────────
 const imgLogo = 'https://www.figma.com/api/mcp/asset/8afe33d4-aada-4a6f-8707-97376b976214.png'
 const imgIconPending = 'https://www.figma.com/api/mcp/asset/399ad211-d391-49ab-a185-028b439ccb60.svg'
 const imgIconArrowGold = 'https://www.figma.com/api/mcp/asset/f223fee5-f048-4591-bc9e-c05802de136c.svg'
@@ -18,465 +19,587 @@ const imgNavLogout = 'https://www.figma.com/api/mcp/asset/ded83df7-aac7-4288-b95
 // ── KYC table rows data ───────────────────────────────────────────────────
 const pendingRows = [
   {
-    initials: 'MR', initialsColor: '#93ccff',
-    name: 'Marcus Rolle', email: 'marcus.rolle@swiftbahamas.bs',
-    type: 'Driver', typeBg: 'rgba(147,204,255,0.1)', typeColor: '#93ccff',
-    territory: 'Nassau /\nNew Providence',
-    asset: '2024 Toyota Camry', assetSub: 'Public Service Badge Valid',
-    age: '2 hours ago', ageColor: '#ffb95f',
+    initials: 'MR',
+    initialsColor: '#93ccff',
+    name: 'Marcus Rolle',
+    email: 'marcus.rolle@swiftbahamas.bs',
+    type: 'Driver',
+    typeBg: 'rgba(147,204,255,0.12)',
+    typeColor: '#93ccff',
+    territory: 'Nassau / New Providence',
+    asset: '2024 Toyota Camry',
+    assetSub: 'Public Service Badge Valid',
+    age: '2 hours ago',
+    ageColor: '#ffb95f',
   },
   {
-    initials: 'IB', initialsColor: '#4cd7f6',
-    name: 'Island Bites Café', email: 'ops@islandbitesbahamas.com',
-    type: 'Food Vendor', typeBg: 'rgba(202,129,0,0.25)', typeColor: '#ffb95f',
-    territory: 'Cable Beach,\nNassau',
-    asset: 'Bahamian Cuisine', assetSub: 'Sanitary Certificate Verified',
-    age: '4 hours ago', ageColor: '#ffb95f',
+    initials: 'IB',
+    initialsColor: '#4cd7f6',
+    name: 'Island Bites Café',
+    email: 'ops@islandbitesbahamas.com',
+    type: 'Food Vendor',
+    typeBg: 'rgba(202,129,0,0.25)',
+    typeColor: '#ffb95f',
+    territory: 'Cable Beach, Nassau',
+    asset: 'Bahamian Cuisine',
+    assetSub: 'Sanitary Certificate Verified',
+    age: '4 hours ago',
+    ageColor: '#ffb95f',
   },
   {
-    initials: 'DS', initialsColor: '#93ccff',
-    name: 'Derick Strachan', email: 'strachan.d@fastmail.bs',
-    type: 'Courier', typeBg: 'rgba(147,204,255,0.1)', typeColor: '#93ccff',
-    territory: 'Freeport,\nGrand Bahama',
-    asset: 'Scooter Express', assetSub: 'Commercial Dispatch License',
-    age: '6 hours ago', ageColor: '#ffb95f',
+    initials: 'DS',
+    initialsColor: '#93ccff',
+    name: 'Derick Strachan',
+    email: 'strachan.d@fastmail.bs',
+    type: 'Courier',
+    typeBg: 'rgba(147,204,255,0.12)',
+    typeColor: '#93ccff',
+    territory: 'Freeport, Grand Bahama',
+    asset: 'Scooter Express',
+    assetSub: 'Commercial Dispatch License',
+    age: '6 hours ago',
+    ageColor: '#ffb95f',
   },
   {
-    initials: 'BD', initialsColor: '#4cd7f6',
-    name: 'Bahama Drift Rentals', email: 'info@bahamadrift.com',
-    type: 'Car Rental Provider', typeBg: 'rgba(76,215,246,0.1)', typeColor: '#4cd7f6',
+    initials: 'BD',
+    initialsColor: '#4cd7f6',
+    name: 'Bahama Drift Rentals',
+    email: 'info@bahamadrift.com',
+    type: 'Car Rental Provider',
+    typeBg: 'rgba(76,215,246,0.12)',
+    typeColor: '#4cd7f6',
     territory: 'Paradise Island',
-    asset: 'Fleet: 12 Vehicles', assetSub: 'Full Comprehensive Insurance',
-    age: '1 day ago', ageColor: '#bfc7d2',
+    asset: 'Fleet: 12 Vehicles',
+    assetSub: 'Full Comprehensive Insurance',
+    age: '1 day ago',
+    ageColor: '#bfc7d2',
   },
   {
-    initials: 'CS', initialsColor: '#4cd7f6',
-    name: 'Coral Sands Villa', email: 'bookings@coralsandsexuma.com',
-    type: 'Property Owner', typeBg: 'rgba(76,215,246,0.1)', typeColor: '#4cd7f6',
+    initials: 'CS',
+    initialsColor: '#4cd7f6',
+    name: 'Coral Sands Villa',
+    email: 'bookings@coralsandsexuma.com',
+    type: 'Property Owner',
+    typeBg: 'rgba(76,215,246,0.12)',
+    typeColor: '#4cd7f6',
     territory: 'Exuma Cays',
-    asset: '3 Luxury Units', assetSub: 'Bahamas Ministry\nTourism Reg #884',
-    age: '1 day ago', ageColor: '#bfc7d2',
+    asset: '3 Luxury Units',
+    assetSub: 'Bahamas Ministry Tourism Reg #884',
+    age: '1 day ago',
+    ageColor: '#bfc7d2',
   },
 ]
 
 export default function Dashboard() {
   const auth = useAuth()
   const nav = useNavigate()
+  const [isCollapsed, setIsCollapsed] = useState(false)
+  const [isMobileOpen, setIsMobileOpen] = useState(false)
 
   function handleLogout() {
     auth.logout()
-    nav('/')
+    nav('/login')
   }
+
+  const navItems = [
+    { icon: imgNavDashboard, label: 'Dashboard', active: true },
+    { icon: imgNavUsers, label: 'User Management', active: false },
+    { icon: imgNavProviders, label: 'Provider Management', active: false },
+    { icon: imgNavSupport, label: 'Contact Support', active: false },
+    { icon: imgNavSettings, label: 'Settings', active: false },
+  ]
 
   return (
     <div
-      className="relative flex flex-col items-start w-full min-h-screen"
-      style={{ background: '#0f131c', paddingLeft: 256 }}
+      className={`relative flex flex-col items-start w-full min-h-screen bg-[#0f131c] text-[#dfe2ee] font-sans antialiased overflow-x-hidden transition-all duration-300 ease-in-out ${
+        isCollapsed ? 'lg:pl-[72px]' : 'lg:pl-64'
+      }`}
     >
+      {/* ═══ MOBILE BACKDROP OVERLAY ════════════════════════════════════════ */}
+      {isMobileOpen && (
+        <div
+          onClick={() => setIsMobileOpen(false)}
+          className="fixed inset-0 z-30 bg-black/60 backdrop-blur-sm lg:hidden transition-opacity"
+        />
+      )}
+
       {/* ═══ SIDEBAR ═══════════════════════════════════════════════════════ */}
       <aside
-        className="fixed left-0 top-0 flex flex-col justify-between items-start"
-        style={{
-          width: 256,
-          height: '100vh',
-          background: '#0a0e16',
-          boxShadow: '1px 0 4px rgba(0,0,0,0.35)',
-          zIndex: 20,
-        }}
+        className={`fixed left-0 top-0 h-screen flex flex-col justify-between bg-[#0a0e16] border-r border-[#1c2028] z-40 transition-all duration-300 ease-in-out shadow-2xl ${
+          isCollapsed ? 'lg:w-[72px]' : 'lg:w-64'
+        } ${isMobileOpen ? 'translate-x-0 w-64' : '-translate-x-full lg:translate-x-0'}`}
       >
         <div className="flex flex-col items-start w-full">
-          {/* Brand */}
-          <div
-            className="flex gap-2 items-center px-6 w-full shrink-0"
-            style={{ height: 64, background: 'rgba(24,28,36,0.4)' }}
-          >
-            <img src={imgLogo} alt="GoSwift logo" style={{ width: 53, height: 52, objectFit: 'cover' }} />
-            <div className="flex flex-col" style={{ gap: 5 }}>
-              <span style={{ display: 'block', fontSize: 16, lineHeight: '16px', fontWeight: 600, color: '#dfe2ee', letterSpacing: '-0.4px' }}>
-                GO SWIFT
-              </span>
-              <span style={{ display: 'block', fontSize: 11, lineHeight: '13.75px', fontWeight: 600, color: '#4cd7f6', textTransform: 'uppercase', letterSpacing: '0.55px' }}>
-                BAHAMASPORTAL
-              </span>
+          {/* Brand Header & Collapse Icon */}
+          <div className="flex items-center justify-between px-3.5 sm:px-4 w-full h-16 shrink-0 bg-[#181c24]/50 border-b border-[#1c2028]">
+            <div className={`flex items-center gap-2.5 overflow-hidden ${isCollapsed ? 'lg:justify-center w-full' : ''}`}>
+              <img
+                src={imgLogo}
+                alt="GoSwift"
+                className="w-9 h-9 object-contain shrink-0 transition-transform hover:scale-105"
+              />
+              <div className={`flex flex-col transition-opacity duration-200 ${isCollapsed ? 'lg:hidden' : ''}`}>
+                <span className="text-[15px] font-bold text-[#dfe2ee] tracking-tight leading-tight whitespace-nowrap">
+                  GO SWIFT
+                </span>
+                <span className="text-[10px] font-bold text-[#4cd7f6] uppercase tracking-wider leading-tight whitespace-nowrap">
+                  BAHAMAS PORTAL
+                </span>
+              </div>
             </div>
+
+            {/* Desktop Collapse Toggle Button */}
+            {!isCollapsed && (
+              <button
+                type="button"
+                onClick={() => setIsCollapsed(true)}
+                className="hidden lg:flex items-center justify-center p-1.5 rounded-lg text-[#89929b] hover:text-[#dfe2ee] hover:bg-[#262b35] transition-colors cursor-pointer border-0 bg-transparent"
+                title="Collapse sidebar"
+                aria-label="Collapse sidebar"
+              >
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
+                </svg>
+              </button>
+            )}
+
+            {/* Mobile Close Button */}
+            <button
+              type="button"
+              onClick={() => setIsMobileOpen(false)}
+              className="flex lg:hidden items-center justify-center p-1.5 rounded-lg text-[#89929b] hover:text-[#dfe2ee] hover:bg-[#262b35] transition-colors cursor-pointer border-0 bg-transparent"
+              aria-label="Close menu"
+            >
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
           </div>
 
-          {/* Nav section label */}
-          <div className="px-6 w-full" style={{ paddingTop: 31, paddingBottom: 7 }}>
-            <span style={{ fontSize: 11, fontWeight: 600, color: '#89929b', textTransform: 'uppercase', letterSpacing: '0.55px' }}>
-              NAVIGATION
+          {/* Collapsed Expand Toggle Bar (Visible when collapsed on desktop) */}
+          {isCollapsed && (
+            <div className="hidden lg:flex justify-center w-full py-2 border-b border-[#1c2028]">
+              <button
+                type="button"
+                onClick={() => setIsCollapsed(false)}
+                className="flex items-center justify-center p-2 rounded-lg text-[#89929b] hover:text-[#dfe2ee] hover:bg-[#262b35] transition-colors cursor-pointer border-0 bg-transparent"
+                title="Expand sidebar"
+                aria-label="Expand sidebar"
+              >
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 5l7 7-7 7M5 5l7 7-7 7" />
+                </svg>
+              </button>
+            </div>
+          )}
+
+          {/* Navigation Section Title */}
+          <div className={`px-5 w-full pt-6 pb-2 ${isCollapsed ? 'lg:hidden' : ''}`}>
+            <span className="text-[11px] font-bold text-[#89929b] uppercase tracking-wider">
+              Navigation
             </span>
           </div>
-
-          {/* Nav links */}
-          <nav className="flex flex-col w-full" style={{ gap: 4, padding: '0 8px' }}>
-            {/* Dashboard — active */}
-            <div
-              className="flex gap-2 items-center rounded-lg w-full cursor-pointer"
-              style={{ background: '#3198dc', padding: '8px 16px' }}
-            >
-              <img src={imgNavDashboard} alt="" style={{ width: 15, height: 15, flexShrink: 0 }} />
-              <span style={{ fontSize: 14, lineHeight: '20px', color: '#002c47' }}>Dashboard</span>
+          {isCollapsed && (
+            <div className="hidden lg:flex w-full py-3 justify-center">
+              <div className="w-6 h-[1px] bg-[#262b35]" />
             </div>
-            {[
-              { icon: imgNavUsers, label: 'User Management', w: 18.33, h: 13.33 },
-              { icon: imgNavProviders, label: 'Provider Management', w: 18, h: 21 },
-              { icon: imgNavSupport, label: 'Contact Support', w: 16.67, h: 15 },
-              { icon: imgNavSettings, label: 'Settings', w: 16.75, h: 16.67 },
-            ].map(({ icon, label, w, h }) => (
+          )}
+
+          {/* Navigation Links */}
+          <nav className="flex flex-col w-full gap-1 px-2.5">
+            {navItems.map((item) => (
               <div
-                key={label}
-                className="flex gap-2 items-center rounded-lg w-full cursor-pointer"
-                style={{ padding: '8px 16px', transition: 'background 0.15s' }}
-                onMouseEnter={e => (e.currentTarget.style.background = '#1c2028')}
-                onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
+                key={item.label}
+                title={item.label}
+                className={`flex items-center rounded-lg cursor-pointer transition-all duration-150 ${
+                  item.active
+                    ? 'bg-[#3198dc] text-[#002c47] font-semibold shadow-md'
+                    : 'text-[#bfc7d2] hover:bg-[#1c2028] hover:text-white'
+                } ${isCollapsed ? 'lg:justify-center lg:p-2.5 gap-3 px-3.5 py-2.5' : 'gap-3 px-3.5 py-2.5'}`}
               >
-                <img src={icon} alt="" style={{ width: w, height: h, flexShrink: 0 }} />
-                <span style={{ fontSize: 14, lineHeight: '20px', color: '#bfc7d2' }}>{label}</span>
+                <img
+                  src={item.icon}
+                  alt=""
+                  className={`w-4 h-4 shrink-0 ${item.active ? 'brightness-0' : ''}`}
+                />
+                <span className={`text-[13.5px] leading-5 truncate ${isCollapsed ? 'lg:hidden' : ''}`}>
+                  {item.label}
+                </span>
               </div>
             ))}
           </nav>
         </div>
 
-        {/* Footer logout */}
-        <div className="flex flex-col items-start w-full" style={{ padding: 8 }}>
-          <div className="flex flex-col items-start w-full" style={{ borderTop: '1px solid rgba(196,199,200,0.3)', paddingTop: 17, paddingBottom: 16, paddingLeft: 16, paddingRight: 16 }}>
-            <button
-              onClick={handleLogout}
-              className="flex items-center rounded-lg w-full cursor-pointer border-0 bg-transparent"
-              style={{ gap: 12, padding: '8px 12px', transition: 'background 0.15s' }}
-              onMouseEnter={e => (e.currentTarget.style.background = '#1c2028')}
-              onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
-            >
-              <img src={imgNavLogout} alt="" style={{ width: 18, height: 18, flexShrink: 0 }} />
-              <span style={{ fontSize: 14, lineHeight: '14px', fontWeight: 600, color: '#fff', letterSpacing: '0.28px' }}>Logout</span>
-            </button>
-          </div>
+        {/* Sidebar Footer Logout */}
+        <div className="flex flex-col items-start w-full p-2.5 border-t border-[#1c2028] bg-[#0a0e16]">
+          <button
+            onClick={handleLogout}
+            title="Logout"
+            className={`flex items-center rounded-lg w-full cursor-pointer border-0 bg-transparent text-[#bfc7d2] hover:bg-[#1c2028] hover:text-red-400 transition-colors ${
+              isCollapsed ? 'lg:justify-center lg:p-2.5 gap-3 px-3.5 py-2.5' : 'gap-3 px-3.5 py-2.5'
+            }`}
+          >
+            <img src={imgNavLogout} alt="" className="w-4 h-4 shrink-0" />
+            <span className={`text-[13.5px] font-semibold tracking-wide ${isCollapsed ? 'lg:hidden' : ''}`}>
+              Logout
+            </span>
+          </button>
         </div>
       </aside>
 
       {/* ═══ TOP HEADER ════════════════════════════════════════════════════ */}
       <header
-        className="fixed top-0 right-0 flex items-center justify-end"
-        style={{
-          left: 256,
-          height: 64,
-          padding: '0 32px',
-          background: 'rgba(10,14,22,0.9)',
-          backdropFilter: 'blur(12px)',
-          boxShadow: '0 1px 8px rgba(0,0,0,0.25)',
-          zIndex: 10,
-        }}
+        className={`fixed top-0 right-0 left-0 h-16 flex items-center justify-between px-4 sm:px-6 lg:px-8 bg-[#0a0e16]/85 backdrop-blur-md border-b border-[#1c2028] z-20 transition-all duration-300 ease-in-out ${
+          isCollapsed ? 'lg:left-[72px]' : 'lg:left-64'
+        }`}
       >
-        <div
-          className="flex gap-2 items-center"
-          style={{ background: '#1c2028', borderRadius: 12, paddingLeft: 16, paddingRight: 4, paddingTop: 4, paddingBottom: 4 }}
-        >
-          <div className="flex flex-col items-end">
-            <span style={{ fontSize: 12, lineHeight: '15px', fontWeight: 600, color: '#dfe2ee', letterSpacing: '0.24px' }}>Admin Officer</span>
-            <span style={{ fontSize: 11, lineHeight: '13.75px', fontWeight: 600, color: '#89929b', letterSpacing: '0.55px' }}>admin@goswiftbahamas.com</span>
-          </div>
-          <div
-            className="flex items-center justify-center shrink-0"
-            style={{ background: '#93ccff', borderRadius: 12, width: 32, height: 32 }}
+        {/* Left Side: Mobile Menu Button & Desktop Quick Collapse */}
+        <div className="flex items-center gap-3">
+          {/* Mobile hamburger menu button */}
+          <button
+            type="button"
+            onClick={() => setIsMobileOpen(true)}
+            className="flex lg:hidden p-2 rounded-lg text-[#dfe2ee] hover:bg-[#1c2028] transition-colors border-0 bg-transparent cursor-pointer"
+            aria-label="Open navigation menu"
           >
-            <img src={imgIconUserAvatar} alt="" style={{ width: 12, height: 12 }} />
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+          </button>
+
+          {/* Desktop Toggle Button */}
+          <button
+            type="button"
+            onClick={() => setIsCollapsed(!isCollapsed)}
+            className="hidden lg:flex items-center gap-2 p-1.5 px-2.5 rounded-lg text-[#89929b] hover:text-[#dfe2ee] hover:bg-[#1c2028] transition-colors border border-transparent hover:border-[#262b35] bg-transparent cursor-pointer text-xs"
+            title={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+          >
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h8m-8 6h16" />
+            </svg>
+            <span>{isCollapsed ? 'Expand' : 'Collapse'}</span>
+          </button>
+        </div>
+
+        {/* Right Side: User profile badge */}
+        <div className="flex items-center gap-2.5 bg-[#1c2028] border border-[#262b35] rounded-xl pl-3 sm:pl-4 pr-1.5 py-1.5 shadow-sm">
+          <div className="flex flex-col items-end text-right">
+            <span className="text-xs font-semibold text-[#dfe2ee] leading-tight">Admin Officer</span>
+            <span className="text-[10px] font-medium text-[#89929b] tracking-wider leading-tight hidden sm:inline">
+              admin@goswiftbahamas.com
+            </span>
+          </div>
+          <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-[#93ccff] text-[#002c47] font-bold shrink-0 shadow-inner">
+            <img src={imgIconUserAvatar} alt="" className="w-3.5 h-3.5" />
           </div>
         </div>
       </header>
 
       {/* ═══ MAIN CONTENT ══════════════════════════════════════════════════ */}
-      <main className="flex flex-col items-start w-full" style={{ paddingTop: 64 }}>
-
-        {/* Operational Header */}
-        <div
-          className="flex items-center justify-between w-full shrink-0"
-          style={{ background: '#181c24', padding: '24px 32px' }}
-        >
-          <div className="flex flex-col items-start" style={{ gap: 4 }}>
-            {/* Breadcrumb */}
-            <div className="flex items-center" style={{ gap: 8 }}>
-              <span style={{ fontSize: 11, fontWeight: 600, color: '#93ccff', textTransform: 'uppercase', letterSpacing: '1.1px', lineHeight: '14px' }}>
+      <main className="flex flex-col items-start w-full pt-16 min-h-screen">
+        {/* Operational Header Bar */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 w-full bg-[#181c24] border-b border-[#1c2028] px-4 sm:px-6 lg:px-8 py-5 sm:py-6 shrink-0">
+          <div className="flex flex-col items-start gap-1">
+            {/* Breadcrumb & Live System Status */}
+            <div className="flex flex-wrap items-center gap-2 mb-1">
+              <span className="text-[10.5px] font-bold text-[#93ccff] uppercase tracking-widest">
                 EXECUTIVE COMMAND CENTER
               </span>
-              <span style={{ fontSize: 16, color: '#3f4850', lineHeight: '24px' }}>•</span>
-              <div
-                className="flex items-center"
-                style={{ gap: 4, background: '#31353e', borderRadius: 12, padding: '2px 8px' }}
-              >
-                <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#4cd7f6', flexShrink: 0 }} />
-                <span style={{ fontSize: 11, fontWeight: 600, color: '#bfc7d2', letterSpacing: '0.55px', lineHeight: '14px' }}>
+              <span className="text-[#3f4850] text-sm">•</span>
+              <div className="flex items-center gap-1.5 bg-[#31353e] rounded-full px-2.5 py-0.5 border border-[#3f4850]/40">
+                <div className="w-1.5 h-1.5 rounded-full bg-[#4cd7f6] animate-pulse" />
+                <span className="text-[10.5px] font-semibold text-[#bfc7d2] tracking-wider">
                   NASSAU, BS 10:42 AM EDT
                 </span>
               </div>
             </div>
-            {/* Title */}
-            <h1 style={{ fontSize: 24, fontWeight: 700, color: '#dfe2ee', letterSpacing: '-0.6px', lineHeight: '32px', margin: 0 }}>
+
+            {/* Welcome Title */}
+            <h1 className="text-xl sm:text-2xl font-bold text-[#dfe2ee] tracking-tight m-0 text-left">
               Welcome back, Admin Officer
             </h1>
-            <p style={{ fontSize: 13, color: '#bfc7d2', lineHeight: '18px', margin: 0 }}>
+            <p className="text-xs sm:text-sm text-[#bfc7d2] m-0 text-left">
               Review 5 pending operational verifications and address 3 urgent inbound support tickets.
             </p>
           </div>
 
-          {/* Status badge */}
-          <div
-            className="flex items-center shrink-0"
-            style={{ gap: 3.99, background: 'rgba(202,129,0,0.2)', borderRadius: 8, padding: '6px 12px', boxShadow: '0 1px 2px rgba(0,0,0,0.05)' }}
-          >
-            <img src={imgIconPending} alt="" style={{ width: 11.67, height: 11.70, flexShrink: 0 }} />
-            <span style={{ fontSize: 11, fontWeight: 600, color: '#ffb95f', letterSpacing: '0.55px', lineHeight: '14px' }}>
+          {/* Pending status badge */}
+          <div className="flex items-center self-start sm:self-center gap-2 bg-[#ca8100]/20 border border-[#ca8100]/30 rounded-lg px-3 py-1.5 shrink-0 shadow-sm">
+            <img src={imgIconPending} alt="" className="w-3.5 h-3.5 shrink-0" />
+            <span className="text-xs font-semibold text-[#ffb95f] tracking-wide">
               5 Pending Registrations
             </span>
           </div>
         </div>
 
-        {/* ── Metric Cards ─────────────────────────────────────────────────── */}
-        <div
-          className="w-full shrink-0"
-          style={{ display: 'grid', gridTemplateColumns: 'repeat(12,minmax(0,1fr))', gap: 24, padding: 32 }}
-        >
-          {/* Card 1: Pending Approvals */}
-          <div
-            className="flex flex-col justify-between overflow-hidden relative"
-            style={{ gridColumn: 'span 4', background: '#181c24', borderRadius: 8, padding: 24, boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1),0 2px 4px -2px rgba(0,0,0,0.1)' }}
-          >
-            <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 4, background: '#ffb95f' }} />
-            <div className="flex flex-col items-start w-full" style={{ gap: 16 }}>
+        {/* ── Metric Cards Grid ───────────────────────────────────────────── */}
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-12 gap-5 w-full p-4 sm:p-6 lg:p-8">
+          
+          {/* Card 1: Action Requisition */}
+          <div className="xl:col-span-4 flex flex-col justify-between relative bg-[#181c24] border border-[#262b35] rounded-xl p-5 sm:p-6 shadow-lg overflow-hidden group hover:border-[#ffb95f]/40 transition-all">
+            <div className="absolute top-0 left-0 right-0 h-1 bg-[#ffb95f]" />
+            <div className="flex flex-col items-start w-full gap-4 text-left">
               <div className="flex items-center justify-between w-full">
-                <span style={{ fontSize: 11, fontWeight: 600, color: '#89929b', textTransform: 'uppercase', letterSpacing: '1.1px' }}>ACTION REQUISITION</span>
-                <div style={{ background: 'rgba(202,129,0,0.3)', borderRadius: 12, padding: '2px 8px' }}>
-                  <span style={{ fontSize: 11, fontWeight: 600, color: '#ffb95f', letterSpacing: '0.55px' }}>Immediate</span>
-                </div>
+                <span className="text-[10.5px] font-bold text-[#89929b] uppercase tracking-widest">
+                  ACTION REQUISITION
+                </span>
+                <span className="bg-[#ca8100]/20 border border-[#ca8100]/30 text-[#ffb95f] text-[10.5px] font-bold px-2 py-0.5 rounded-full">
+                  Immediate
+                </span>
               </div>
-              <div className="flex flex-col items-start w-full" style={{ gap: 4 }}>
-                <div className="flex items-baseline" style={{ gap: 8 }}>
-                  <span style={{ fontSize: 36, fontWeight: 700, color: '#dfe2ee', letterSpacing: '-0.9px', lineHeight: '44px' }}>5</span>
-                  <span style={{ fontSize: 16, fontWeight: 600, color: '#ffb95f', letterSpacing: '-0.16px', lineHeight: '24px' }}>Awaiting Review</span>
+              <div className="flex flex-col items-start w-full gap-1">
+                <div className="flex items-baseline gap-2">
+                  <span className="text-3xl sm:text-4xl font-extrabold text-[#dfe2ee] tracking-tight">5</span>
+                  <span className="text-sm font-semibold text-[#ffb95f]">Awaiting Review</span>
                 </div>
-                <h2 style={{ fontSize: 16, fontWeight: 600, color: '#dfe2ee', letterSpacing: '-0.16px', lineHeight: '24px', margin: 0, width: '100%' }}>
+                <h2 className="text-base font-semibold text-[#dfe2ee] m-0">
                   Pending Provider Registrations
                 </h2>
-                <p style={{ fontSize: 13, color: '#bfc7d2', lineHeight: '18px', margin: 0 }}>
-                  New drivers, fleet rentals, &amp; food venues<br />submitted KYC credentials requiring<br />approval.
+                <p className="text-xs sm:text-[13px] text-[#bfc7d2] leading-relaxed m-0">
+                  New drivers, fleet rentals, &amp; food venues submitted KYC credentials requiring approval.
                 </p>
               </div>
             </div>
-            <div style={{ paddingTop: 24, width: '100%' }}>
-              <div style={{ paddingTop: 16, background: '#181c24' }}>
-                <button
-                  className="flex items-center justify-between w-full border-0 cursor-pointer rounded"
-                  style={{ background: '#ca8100', padding: '8px 16px', filter: 'drop-shadow(0 1px 1px rgba(0,0,0,0.05))' }}
-                >
-                  <span style={{ fontSize: 12, fontWeight: 600, color: '#3e2400', letterSpacing: '0.24px' }}>Review Approvals</span>
-                  <img src={imgIconArrowGold} alt="" style={{ width: 10.67, height: 10.67 }} />
-                </button>
-              </div>
+
+            <div className="pt-6 w-full">
+              <button
+                type="button"
+                className="flex items-center justify-between w-full rounded-lg bg-[#ca8100] hover:bg-[#e09100] text-[#3e2400] font-bold text-xs px-4 py-2.5 transition-colors cursor-pointer border-0 shadow-md"
+              >
+                <span>Review Approvals</span>
+                <img src={imgIconArrowGold} alt="" className="w-3 h-3" />
+              </button>
             </div>
           </div>
 
-          {/* Card 2: Registered Users */}
-          <div
-            className="flex flex-col justify-between relative"
-            style={{ gridColumn: 'span 5', background: '#181c24', borderRadius: 8, padding: 24, boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1),0 2px 4px -2px rgba(0,0,0,0.1)' }}
-          >
-            <div className="flex flex-col items-start w-full" style={{ gap: 16 }}>
+          {/* Card 2: Verified Directory */}
+          <div className="md:col-span-2 xl:col-span-5 flex flex-col justify-between relative bg-[#181c24] border border-[#262b35] rounded-xl p-5 sm:p-6 shadow-lg hover:border-[#4cd7f6]/40 transition-all">
+            <div className="flex flex-col items-start w-full gap-4 text-left">
               <div className="flex items-center justify-between w-full">
-                <span style={{ fontSize: 11, fontWeight: 600, color: '#89929b', textTransform: 'uppercase', letterSpacing: '1.1px' }}>VERIFIED DIRECTORY</span>
-                <div style={{ background: '#31353e', borderRadius: 12, padding: '2px 8px' }}>
-                  <span style={{ fontSize: 11, fontWeight: 600, color: '#4cd7f6', letterSpacing: '0.55px' }}>6 Categories</span>
-                </div>
+                <span className="text-[10.5px] font-bold text-[#89929b] uppercase tracking-widest">
+                  VERIFIED DIRECTORY
+                </span>
+                <span className="bg-[#31353e] text-[#4cd7f6] border border-[#4cd7f6]/20 text-[10.5px] font-bold px-2 py-0.5 rounded-full">
+                  6 Categories
+                </span>
               </div>
-              <div className="flex flex-col items-start w-full" style={{ gap: 4 }}>
-                <div className="flex items-baseline" style={{ gap: 8 }}>
-                  <span style={{ fontSize: 36, fontWeight: 700, color: '#dfe2ee', letterSpacing: '-0.9px', lineHeight: '44px' }}>1,428</span>
-                  <span style={{ fontSize: 13, color: '#bfc7d2', lineHeight: '18px' }}>Active Accounts</span>
+              <div className="flex flex-col items-start w-full gap-1">
+                <div className="flex items-baseline gap-2">
+                  <span className="text-3xl sm:text-4xl font-extrabold text-[#dfe2ee] tracking-tight">1,428</span>
+                  <span className="text-xs text-[#bfc7d2]">Active Accounts</span>
                 </div>
-                <h2 style={{ fontSize: 16, fontWeight: 600, color: '#dfe2ee', letterSpacing: '-0.16px', lineHeight: '24px', margin: 0, width: '100%' }}>
+                <h2 className="text-base font-semibold text-[#dfe2ee] m-0">
                   Total Registered Users
                 </h2>
-                {/* Category grid */}
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,minmax(0,1fr))', gap: 4, paddingTop: 12, width: '100%' }}>
-                  {[['Customers','1,120'],['Drivers','142'],['Food Vendors','56'],['Couriers','48'],['Car Rentals','28'],['Properties','34']].map(([label, val]) => (
-                    <div key={label} style={{ background: '#31353e', borderRadius: 2, padding: '5px 8px 6px' }}>
-                      <span style={{ display: 'block', fontSize: 11, fontWeight: 600, color: '#89929b', letterSpacing: '0.55px', lineHeight: '13.75px' }}>{label}</span>
-                      <span style={{ display: 'block', fontSize: 13, fontWeight: 600, color: '#dfe2ee', letterSpacing: '0.13px', lineHeight: '18px' }}>{val}</span>
+
+                {/* 6 Category Grid */}
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 pt-3 w-full">
+                  {[
+                    ['Customers', '1,120'],
+                    ['Drivers', '142'],
+                    ['Food Vendors', '56'],
+                    ['Couriers', '48'],
+                    ['Car Rentals', '28'],
+                    ['Properties', '34'],
+                  ].map(([label, val]) => (
+                    <div key={label} className="bg-[#262b35]/70 border border-[#31353e] rounded-md p-2 text-left">
+                      <span className="block text-[10.5px] font-semibold text-[#89929b] tracking-wider truncate">
+                        {label}
+                      </span>
+                      <span className="block text-xs sm:text-sm font-bold text-[#dfe2ee] tracking-wide">
+                        {val}
+                      </span>
                     </div>
                   ))}
                 </div>
               </div>
             </div>
-            <div style={{ paddingTop: 24, width: '100%' }}>
-              <div style={{ paddingTop: 16, background: '#181c24' }}>
-                <button
-                  className="flex items-center justify-between w-full border-0 cursor-pointer rounded"
-                  style={{ background: '#262a33', padding: '8px 16px', filter: 'drop-shadow(0 1px 1px rgba(0,0,0,0.05))' }}
-                >
-                  <span style={{ fontSize: 12, fontWeight: 600, color: '#dfe2ee', letterSpacing: '0.24px' }}>Manage User Directory</span>
-                  <img src={imgIconArrowGray} alt="" style={{ width: 10.67, height: 10.67 }} />
-                </button>
-              </div>
+
+            <div className="pt-6 w-full">
+              <button
+                type="button"
+                className="flex items-center justify-between w-full rounded-lg bg-[#262a33] hover:bg-[#31353e] text-[#dfe2ee] font-semibold text-xs px-4 py-2.5 transition-colors cursor-pointer border border-[#31353e] shadow-md"
+              >
+                <span>Manage User Directory</span>
+                <img src={imgIconArrowGray} alt="" className="w-3 h-3" />
+              </button>
             </div>
           </div>
 
-          {/* Card 3: Support Inquiries */}
-          <div
-            className="flex flex-col justify-between overflow-hidden relative"
-            style={{ gridColumn: 'span 3', background: '#181c24', borderRadius: 8, padding: 24, boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1),0 2px 4px -2px rgba(0,0,0,0.1)' }}
-          >
-            <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 4, background: '#4cd7f6' }} />
-            <div className="flex flex-col items-start w-full" style={{ gap: 16 }}>
+          {/* Card 3: Resolution Queue */}
+          <div className="md:col-span-2 xl:col-span-3 flex flex-col justify-between relative bg-[#181c24] border border-[#262b35] rounded-xl p-5 sm:p-6 shadow-lg overflow-hidden group hover:border-[#4cd7f6]/40 transition-all">
+            <div className="absolute top-0 left-0 right-0 h-1 bg-[#4cd7f6]" />
+            <div className="flex flex-col items-start w-full gap-4 text-left">
               <div className="flex items-center justify-between w-full">
-                <span style={{ fontSize: 11, fontWeight: 600, color: '#89929b', textTransform: 'uppercase', letterSpacing: '1.1px', lineHeight: '14px' }}>
-                  RESOLUTION<br />QUEUE
+                <span className="text-[10.5px] font-bold text-[#89929b] uppercase tracking-widest">
+                  RESOLUTION QUEUE
                 </span>
-                <div style={{ background: 'rgba(76,215,246,0.15)', borderRadius: 12, padding: '2px 8px' }}>
-                  <span style={{ fontSize: 11, fontWeight: 600, color: '#4cd7f6', letterSpacing: '0.55px' }}>Open</span>
-                </div>
+                <span className="bg-[#4cd7f6]/15 border border-[#4cd7f6]/30 text-[#4cd7f6] text-[10.5px] font-bold px-2 py-0.5 rounded-full">
+                  Open
+                </span>
               </div>
-              <div className="flex flex-col items-start w-full" style={{ gap: 4 }}>
-                <div className="flex items-baseline" style={{ gap: 8 }}>
-                  <span style={{ fontSize: 36, fontWeight: 700, color: '#dfe2ee', letterSpacing: '-0.9px', lineHeight: '44px' }}>3</span>
-                  <span style={{ fontSize: 16, fontWeight: 600, color: '#4cd7f6', letterSpacing: '-0.16px', lineHeight: '24px' }}>New Tickets</span>
+              <div className="flex flex-col items-start w-full gap-1">
+                <div className="flex items-baseline gap-2">
+                  <span className="text-3xl sm:text-4xl font-extrabold text-[#dfe2ee] tracking-tight">3</span>
+                  <span className="text-sm font-semibold text-[#4cd7f6]">New Tickets</span>
                 </div>
-                <h2 style={{ fontSize: 16, fontWeight: 600, color: '#dfe2ee', letterSpacing: '-0.16px', lineHeight: '24px', margin: 0, width: '100%' }}>
+                <h2 className="text-base font-semibold text-[#dfe2ee] m-0">
                   Support Inquiries
                 </h2>
-                <p style={{ fontSize: 13, color: '#bfc7d2', lineHeight: '18px', margin: 0 }}>
-                  Client &amp; vendor support<br />messages requiring<br />administrative triage.
+                <p className="text-xs sm:text-[13px] text-[#bfc7d2] leading-relaxed m-0">
+                  Client &amp; vendor support messages requiring administrative triage.
                 </p>
               </div>
             </div>
-            <div style={{ paddingTop: 24, width: '100%' }}>
-              <div style={{ paddingTop: 16, background: '#181c24' }}>
-                <button
-                  className="flex items-center justify-between w-full border-0 cursor-pointer rounded"
-                  style={{ background: '#3198dc', padding: '8px 16px', filter: 'drop-shadow(0 1px 1px rgba(0,0,0,0.05))' }}
-                >
-                  <span style={{ fontSize: 12, fontWeight: 600, color: '#002c47', letterSpacing: '0.24px' }}>View Inquiries</span>
-                  <img src={imgIconArrowBlue} alt="" style={{ width: 10.67, height: 10.67 }} />
-                </button>
-              </div>
+
+            <div className="pt-6 w-full">
+              <button
+                type="button"
+                className="flex items-center justify-between w-full rounded-lg bg-[#3198dc] hover:bg-[#43a4e5] text-[#002c47] font-bold text-xs px-4 py-2.5 transition-colors cursor-pointer border-0 shadow-md"
+              >
+                <span>View Inquiries</span>
+                <img src={imgIconArrowBlue} alt="" className="w-3 h-3" />
+              </button>
             </div>
           </div>
         </div>
 
-        {/* ── KYC Verification Table ──────────────────────────────────────── */}
-        <section
-          className="flex flex-col items-start w-full shrink-0"
-          style={{ gap: 16, paddingBottom: 24, paddingLeft: 32, paddingRight: 32 }}
-        >
-          {/* Section header */}
-          <div className="flex items-center justify-between w-full">
-            <div className="flex items-center" style={{ gap: 8 }}>
-              <div style={{ width: 10, height: 10, borderRadius: '50%', background: '#ffb95f', flexShrink: 0 }} />
-              <h2 style={{ fontSize: 20, fontWeight: 700, color: '#dfe2ee', letterSpacing: '-0.3px', lineHeight: '28px', margin: 0, whiteSpace: 'nowrap' }}>
+        {/* ── Priority Action: Pending Provider Registrations Section ────── */}
+        <section className="flex flex-col items-start w-full pb-10 px-4 sm:px-6 lg:px-8">
+          
+          {/* Section Header */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 w-full mb-4">
+            <div className="flex flex-wrap items-center gap-2.5 text-left">
+              <div className="w-2.5 h-2.5 rounded-full bg-[#ffb95f] shrink-0 shadow-[0_0_8px_rgba(255,185,95,0.6)]" />
+              <h2 className="text-base sm:text-lg font-bold text-[#dfe2ee] tracking-tight m-0">
                 Priority Action: Pending Provider Registrations
               </h2>
-              <div style={{ background: 'rgba(202,129,0,0.3)', borderRadius: 12, padding: '2px 8px', flexShrink: 0 }}>
-                <span style={{ fontSize: 11, fontWeight: 600, color: '#ffb95f', letterSpacing: '0.55px' }}>5 Pending Verification</span>
+              <div className="bg-[#ca8100]/20 border border-[#ca8100]/30 rounded-full px-2.5 py-0.5 shrink-0">
+                <span className="text-[10.5px] font-bold text-[#ffb95f] tracking-wide">
+                  5 Pending Verification
+                </span>
               </div>
             </div>
-            <span style={{ fontSize: 11, fontWeight: 600, color: '#89929b', textTransform: 'uppercase', letterSpacing: '0.55px', whiteSpace: 'nowrap' }}>
+            <span className="text-[10.5px] font-bold text-[#89929b] uppercase tracking-widest text-left sm:text-right">
               KYC VERIFICATION QUEUE
             </span>
           </div>
 
-          {/* Table */}
-          <div
-            className="flex flex-col items-start overflow-auto w-full"
-            style={{ background: '#181c24', borderRadius: 8, boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1),0 4px 6px -4px rgba(0,0,0,0.1)' }}
-          >
-            {/* Header row */}
-            <div className="flex items-start justify-center w-full" style={{ background: '#0a0e16' }}>
-              {[
-                { label: 'PROVIDER / BUSINESS ENTITY', w: 268, align: 'left' },
-                { label: 'CLASSIFICATION', w: 142, align: 'left' },
-                { label: 'TERRITORY &\nISLAND', w: 137, align: 'left' },
-                { label: 'CORE ASSET /\nSPECIFICATION', w: 168, align: 'left' },
-                { label: 'SUBMISSION\nAGE', w: 117, align: 'left' },
-                { label: 'WORKFLOW\nACTION', w: 128, align: 'right' },
-              ].map(({ label, w, align }) => (
-                <div key={label} className="flex flex-col items-start shrink-0" style={{ width: w, padding: '8px 16px', textAlign: align as 'left' | 'right' }}>
-                  <span
-                    className="font-semibold text-[#89929b] uppercase whitespace-pre"
-                    style={{ fontSize: 11, lineHeight: '14px', letterSpacing: '0.55px', width: '100%', textAlign: align as 'left' | 'right' }}
-                  >
-                    {label}
-                  </span>
-                </div>
-              ))}
-            </div>
+          {/* Full-width Responsive Table Container */}
+          <div className="w-full bg-[#181c24] border border-[#262b35] rounded-xl shadow-xl overflow-hidden">
+            <div className="overflow-x-auto w-full">
+              <table className="w-full min-w-[920px] border-collapse text-left">
+                {/* Table Header */}
+                <thead className="bg-[#0a0e16] border-b border-[#262b35]">
+                  <tr>
+                    <th scope="col" className="py-3.5 px-6 text-[10.5px] font-bold text-[#89929b] uppercase tracking-wider w-[28%]">
+                      PROVIDER / BUSINESS ENTITY
+                    </th>
+                    <th scope="col" className="py-3.5 px-4 text-[10.5px] font-bold text-[#89929b] uppercase tracking-wider w-[16%]">
+                      CLASSIFICATION
+                    </th>
+                    <th scope="col" className="py-3.5 px-4 text-[10.5px] font-bold text-[#89929b] uppercase tracking-wider w-[16%]">
+                      TERRITORY &amp; ISLAND
+                    </th>
+                    <th scope="col" className="py-3.5 px-4 text-[10.5px] font-bold text-[#89929b] uppercase tracking-wider w-[20%]">
+                      CORE ASSET / SPECIFICATION
+                    </th>
+                    <th scope="col" className="py-3.5 px-4 text-[10.5px] font-bold text-[#89929b] uppercase tracking-wider w-[10%]">
+                      SUBMISSION AGE
+                    </th>
+                    <th scope="col" className="py-3.5 px-6 text-[10.5px] font-bold text-[#89929b] uppercase tracking-wider text-right w-[10%]">
+                      WORKFLOW ACTION
+                    </th>
+                  </tr>
+                </thead>
 
-            {/* Data rows */}
-            <div className="flex flex-col items-start w-full">
-              {pendingRows.map((row, idx) => (
-                <div
-                  key={row.name}
-                  className="flex items-center justify-center w-full"
-                  style={{
-                    paddingLeft: 16,
-                    borderTop: idx === 0 ? 'none' : '1px solid #1c2028',
-                    marginBottom: idx < pendingRows.length - 1 ? -1 : 0,
-                  }}
-                >
-                  {/* Provider */}
-                  <div className="flex items-center shrink-0" style={{ gap: 8, width: 236 }}>
-                    <div className="flex items-center justify-center shrink-0" style={{ width: 32, height: 32, background: '#262a33', borderRadius: 4 }}>
-                      <span style={{ fontSize: 16, fontWeight: 700, color: row.initialsColor, letterSpacing: '-0.16px', lineHeight: '24px', textAlign: 'center' }}>
-                        {row.initials}
-                      </span>
-                    </div>
-                    <div className="flex flex-col items-start overflow-hidden">
-                      <span style={{ fontSize: 14, fontWeight: 600, color: '#dfe2ee', lineHeight: '20px', whiteSpace: 'nowrap' }}>{row.name}</span>
-                      <span style={{ fontSize: 11, fontWeight: 600, color: '#89929b', letterSpacing: '0.55px', lineHeight: '14px', whiteSpace: 'nowrap' }}>{row.email}</span>
-                    </div>
-                  </div>
-
-                  {/* Classification */}
-                  <div className="flex flex-col items-start shrink-0" style={{ width: 158, paddingLeft: 32, paddingRight: 16, paddingTop: 22, paddingBottom: 22 }}>
-                    <div className="flex items-center shrink-0" style={{ background: row.typeBg, borderRadius: 12, padding: '2px 8px' }}>
-                      <span style={{ fontSize: 11, fontWeight: 600, color: row.typeColor, letterSpacing: '0.55px', lineHeight: '14px', whiteSpace: 'nowrap' }}>
-                        {row.type}
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Territory */}
-                  <div className="flex flex-col items-start shrink-0" style={{ width: 137, padding: '13px 16px' }}>
-                    <span style={{ fontSize: 13, fontWeight: 500, color: '#bfc7d2', letterSpacing: '0.13px', lineHeight: '18px', whiteSpace: 'pre-wrap' }}>
-                      {row.territory}
-                    </span>
-                  </div>
-
-                  {/* Asset */}
-                  <div className="flex flex-col items-start shrink-0" style={{ width: 168, padding: '8px 16px' }}>
-                    <span style={{ fontSize: 13, color: '#dfe2ee', lineHeight: '18px', whiteSpace: 'nowrap' }}>{row.asset}</span>
-                    <span style={{ fontSize: 11, fontWeight: 600, color: '#89929b', letterSpacing: '0.55px', lineHeight: '14px', whiteSpace: 'pre-wrap', width: '100%' }}>
-                      {row.assetSub}
-                    </span>
-                  </div>
-
-                  {/* Age */}
-                  <div className="flex flex-col items-start shrink-0" style={{ width: 117, padding: '22px 16px' }}>
-                    <span style={{ fontSize: 13, fontWeight: 500, color: row.ageColor, letterSpacing: '0.13px', lineHeight: '18px', whiteSpace: 'nowrap' }}>
-                      {row.age}
-                    </span>
-                  </div>
-
-                  {/* Action */}
-                  <div className="flex flex-col items-end shrink-0" style={{ width: 128, padding: '9px 16px' }}>
-                    <button
-                      className="flex items-center justify-center border-0 cursor-pointer"
-                      style={{ background: '#93ccff', borderRadius: 2, padding: '6px 20.66px', filter: 'drop-shadow(0 1px 1px rgba(0,0,0,0.05))' }}
+                {/* Table Body */}
+                <tbody className="divide-y divide-[#222834]">
+                  {pendingRows.map((row) => (
+                    <tr
+                      key={row.name}
+                      className="hover:bg-[#1f242e]/70 transition-colors duration-150"
                     >
-                      <span style={{ fontSize: 12, fontWeight: 600, color: '#003351', letterSpacing: '0.24px', lineHeight: '16px', textAlign: 'center', whiteSpace: 'nowrap' }}>
-                        Review &amp;<br />Decide
-                      </span>
-                    </button>
-                  </div>
-                </div>
-              ))}
+                      {/* Provider Entity & Avatar */}
+                      <td className="py-4 px-6 align-middle">
+                        <div className="flex items-center gap-3">
+                          <div
+                            className="flex items-center justify-center w-9 h-9 rounded-md bg-[#262a33] shrink-0 border border-[#31353e] shadow-sm"
+                          >
+                            <span
+                              className="text-sm font-bold tracking-tight"
+                              style={{ color: row.initialsColor }}
+                            >
+                              {row.initials}
+                            </span>
+                          </div>
+                          <div className="flex flex-col text-left">
+                            <span className="text-sm font-semibold text-[#dfe2ee] leading-tight">
+                              {row.name}
+                            </span>
+                            <span className="text-[11px] font-medium text-[#89929b] leading-tight mt-0.5">
+                              {row.email}
+                            </span>
+                          </div>
+                        </div>
+                      </td>
+
+                      {/* Classification Pill */}
+                      <td className="py-4 px-4 align-middle">
+                        <span
+                          className="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-semibold tracking-wide"
+                          style={{
+                            backgroundColor: row.typeBg,
+                            color: row.typeColor,
+                            border: `1px solid ${row.typeColor}30`,
+                          }}
+                        >
+                          {row.type}
+                        </span>
+                      </td>
+
+                      {/* Territory */}
+                      <td className="py-4 px-4 align-middle">
+                        <span className="text-xs sm:text-[13px] font-medium text-[#bfc7d2] leading-snug">
+                          {row.territory}
+                        </span>
+                      </td>
+
+                      {/* Asset & Sub-tag */}
+                      <td className="py-4 px-4 align-middle">
+                        <div className="flex flex-col text-left">
+                          <span className="text-xs sm:text-[13px] font-semibold text-[#dfe2ee] leading-snug">
+                            {row.asset}
+                          </span>
+                          <span className="text-[11px] text-[#89929b] leading-snug mt-0.5">
+                            {row.assetSub}
+                          </span>
+                        </div>
+                      </td>
+
+                      {/* Submission Age */}
+                      <td className="py-4 px-4 align-middle">
+                        <span
+                          className="text-xs font-semibold"
+                          style={{ color: row.ageColor }}
+                        >
+                          {row.age}
+                        </span>
+                      </td>
+
+                      {/* Action Button */}
+                      <td className="py-4 px-6 align-middle text-right">
+                        <button
+                          type="button"
+                          className="inline-flex items-center justify-center px-3.5 py-1.5 rounded bg-[#93ccff] hover:bg-[#b0dcff] text-[#003351] font-bold text-xs tracking-wide transition-colors cursor-pointer border-0 shadow-sm"
+                        >
+                          Review &amp; Decide
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           </div>
         </section>

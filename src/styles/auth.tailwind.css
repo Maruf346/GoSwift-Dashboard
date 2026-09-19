@@ -3,25 +3,25 @@
 @tailwind utilities;
 
 .auth-outer {
-  @apply min-h-screen flex items-center justify-center bg-[#0f131c] px-10 py-10;
+  @apply min-h-screen flex items-center justify-center bg-[#0f131c] px-4 sm:px-8 md:px-10 py-6 sm:py-10;
 }
 .auth-panel {
-  @apply w-full max-w-lg bg-[#1c2028] p-10 rounded-lg shadow-[0_25px_50px_-12px_rgba(0,0,0,0.6)] text-[#dfe2ee] flex flex-col gap-3;
+  @apply w-full max-w-lg bg-[#1c2028] p-5 sm:p-8 md:p-10 rounded-lg shadow-[0_25px_50px_-12px_rgba(0,0,0,0.6)] text-[#dfe2ee] flex flex-col gap-3;
 }
 .badge {
   @apply self-center bg-[rgba(76,215,246,0.12)] text-[#4cd7f6] px-3 py-1 rounded-full font-semibold text-xs tracking-wider;
 }
-.brand { @apply w-36 h-36 self-center }
-.title { @apply text-[20px] font-bold uppercase text-center tracking-[1px]; }
-.title.small { @apply text-[20px]; }
+.brand { @apply w-28 h-28 sm:w-36 sm:h-36 self-center }
+.title { @apply text-[18px] sm:text-[20px] font-bold uppercase text-center tracking-[1px]; }
+.title.small { @apply text-[18px] sm:text-[20px]; }
 .brand-title { @apply text-[#dfe2ee]; }
 .accent { @apply text-[#ffb95f] tracking-[2px] font-extrabold; }
 .label { @apply text-xs text-[#bfc7d2] uppercase tracking-wider font-semibold text-left block }
 .input-field { @apply bg-[#0a0e16] px-4 py-3 rounded text-[#dfe2ee] w-full border border-[rgba(255,255,255,0.03)]; }
 .actions { @apply flex gap-3 items-center }
-.primary { @apply bg-[#3198dc] text-[#003351] px-4 py-3 rounded font-bold }
+.primary { @apply bg-[#3198dc] text-[#003351] px-4 py-3 rounded font-bold hover:bg-[#43a4e5] transition-colors cursor-pointer; }
 .otp-group { @apply flex gap-2 justify-center my-2 }
-.otp-input { @apply w-12 h-12 bg-[#0a0e16] border border-[rgba(255,255,255,0.04)] text-[#dfe2ee] text-lg text-center rounded-md }
+.otp-input { @apply w-10 h-10 sm:w-12 sm:h-12 bg-[#0a0e16] border border-[rgba(255,255,255,0.04)] text-[#dfe2ee] text-lg text-center rounded-md }
 
 /* ── OTP Verification Step (Figma-matched) ────────────────────────── */
 
@@ -58,14 +58,14 @@
 
 /* OTP digit slot grid */
 .otp-grid {
-  @apply flex gap-[10px] justify-center w-full;
+  @apply flex gap-1.5 sm:gap-[10px] justify-center w-full max-w-full overflow-x-auto py-1;
 }
 
 /* Base digit slot */
 .otp-digit {
-  @apply flex flex-col items-center justify-center rounded-lg text-[20px] font-bold text-center
+  @apply flex flex-col items-center justify-center rounded-lg text-[16px] sm:text-[20px] font-bold text-center
          bg-[#080c14] border border-[rgba(21,94,117,0.8)] text-[#67e8f9]
-         w-[72px] h-[56px] shrink-0 outline-none;
+         w-[44px] h-[48px] sm:w-[72px] sm:h-[56px] shrink-0 outline-none;
   font-family: 'JetBrains Mono', 'Courier New', monospace;
   transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
