@@ -126,7 +126,7 @@ export default function ForgotPassword() {
     setLoading(false)
     if (res.ok) {
       setMessage('Password updated successfully')
-      setTimeout(() => nav('/'), 1200)
+      setTimeout(() => nav('/login'), 1200)
     }
   }
 
@@ -164,7 +164,7 @@ export default function ForgotPassword() {
               <button className="primary" onClick={sendOtp} disabled={loading}>
                 {loading ? 'Sending…' : 'Send OTP'}
               </button>
-              <Link to="/" className="link muted">Back to Login</Link>
+              <Link to="/login" className="link muted">Back to Login</Link>
             </div>
           </>
         )}
@@ -247,7 +247,7 @@ export default function ForgotPassword() {
 
             {/* Back link */}
             <div style={{ paddingTop: 7, paddingBottom: 5 }}>
-              <Link to="/" className="otp-back-link">
+              <Link to="/login" className="otp-back-link">
                 <ArrowLeftIcon />
                 Return to Admin Gateway Login
               </Link>
