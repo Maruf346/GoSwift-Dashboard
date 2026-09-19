@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 
 // ── Asset URLs (Figma-sourced) ─────────────────────────────────────────────
@@ -102,11 +102,11 @@ export default function Dashboard() {
   }
 
   const navItems = [
-    { icon: imgNavDashboard, label: 'Dashboard', active: true },
-    { icon: imgNavUsers, label: 'User Management', active: false },
-    { icon: imgNavProviders, label: 'Provider Management', active: false },
-    { icon: imgNavSupport, label: 'Contact Support', active: false },
-    { icon: imgNavSettings, label: 'Settings', active: false },
+    { icon: imgNavDashboard, label: 'Dashboard', path: '/', active: true },
+    { icon: imgNavUsers, label: 'User Management', path: '/users', active: false },
+    { icon: imgNavProviders, label: 'Provider Management', path: '/providers', active: false },
+    { icon: imgNavSupport, label: 'Contact Support', path: '/support', active: false },
+    { icon: imgNavSettings, label: 'Settings', path: '/settings', active: false },
   ]
 
   return (
@@ -208,10 +208,11 @@ export default function Dashboard() {
           {/* Navigation Links */}
           <nav className="flex flex-col w-full gap-1 px-2.5">
             {navItems.map((item) => (
-              <div
+              <Link
                 key={item.label}
+                to={item.path}
                 title={item.label}
-                className={`flex items-center rounded-lg cursor-pointer transition-all duration-150 ${
+                className={`flex items-center rounded-lg cursor-pointer transition-all duration-150 no-underline ${
                   item.active
                     ? 'bg-[#3198dc] text-[#002c47] font-semibold shadow-md'
                     : 'text-[#bfc7d2] hover:bg-[#1c2028] hover:text-white'
@@ -225,7 +226,7 @@ export default function Dashboard() {
                 <span className={`text-[13.5px] leading-5 truncate ${isCollapsed ? 'lg:hidden' : ''}`}>
                   {item.label}
                 </span>
-              </div>
+              </Link>
             ))}
           </nav>
         </div>
@@ -418,6 +419,7 @@ export default function Dashboard() {
             <div className="pt-6 w-full">
               <button
                 type="button"
+                onClick={() => nav('/users')}
                 className="flex items-center justify-between w-full rounded-lg bg-[#262a33] hover:bg-[#31353e] text-[#dfe2ee] font-semibold text-xs px-4 py-2.5 transition-colors cursor-pointer border border-[#31353e] shadow-md"
               >
                 <span>Manage User Directory</span>
