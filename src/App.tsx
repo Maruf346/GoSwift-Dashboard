@@ -5,6 +5,7 @@ import Dashboard from './pages/Dashboard'
 import UserManagement from './pages/UserManagement'
 import ProviderManagement from './pages/ProviderManagement'
 import ContactSupport from './pages/ContactSupport'
+import AdminSettings from './pages/AdminSettings'
 import './App.css'
 
 function App() {
@@ -17,6 +18,7 @@ function App() {
         <Route path="/users" element={<UserManagement />} />
         <Route path="/providers" element={<ProviderManagement />} />
         <Route path="/support" element={<ContactSupport />} />
+        <Route path="/settings" element={<AdminSettings />} />
       </Routes>
     </BrowserRouter>
   )
