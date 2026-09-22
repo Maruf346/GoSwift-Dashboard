@@ -1,6 +1,7 @@
 import { useState, useMemo, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
+import ProviderDetailModal, { type ProviderDetailItem } from '../components/modals/ProviderDetailModal'
 
 // ── Asset URLs (Figma-sourced) ─────────────────────────────────────────────
 const imgAvatar1 = 'https://www.figma.com/api/mcp/asset/dac17cf5-a03c-48ae-9ca7-dd6e0fe1d2e1.png'
@@ -29,31 +30,13 @@ const imgNavLogout = 'https://www.figma.com/api/mcp/asset/073b8ddc-b8ae-4ada-a0d
 export type ProviderStatus = 'Pending' | 'Approved' | 'Rejected'
 export type ProviderCategory = 'Driver' | 'Food Vendor' | 'Courier' | 'Car Rental Provider' | 'Property Owner'
 
-export interface ProviderItem {
-  id: string
-  name: string
-  providerId: string
-  avatarImage?: string
-  avatarInitials?: string
-  avatarBg?: string
-  avatarColor?: string
-  hasPendingBadge?: boolean
-  category: ProviderCategory
-  categoryIcon: string
-  phone: string
-  email: string
-  hub: string
-  status: ProviderStatus
-  documentName?: string
-  documentStatus?: string
-  submittedDate?: string
-}
+export type ProviderItem = ProviderDetailItem
 
-const providerRecords: ProviderItem[] = [
+const initialProviderRecords: ProviderItem[] = [
   {
     id: '1',
     name: 'Marcus Rolle',
-    providerId: 'ID: SWIFT-DRV-8921',
+    providerId: 'SWIFT-DRV-8921',
     avatarImage: imgAvatar1,
     hasPendingBadge: true,
     category: 'Driver',
@@ -65,11 +48,32 @@ const providerRecords: ProviderItem[] = [
     documentName: 'Public Service Driver License & Police Record',
     documentStatus: 'KYC Verification Required',
     submittedDate: '2 hours ago',
+    driverData: {
+      driverLicenseNumber: 'BS-DL-8921-9902',
+      driverLicenseClass: 'Class B (Public Service Vehicle Endorsed)',
+      driverLicenseExpiry: 'Nov 14, 2026',
+      nibNumber: 'NIB-8821-0029',
+      vehicleMake: 'Toyota',
+      vehicleModel: 'Camry Hybrid (Executive Class)',
+      vehicleYear: 2023,
+      vehicleColor: 'Ocean Silver Metallic',
+      licensePlate: 'TX-8921',
+      vehicleType: 'Executive Sedan / Airport Express',
+      seatingCapacity: 4,
+      policeRecordDocStatus: 'Clear / Verified',
+      insurancePolicyNumber: 'BS-BAH-AUTO-44019',
+      insuranceExpiry: 'Dec 15, 2025',
+      roadTrafficInspectionDate: 'Oct 01, 2024',
+      inspectionExpiry: 'Oct 01, 2025',
+      operatingZone: 'Nassau Metro & Lynden Pindling International Airport (LPIA)',
+      rating: 4.95,
+      completedTrips: 184,
+    },
   },
   {
     id: '2',
     name: 'Twin Brothers Arawak Seafood',
-    providerId: 'ID: SWIFT-VEN-4109',
+    providerId: 'SWIFT-VEN-4109',
     avatarImage: imgAvatar2,
     category: 'Food Vendor',
     categoryIcon: imgCatVendor,
@@ -80,11 +84,31 @@ const providerRecords: ProviderItem[] = [
     documentName: 'Bahamas Sanitary & Food Safety Certificate',
     documentStatus: 'Verified by Ministry of Health',
     submittedDate: 'Nov 02, 2024',
+    vendorData: {
+      businessLegalName: 'Twin Brothers Hospitality Ltd.',
+      tradingName: 'Twin Brothers Arawak Seafood',
+      cuisineType: 'Authentic Bahamian Seafood, Conch Salad & Grilled Snapper',
+      operatingHours: '11:00 AM - 11:00 PM (Mon - Sun)',
+      kitchenType: 'Commercial Waterfront Kitchen & Restaurant',
+      seatingCapacity: 85,
+      takeoutAvailable: true,
+      deliveryRadiusKm: 18,
+      avgPreparationTime: '15 - 20 minutes',
+      healthSanitaryCertNumber: 'MOH-BS-SAN-4109',
+      healthSanitaryExpiry: 'Nov 02, 2025',
+      healthInspectionGrade: 'Grade A (Score: 99/100)',
+      foodHandlersCount: 12,
+      foodHandlersCertified: true,
+      liquorLicenseNumber: 'LL-NIB-2024-5510',
+      businessRegistrationNumber: 'REG-VEN-BS-4109',
+      menuItemsCount: 54,
+      bankPayoutAccount: 'CIBC FirstCaribbean Bank •••• 4109',
+    },
   },
   {
     id: '3',
     name: 'Devon Bethel',
-    providerId: 'ID: SWIFT-CUR-1029',
+    providerId: 'SWIFT-CUR-1029',
     avatarInitials: 'DB',
     avatarBg: '#31353e',
     avatarColor: '#4cd7f6',
@@ -98,11 +122,26 @@ const providerRecords: ProviderItem[] = [
     documentName: 'Commercial Motorbike Dispatch Authorization',
     documentStatus: 'KYC Verification Required',
     submittedDate: '6 hours ago',
+    courierData: {
+      courierType: 'Licensed Commercial Express Courier',
+      dispatchVehicleType: 'Yamaha Cargo Motorcycle (250cc) / Insulated Box',
+      vehiclePlate: 'CR-1029 (Grand Bahama Dispatch)',
+      maxPayloadKg: 40,
+      cargoBoxEquipped: true,
+      refrigeratedStorage: true,
+      driverLicenseNumber: 'BS-DL-GB-10290',
+      portAuthorityAuthNumber: 'GBPA-DISP-2024-1029',
+      transitInsurancePolicy: 'BS-TR-INS-10290',
+      policeRecordClearance: 'Verified & Clean Record (Freeport HQ)',
+      primaryServiceHub: 'Grand Bahama Port Authority Freeport Industrial District',
+      availabilityHours: '7:30 AM - 8:30 PM (Express On-Demand)',
+      emergencyContact: '+1 (242) 555-9921',
+    },
   },
   {
     id: '4',
     name: 'Reef Rentals Marsh Harbour',
-    providerId: 'ID: SWIFT-RNT-0082',
+    providerId: 'SWIFT-RNT-0082',
     avatarInitials: 'RC',
     avatarBg: '#31353e',
     avatarColor: '#89929b',
@@ -115,11 +154,28 @@ const providerRecords: ProviderItem[] = [
     documentName: 'Commercial Fleet Insurance (Expired Policy)',
     documentStatus: 'Insurance Policy Non-Compliant',
     submittedDate: 'Oct 14, 2024',
+    rentalData: {
+      companyLegalName: 'Reef Fleet Services Abaco Ltd.',
+      tradingName: 'Reef Rentals Marsh Harbour',
+      fleetSize: 14,
+      vehicleCategories: ['Compact Sedans', 'Island Jeeps', '4x4 SUVs'],
+      officeLocation: 'Marsh Harbour Commercial District, Abaco',
+      airportPickupAvailable: true,
+      businessLicenseNumber: 'BL-RNT-2024-0082',
+      commercialFleetInsurancePolicy: 'BS-COMM-FLT-0082',
+      insuranceCoverageAmount: '$1,000,000 BSD Fleet Liability',
+      insuranceExpiry: 'Oct 10, 2024 (Expired)',
+      roadTrafficRentalPermitNumber: 'RTD-RNT-AB-2024-0082',
+      minimumRenterAge: 25,
+      securityDepositBSD: 500,
+      gpsTrackingEquipped: true,
+      roadsideAssistancePartner: 'Abaco Towing & Fleet Rescue',
+    },
   },
   {
     id: '5',
     name: 'Tar Bay Villa Estates',
-    providerId: 'ID: SWIFT-PROP-7193',
+    providerId: 'SWIFT-PROP-7193',
     avatarImage: imgAvatar3,
     category: 'Property Owner',
     categoryIcon: imgCatProperty,
@@ -130,11 +186,48 @@ const providerRecords: ProviderItem[] = [
     documentName: 'Bahamas Ministry Tourism Reg #7193',
     documentStatus: 'Official Tourism Board Approved',
     submittedDate: 'Oct 20, 2024',
+    propertyData: {
+      ownerName: 'Alexander & Elena Forbes',
+      nibNumber: 'NIB-7193-4401',
+      businessName: 'Tar Bay Luxury Estates Ltd.',
+      propertyTitle: 'Tar Bay Oceanfront Villa Estates',
+      propertyType: 'Beachfront Luxury Villa & Private Estate',
+      propertyAddress: 'Lot 14, Queens Highway, Tar Bay',
+      settlement: 'Tar Bay Settlement',
+      island: 'Exuma',
+      bedroomCount: 5,
+      bathroomCount: 5.5,
+      maxGuests: 12,
+      nightlyRate: 1850,
+      currency: 'BSD / USD',
+      securityDeposit: 1500,
+      minimumStayNights: 3,
+      amenities: [
+        'Private Oceanfront Beach Access',
+        'Infinity Edge Saltwater Pool & Spa',
+        'High-Speed Starlink Commercial Internet',
+        'Backup Generator (125kVA)',
+        'Commercial Reverse Osmosis Water Plant',
+        'Private Deep-Water Dock & Boat Slip',
+        'Multi-Zone Climate Control',
+        '24/7 Monitored Estate Security',
+      ],
+      tourismRegNumber: 'MOT-EXU-2024-7193',
+      tourismRegDocStatus: 'Verified',
+      proofOfOwnershipDoc: 'Deed of Conveyance & Title Certificate (Vol. 5104 / Pg. 112)',
+      businessLicenseNumber: 'BL-NIB-2024-71930',
+      taxComplianceCertStatus: 'Valid',
+      insurancePolicyNumber: 'BS-LGT-PROP-719301',
+      insuranceExpiry: 'Dec 31, 2025',
+      fireSafetyCertified: true,
+      healthSanitationRating: 'Grade A - Luxury Short Term Rental Standard',
+      payoutAccount: 'FirstCaribbean Int. Bank (FCIB) •••• 7193',
+    },
   },
   {
     id: '6',
     name: 'Kendra Christie',
-    providerId: 'ID: SWIFT-DRV-5512',
+    providerId: 'SWIFT-DRV-5512',
     avatarImage: imgAvatar4,
     category: 'Driver',
     categoryIcon: imgCatDriver,
@@ -145,11 +238,32 @@ const providerRecords: ProviderItem[] = [
     documentName: 'Public Service License & Vehicle Registration',
     documentStatus: 'Verified',
     submittedDate: 'Sep 29, 2024',
+    driverData: {
+      driverLicenseNumber: 'BS-DL-5512-8812',
+      driverLicenseClass: 'Class B (Public Service Vehicle Endorsed)',
+      driverLicenseExpiry: 'Oct 20, 2026',
+      nibNumber: 'NIB-5512-9901',
+      vehicleMake: 'Chevrolet',
+      vehicleModel: 'Suburban LT 4WD',
+      vehicleYear: 2022,
+      vehicleColor: 'Black Diamond Metallic',
+      licensePlate: 'TX-5512',
+      vehicleType: 'Luxury Island SUV / Resort Transfer',
+      seatingCapacity: 7,
+      policeRecordDocStatus: 'Clear / Verified',
+      insurancePolicyNumber: 'BS-BAH-AUTO-55120',
+      insuranceExpiry: 'Nov 15, 2025',
+      roadTrafficInspectionDate: 'Sep 20, 2024',
+      inspectionExpiry: 'Sep 20, 2025',
+      operatingZone: 'North Eleuthera Airport (ELH) & Harbour Island Ferry Dock',
+      rating: 4.98,
+      completedTrips: 340,
+    },
   },
   {
     id: '7',
     name: 'Island Bites Café',
-    providerId: 'ID: SWIFT-VEN-8821',
+    providerId: 'SWIFT-VEN-8821',
     avatarInitials: 'IB',
     avatarBg: 'rgba(202,129,0,0.3)',
     avatarColor: '#ffb95f',
@@ -163,11 +277,30 @@ const providerRecords: ProviderItem[] = [
     documentName: 'Bahamian Cuisine Health Certification',
     documentStatus: 'KYC Verification Required',
     submittedDate: '4 hours ago',
+    vendorData: {
+      businessLegalName: 'Island Bites Food Services Ltd.',
+      tradingName: 'Island Bites Café',
+      cuisineType: 'Bahamian Breakfast, Johnny Cake, Stew Fish & Pastries',
+      operatingHours: '6:30 AM - 4:00 PM (Mon - Sat)',
+      kitchenType: 'Commercial Artisan Café Kitchen',
+      seatingCapacity: 35,
+      takeoutAvailable: true,
+      deliveryRadiusKm: 12,
+      avgPreparationTime: '10 - 15 minutes',
+      healthSanitaryCertNumber: 'MOH-BS-SAN-8821',
+      healthSanitaryExpiry: 'Jan 15, 2026',
+      healthInspectionGrade: 'Grade A (Score: 97/100)',
+      foodHandlersCount: 6,
+      foodHandlersCertified: true,
+      businessRegistrationNumber: 'REG-VEN-BS-8821',
+      menuItemsCount: 38,
+      bankPayoutAccount: 'Commonwealth Bank Ltd. •••• 8821',
+    },
   },
   {
     id: '8',
     name: 'Bahama Drift Rentals',
-    providerId: 'ID: SWIFT-RNT-4401',
+    providerId: 'SWIFT-RNT-4401',
     avatarInitials: 'BD',
     avatarBg: 'rgba(76,215,246,0.2)',
     avatarColor: '#4cd7f6',
@@ -181,11 +314,28 @@ const providerRecords: ProviderItem[] = [
     documentName: 'Fleet Registration (12 Vehicles) & Full Insurance',
     documentStatus: 'KYC Verification Required',
     submittedDate: '1 day ago',
+    rentalData: {
+      companyLegalName: 'Bahama Drift Auto Rentals Ltd.',
+      tradingName: 'Bahama Drift Rentals',
+      fleetSize: 22,
+      vehicleCategories: ['Compact Sedans', 'Convertibles', 'Luxury SUVs', 'Open-Top Jeeps'],
+      officeLocation: 'Paradise Island & Lynden Pindling Airport (LPIA)',
+      airportPickupAvailable: true,
+      businessLicenseNumber: 'BL-RNT-2024-4401',
+      commercialFleetInsurancePolicy: 'BS-COMM-FLT-4401',
+      insuranceCoverageAmount: '$2,000,000 BSD Fleet Liability & Collision',
+      insuranceExpiry: 'Dec 15, 2025',
+      roadTrafficRentalPermitNumber: 'RTD-RNT-NAS-2024-4401',
+      minimumRenterAge: 23,
+      securityDepositBSD: 400,
+      gpsTrackingEquipped: true,
+      roadsideAssistancePartner: 'Bahamas Towing & Fleet Rescue 24/7',
+    },
   },
   {
     id: '9',
     name: 'Coral Sands Villa',
-    providerId: 'ID: SWIFT-PROP-0914',
+    providerId: 'SWIFT-PROP-0914',
     avatarInitials: 'CS',
     avatarBg: 'rgba(255,221,184,0.2)',
     avatarColor: '#ffddb8',
@@ -199,11 +349,48 @@ const providerRecords: ProviderItem[] = [
     documentName: 'Bahamas Ministry Tourism Reg #884',
     documentStatus: 'KYC Verification Required',
     submittedDate: '1 day ago',
+    propertyData: {
+      ownerName: 'Marcus & Sophia Cartwright',
+      nibNumber: 'NIB-0914-7721',
+      businessName: 'Coral Sands Exuma Hospitality Ltd.',
+      propertyTitle: 'Coral Sands Private Beachfront Estate',
+      propertyType: 'Oceanfront Luxury Villa & Cottage',
+      propertyAddress: 'Sandy Cay Road, Great Exuma',
+      settlement: 'George Town Settlement',
+      island: 'Exuma',
+      bedroomCount: 4,
+      bathroomCount: 4,
+      maxGuests: 8,
+      nightlyRate: 1350,
+      currency: 'BSD / USD',
+      securityDeposit: 1000,
+      minimumStayNights: 3,
+      amenities: [
+        'Private Turquoise Beach Access',
+        'Heated Fresh-Water Swimming Pool',
+        'Starlink Satellite Internet',
+        'Diesel Backup Generator (85kVA)',
+        'Water Purification & Softener Unit',
+        'Outdoor BBQ Kitchen & Dining Pavilion',
+        'Kayaks & Snorkeling Gear Included',
+        'Smart Keyless Digital Entry',
+      ],
+      tourismRegNumber: 'MOT-EXU-2024-0914',
+      tourismRegDocStatus: 'Pending Review',
+      proofOfOwnershipDoc: 'Bahamas Land Title Deed Certificate #8841-EX',
+      businessLicenseNumber: 'BL-NIB-2024-09140',
+      taxComplianceCertStatus: 'Valid',
+      insurancePolicyNumber: 'BS-LGT-PROP-091400',
+      insuranceExpiry: 'Nov 30, 2025',
+      fireSafetyCertified: true,
+      healthSanitationRating: 'Grade A - Certified Short Term Rental',
+      payoutAccount: 'Royal Bank of Canada (RBC) Bahamas •••• 0914',
+    },
   },
   {
     id: '10',
     name: 'Lucaya Express Couriers',
-    providerId: 'ID: SWIFT-CUR-7712',
+    providerId: 'SWIFT-CUR-7712',
     avatarInitials: 'LE',
     avatarBg: '#31353e',
     avatarColor: '#dfe2ee',
@@ -216,6 +403,21 @@ const providerRecords: ProviderItem[] = [
     documentName: 'Grand Bahama Port Authority Dispatch License',
     documentStatus: 'Verified',
     submittedDate: 'Aug 11, 2024',
+    courierData: {
+      courierType: 'Licensed Fleet Courier Service',
+      dispatchVehicleType: 'Express Delivery Van & Motorbike Fleet',
+      vehiclePlate: 'CR-7712',
+      maxPayloadKg: 150,
+      cargoBoxEquipped: true,
+      refrigeratedStorage: true,
+      driverLicenseNumber: 'BS-DL-GB-77120',
+      portAuthorityAuthNumber: 'GBPA-DISP-2024-7712',
+      transitInsurancePolicy: 'BS-TR-INS-77120',
+      policeRecordClearance: 'Verified & Clean Record (Freeport HQ)',
+      primaryServiceHub: 'Lucaya Commercial District & Freeport Port',
+      availabilityHours: '8:00 AM - 7:00 PM (Mon - Sat)',
+      emergencyContact: '+1 (242) 352-9902',
+    },
   },
 ]
 
@@ -224,6 +426,9 @@ export default function ProviderManagement() {
   const nav = useNavigate()
   const [isCollapsed, setIsCollapsed] = useState(false)
   const [isMobileOpen, setIsMobileOpen] = useState(false)
+
+  // Records state
+  const [records, setRecords] = useState<ProviderItem[]>(initialProviderRecords)
 
   // Filters state
   const [searchQuery, setSearchQuery] = useState('')
@@ -238,9 +443,63 @@ export default function ProviderManagement() {
   // Modal inspection state
   const [activeModalProvider, setActiveModalProvider] = useState<ProviderItem | null>(null)
 
+  // Toast notification state
+  const [toastMessage, setToastMessage] = useState<string | null>(null)
+
+  function showToast(msg: string) {
+    setToastMessage(msg)
+    setTimeout(() => setToastMessage(null), 3500)
+  }
+
   function handleLogout() {
     auth.logout()
     nav('/login')
+  }
+
+  // Handle Approve
+  function handleApproveProvider(id: string) {
+    setRecords((prev) =>
+      prev.map((p) => {
+        if (p.id === id) {
+          return {
+            ...p,
+            status: 'Approved',
+            hasPendingBadge: false,
+            documentStatus: 'Verified by Bahamas Authorities',
+          }
+        }
+        return p
+      })
+    )
+    const p = records.find((r) => r.id === id)
+    showToast(`✓ ${p?.name || 'Provider'} has been officially approved!`)
+    setActiveModalProvider(null)
+  }
+
+  // Handle Reject
+  function handleRejectProvider(id: string, reason?: string) {
+    setRecords((prev) =>
+      prev.map((p) => {
+        if (p.id === id) {
+          return {
+            ...p,
+            status: 'Rejected',
+            hasPendingBadge: false,
+            documentStatus: reason ? `Rejected: ${reason}` : 'Application Rejected',
+          }
+        }
+        return p
+      })
+    )
+    const p = records.find((r) => r.id === id)
+    showToast(`✕ Application for ${p?.name || 'Provider'} rejected.`)
+    setActiveModalProvider(null)
+  }
+
+  // Handle Request Info
+  function handleRequestInfo(id: string, _note?: string) {
+    const p = records.find((r) => r.id === id)
+    showToast(`✉ Request for additional documents sent to ${p?.name || 'Provider'}.`)
   }
 
   const navItems = [
@@ -252,7 +511,7 @@ export default function ProviderManagement() {
   ]
 
   const categories = [
-    { id: 'All', label: 'All Users' },
+    { id: 'All', label: 'All Providers' },
     { id: 'Driver', label: 'Drivers (142)' },
     { id: 'Food Vendor', label: 'Food Vendors (56)' },
     { id: 'Courier', label: 'Couriers (48)' },
@@ -262,7 +521,7 @@ export default function ProviderManagement() {
 
   // Filtered providers
   const filteredProviders = useMemo(() => {
-    return providerRecords.filter((provider) => {
+    return records.filter((provider) => {
       const matchesCategory =
         selectedCategory === 'All' || provider.category === selectedCategory
       const matchesRegion =
@@ -281,7 +540,7 @@ export default function ProviderManagement() {
 
       return matchesCategory && matchesRegion && matchesStatus && matchesSearch
     })
-  }, [selectedCategory, selectedRegion, selectedStatus, searchQuery])
+  }, [records, selectedCategory, selectedRegion, selectedStatus, searchQuery])
 
   // Reset page when filter changes
   useEffect(() => {
@@ -302,6 +561,13 @@ export default function ProviderManagement() {
         isCollapsed ? 'lg:pl-[72px]' : 'lg:pl-64'
       }`}
     >
+      {/* Toast Alert Feedback */}
+      {toastMessage && (
+        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-3 px-4 py-3 rounded-xl bg-[#1c2436] border border-[#4cd7f6]/50 shadow-2xl text-xs font-semibold text-[#dfe2ee] animate-bounce">
+          <span>{toastMessage}</span>
+        </div>
+      )}
+
       {/* ═══ MOBILE BACKDROP OVERLAY ════════════════════════════════════════ */}
       {isMobileOpen && (
         <div
@@ -512,7 +778,7 @@ export default function ProviderManagement() {
                     Provider Management
                   </h1>
                   <span className="text-xs sm:text-sm font-medium text-[#bfc7d2]">
-                    1,428 Verified Entities
+                    {records.length} Registered Entities ({records.filter(r => r.status === 'Pending').length} Pending Review)
                   </span>
                 </div>
               </div>
@@ -677,7 +943,7 @@ export default function ProviderManagement() {
                                 )}
                               </div>
                               <span className="text-[11px] font-semibold text-[#89929b] tracking-wider leading-tight mt-0.5">
-                                {provider.providerId}
+                                ID: {provider.providerId}
                               </span>
                             </div>
                           </div>
@@ -689,7 +955,7 @@ export default function ProviderManagement() {
                             <img
                               src={provider.categoryIcon}
                               alt=""
-                              className="w-3 h-3 object-contain shrink-0"
+                              className="w-3.5 h-3.5 object-contain shrink-0"
                             />
                             <span className="text-xs sm:text-[13px] font-medium text-[#dfe2ee]">
                               {provider.category}
@@ -829,124 +1095,15 @@ export default function ProviderManagement() {
         </div>
       </main>
 
-      {/* ═══ PROVIDER DETAILS & DECISION MODAL ═════════════════════════════ */}
+      {/* ═══ CATEGORY-SPECIFIC DETAILS & DECISION MODAL ════════════════════ */}
       {activeModalProvider && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm animate-fadeIn">
-          <div className="relative flex flex-col w-full max-w-xl bg-[#1c2028] border border-[#262b35] rounded-xl shadow-2xl p-6 text-left gap-5">
-            
-            {/* Modal Header */}
-            <div className="flex items-start justify-between border-b border-[#262b35] pb-4">
-              <div className="flex items-center gap-3">
-                <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-[#31353e] overflow-hidden border border-white/5">
-                  {activeModalProvider.avatarImage ? (
-                    <img
-                      src={activeModalProvider.avatarImage}
-                      alt=""
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <span className="font-bold text-base" style={{ color: activeModalProvider.avatarColor }}>
-                      {activeModalProvider.avatarInitials}
-                    </span>
-                  )}
-                </div>
-                <div>
-                  <h3 className="text-lg font-bold text-[#dfe2ee] m-0 leading-tight">
-                    {activeModalProvider.name}
-                  </h3>
-                  <span className="text-xs text-[#89929b] font-mono">
-                    {activeModalProvider.providerId} • {activeModalProvider.hub}, Bahamas
-                  </span>
-                </div>
-              </div>
-
-              <button
-                type="button"
-                onClick={() => setActiveModalProvider(null)}
-                className="p-1 rounded-lg text-[#89929b] hover:text-white hover:bg-[#262b35] border-0 bg-transparent cursor-pointer"
-              >
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-            </div>
-
-            {/* Provider Details Body */}
-            <div className="grid grid-cols-2 gap-4 text-xs">
-              <div className="flex flex-col gap-1 p-3 bg-[#181c24] rounded-lg border border-[#262b35]">
-                <span className="text-[#89929b] uppercase font-bold text-[10px]">CATEGORY</span>
-                <span className="text-[#dfe2ee] font-semibold text-sm">{activeModalProvider.category}</span>
-              </div>
-              <div className="flex flex-col gap-1 p-3 bg-[#181c24] rounded-lg border border-[#262b35]">
-                <span className="text-[#89929b] uppercase font-bold text-[10px]">STATUS</span>
-                <span className="text-sm font-semibold" style={{ color: activeModalProvider.status === 'Pending' ? '#ffb95f' : activeModalProvider.status === 'Approved' ? '#4cd7f6' : '#ffb4ab' }}>
-                  {activeModalProvider.status}
-                </span>
-              </div>
-              <div className="flex flex-col gap-1 p-3 bg-[#181c24] rounded-lg border border-[#262b35]">
-                <span className="text-[#89929b] uppercase font-bold text-[10px]">PHONE</span>
-                <span className="text-[#dfe2ee] font-medium">{activeModalProvider.phone}</span>
-              </div>
-              <div className="flex flex-col gap-1 p-3 bg-[#181c24] rounded-lg border border-[#262b35]">
-                <span className="text-[#89929b] uppercase font-bold text-[10px]">EMAIL</span>
-                <span className="text-[#dfe2ee] font-medium truncate">{activeModalProvider.email}</span>
-              </div>
-            </div>
-
-            {/* Credential & KYC Section */}
-            <div className="flex flex-col gap-2 p-3.5 bg-[#0a0e16] rounded-lg border border-[#262b35]">
-              <div className="flex items-center justify-between">
-                <span className="text-[11px] font-bold text-[#89929b] uppercase tracking-wider">
-                  SUBMITTED CREDENTIALS &amp; LICENSING
-                </span>
-                <span className="text-[10px] text-[#ffb95f] font-mono">
-                  {activeModalProvider.submittedDate}
-                </span>
-              </div>
-              <p className="text-sm font-semibold text-[#dfe2ee] m-0">
-                {activeModalProvider.documentName}
-              </p>
-              <span className="text-xs text-[#4cd7f6]">
-                Status: {activeModalProvider.documentStatus}
-              </span>
-            </div>
-
-            {/* Modal Actions */}
-            <div className="flex items-center justify-end gap-3 pt-2">
-              <button
-                type="button"
-                onClick={() => setActiveModalProvider(null)}
-                className="px-4 py-2 rounded-lg bg-[#262b35] hover:bg-[#31353e] text-[#dfe2ee] text-xs font-semibold border-0 cursor-pointer transition-colors"
-              >
-                Close
-              </button>
-              {activeModalProvider.status === 'Pending' && (
-                <>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      activeModalProvider.status = 'Rejected'
-                      setActiveModalProvider(null)
-                    }}
-                    className="px-4 py-2 rounded-lg bg-red-950/60 hover:bg-red-900 border border-red-800 text-red-300 text-xs font-bold cursor-pointer transition-colors"
-                  >
-                    Reject
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      activeModalProvider.status = 'Approved'
-                      setActiveModalProvider(null)
-                    }}
-                    className="px-4 py-2 rounded-lg bg-[#3198dc] hover:bg-[#43a4e5] text-[#002c47] text-xs font-bold border-0 cursor-pointer transition-colors shadow-md"
-                  >
-                    Approve Provider
-                  </button>
-                </>
-              )}
-            </div>
-          </div>
-        </div>
+        <ProviderDetailModal
+          provider={activeModalProvider}
+          onClose={() => setActiveModalProvider(null)}
+          onApprove={handleApproveProvider}
+          onReject={handleRejectProvider}
+          onRequestInfo={handleRequestInfo}
+        />
       )}
     </div>
   )

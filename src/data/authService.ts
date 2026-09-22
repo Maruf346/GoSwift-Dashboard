@@ -26,7 +26,7 @@ export function verifyOtpMock(email: string, code: string) {
   })
 }
 
-export function updatePasswordMock(email: string, newPassword: string) {
+export function updatePasswordMock(_email: string, _newPassword: string) {
   return new Promise<{ ok: boolean }>((resolve) => {
     // In real app, update DB. Here just simulate.
     setTimeout(() => resolve({ ok: true }), 400)

@@ -211,7 +211,9 @@ export default function ForgotPassword() {
                       // show real value (or empty) when focused
                       if (e.target.value === '•') e.target.value = ''
                     }}
-                    ref={(el) => (inputsRef.current[i] = el)}
+                    ref={(el) => {
+                      inputsRef.current[i] = el
+                    }}
                   />
                 ))}
               </div>
