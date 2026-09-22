@@ -1,5 +1,9 @@
 import { useState } from 'react'
 
+// ── Asset URLs (Figma-sourced) ─────────────────────────────────────────────
+const imgCourierPortrait = 'https://www.figma.com/api/mcp/asset/55f0bfbc-ea88-4b0f-9df7-73f9dace489b'
+const imgPoliceRecordThumb = 'https://www.figma.com/api/mcp/asset/49bf6797-f491-4b31-b594-29b0814a68ad'
+
 export interface CourierData {
   courierType: string
   dispatchVehicleType: string
@@ -14,6 +18,9 @@ export interface CourierData {
   primaryServiceHub: string
   availabilityHours: string
   emergencyContact: string
+  companyName?: string
+  fullLegalName?: string
+  experienceYears?: number
 }
 
 export interface CourierModalProps {
@@ -45,7 +52,6 @@ export default function CourierReviewModal({
   onReject,
   onRequestInfo,
 }: CourierModalProps) {
-  const [activeTab, setActiveTab] = useState<'profile' | 'transit' | 'authorization' | 'zones'>('profile')
   const [rejectionReason, setRejectionReason] = useState('')
   const [showRejectBox, setShowRejectBox] = useState(false)
   const [showInfoBox, setShowInfoBox] = useState(false)
@@ -54,317 +60,463 @@ export default function CourierReviewModal({
 
   const defaultCourierData: CourierData = {
     courierType: 'Licensed Commercial Express Courier',
-    dispatchVehicleType: 'Heavy-Duty Cargo Motorcycle (250cc) / Insulated Box',
-    vehiclePlate: 'CR-7712 (Grand Bahama Dispatch)',
-    maxPayloadKg: 45,
+    dispatchVehicleType: 'Heavy-Duty Cargo Motorcycle (250cc) • Insulated Cargo Box',
+    vehiclePlate: 'CR-1029 (Grand Bahama Dispatch)',
+    maxPayloadKg: 40,
     cargoBoxEquipped: true,
     refrigeratedStorage: true,
-    driverLicenseNumber: 'BS-DL-GB-88102',
-    portAuthorityAuthNumber: 'GBPA-DISP-2024-9182',
-    transitInsurancePolicy: 'BS-TR-INS-88190',
+    driverLicenseNumber: 'BS-DL-GB-10290',
+    portAuthorityAuthNumber: 'GBPA-DISP-2024-1029',
+    transitInsurancePolicy: 'BS-TR-INS-10290',
     policeRecordClearance: 'Verified & Clean Record (Freeport HQ)',
-    primaryServiceHub: `${provider.hub || 'Grand Bahama'} Port Authority Industrial & Commercial Hub`,
-    availabilityHours: '7:00 AM - 8:00 PM (Express On-Demand)',
-    emergencyContact: '+1 (242) 555-0992',
+    primaryServiceHub: 'Grand Bahama Port Authority & Freeport Industrial Hub',
+    availabilityHours: '7:30 AM - 8:30 PM (Express On-Demand)',
+    emergencyContact: '+1 (242) 555-9921',
+    companyName: 'Island Express Logistics Ltd.',
+    fullLegalName: provider.name.includes('Bethel') ? 'Devon Jamal Bethel' : `${provider.name} Cartwright`,
+    experienceYears: 6,
   }
 
   const cData = provider.courierData || defaultCourierData
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 md:p-6 bg-black/80 backdrop-blur-md animate-fadeIn overflow-y-auto">
-      <div className="relative flex flex-col w-full max-w-4xl bg-[#141822] border border-[#2a303c] rounded-2xl shadow-2xl overflow-hidden max-h-[92vh]">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 md:p-6 bg-black/85 backdrop-blur-md animate-fadeIn overflow-y-auto">
+      <div className="relative flex flex-col w-full max-w-[1024px] bg-[#111620] border border-[#262e3d] rounded-2xl shadow-2xl overflow-hidden max-h-[94vh]">
         
-        {/* Top Header Glow Bar */}
-        <div className="w-full h-1.5 bg-gradient-to-r from-[#4cd7f6] via-[#3198dc] to-[#20c8e4]" />
+        {/* Top Ambient Glow Line */}
+        <div className="w-full h-1 bg-gradient-to-r from-[#4cd7f6] via-[#3198dc] to-[#03b5d3]" />
 
-        {/* Modal Header */}
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 px-6 py-5 bg-[#0e121a] border-b border-[#222834]">
-          <div className="flex items-center gap-4">
-            <div className="flex items-center justify-center w-14 h-14 rounded-2xl bg-[#1c2230] border border-[#313a4d] overflow-hidden shrink-0 shadow-inner">
-              {provider.avatarImage ? (
-                <img src={provider.avatarImage} alt="" className="w-full h-full object-cover" />
-              ) : (
-                <span className="font-extrabold text-lg text-[#4cd7f6]">
-                  {provider.avatarInitials || provider.name.slice(0, 2).toUpperCase()}
-                </span>
-              )}
-            </div>
+        {/* ═══ 1. MODAL HEADER (node 85:2184) ═══════════════════════════════ */}
+        <div className="flex flex-col gap-3 px-6 pt-5 pb-4 bg-[#0d1118] border-b border-[#1f2735]">
+          <div className="flex flex-wrap items-center justify-between gap-3 w-full">
             
-            <div className="flex flex-col text-left">
-              <div className="flex flex-wrap items-center gap-2.5">
-                <h2 className="text-xl sm:text-2xl font-black text-[#dfe2ee] tracking-tight m-0">
-                  {provider.name}
-                </h2>
-                {provider.status === 'Pending' && (
-                  <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold bg-[#ca8100]/25 border border-[#ca8100]/50 text-[#ffb95f]">
-                    <span className="w-1.5 h-1.5 rounded-full bg-[#ffb95f] animate-pulse" />
-                    COURIER DISPATCH REVIEW PENDING
-                  </span>
-                )}
-                {provider.status === 'Approved' && (
-                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-[#4cd7f6]/15 border border-[#4cd7f6]/40 text-[#4cd7f6]">
-                    ✓ AUTHORIZED COMMERCIAL COURIER
-                  </span>
-                )}
-                {provider.status === 'Rejected' && (
-                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-red-950/60 border border-red-500/40 text-red-300">
-                    ✕ REJECTED COURIER
-                  </span>
-                )}
+            {/* Status Tag and Metadata Pills (node 85:2186) */}
+            <div className="flex flex-wrap items-center gap-2 sm:gap-2.5">
+              
+              {/* Status Badge with Pulsing Dot (node 85:2187) */}
+              {provider.status === 'Pending' && (
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#ca8100]/20 border border-[#ca8100]/40 text-[#ffb95f] text-xs font-bold tracking-wide">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#ffb95f] animate-pulse" />
+                  <span>PENDING REGISTRATION REVIEW</span>
+                </div>
+              )}
+              {provider.status === 'Approved' && (
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#4cd7f6]/15 border border-[#4cd7f6]/40 text-[#4cd7f6] text-xs font-bold tracking-wide">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#4cd7f6]" />
+                  <span>AUTHORIZED COURIER</span>
+                </div>
+              )}
+              {provider.status === 'Rejected' && (
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-red-950/60 border border-red-500/40 text-red-300 text-xs font-bold tracking-wide">
+                  <span className="w-1.5 h-1.5 rounded-full bg-red-400" />
+                  <span>REJECTED APPLICATION</span>
+                </div>
+              )}
+
+              {/* Identifier Token (node 85:2192) */}
+              <div className="inline-flex items-center px-2.5 py-1 rounded-md bg-[#18202d] border border-[#263347] text-[#4cd7f6] text-xs font-mono font-bold tracking-wider">
+                ID: {provider.providerId}
               </div>
 
-              <div className="flex flex-wrap items-center gap-2 sm:gap-3 text-xs text-[#89929b] mt-1 font-medium">
-                <span className="font-mono text-[#4cd7f6]">{provider.providerId}</span>
-                <span>•</span>
-                <span>{provider.hub} Hub, Bahamas</span>
-                <span>•</span>
+              {/* Submitted Elapsed Time (node 85:2196) */}
+              <div className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs text-[#89929b] font-medium">
+                <svg className="w-3.5 h-3.5 text-[#89929b]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
                 <span>Submitted: {provider.submittedDate || '6 hours ago'}</span>
-                <span>•</span>
-                <span className="text-[#dfe2ee]">Bahamas Dispatch Jurisdiction</span>
+              </div>
+
+              {/* Hub Pill (node 85:2198) */}
+              <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-[#18202d] border border-[#263347] text-xs font-medium text-[#dfe2ee]">
+                <svg className="w-3 h-3 text-[#4cd7f6]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                </svg>
+                <span>{provider.hub} Hub, Bahamas</span>
+              </div>
+
+              {/* Category Pill (node 85:2200) */}
+              <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-[#18202d] border border-[#263347] text-xs font-medium text-[#4cd7f6]">
+                <span>📦</span>
+                <span>Commercial Courier</span>
+              </div>
+            </div>
+
+            {/* Close Button (node 85:2204) */}
+            <button
+              type="button"
+              onClick={onClose}
+              className="p-1.5 rounded-lg text-[#89929b] hover:text-[#dfe2ee] hover:bg-[#1f2735] border border-transparent hover:border-[#2a3548] transition-colors cursor-pointer"
+              aria-label="Close dialog"
+            >
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+
+          {/* Heading 1 - Modal Title (node 85:2202) */}
+          <div className="pt-1 text-left">
+            <h2 className="text-xl sm:text-2xl font-black text-[#dfe2ee] tracking-tight m-0">
+              Commercial Dispatch Courier Review
+            </h2>
+            <p className="text-xs text-[#89929b] font-medium m-0 mt-0.5">
+              Grand Bahama Port Authority (GBPA) &amp; Road Traffic Department Dispatch Authorization
+            </p>
+          </div>
+        </div>
+
+        {/* ═══ SCROLLABLE MODAL BODY (node 85:2207) ═════════════════════════ */}
+        <div className="flex-1 overflow-y-auto p-5 sm:p-6 space-y-6 text-left">
+          
+          {/* ═══ COURIER PROFILE GRID (node 85:2208) ══════════════════════════ */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
+            
+            {/* Left Column: Portrait & Identity (node 85:2209) */}
+            <div className="lg:col-span-4 flex flex-col gap-4">
+              <div className="p-4 rounded-2xl bg-[#0d1118] border border-[#1f2735] space-y-4">
+                
+                {/* Courier Portrait (node 85:2211) */}
+                <div className="relative h-56 rounded-xl overflow-hidden bg-[#151c27] border border-[#222c3b] shadow-inner group">
+                  <img
+                    src={imgCourierPortrait}
+                    alt={provider.name}
+                    className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                    onError={(e) => {
+                      const target = e.currentTarget
+                      target.style.display = 'none'
+                      if (target.parentElement) {
+                        target.parentElement.innerHTML = '<div class="w-full h-full flex items-center justify-center font-bold text-2xl text-[#4cd7f6]">DB</div>'
+                      }
+                    }}
+                  />
+                  <div className="absolute bottom-2 left-2 px-2 py-0.5 rounded bg-black/70 backdrop-blur-md text-[10px] font-bold text-[#4cd7f6] border border-[#4cd7f6]/30">
+                    ID Badge Verified
+                  </div>
+                </div>
+
+                {/* Identity Metadata (node 85:2213) */}
+                <div className="space-y-1 text-left">
+                  <span className="text-[10px] font-bold text-[#89929b] uppercase tracking-wider block">
+                    COURIER DISPATCH OPERATOR
+                  </span>
+                  <h3 className="text-lg font-black text-[#dfe2ee] m-0">
+                    {provider.name}
+                  </h3>
+                  <span className="text-xs text-[#4cd7f6] font-semibold block">
+                    Certified Dispatch Courier • {cData.experienceYears || 6}+ Yrs Island Delivery
+                  </span>
+                </div>
+
+              </div>
+            </div>
+
+            {/* Right Column: Entity & Fleet Details (node 85:2220) */}
+            <div className="lg:col-span-8 flex flex-col gap-4">
+              <div className="p-5 rounded-2xl bg-[#0d1118] border border-[#1f2735] space-y-4">
+                
+                {/* Dispatch Entity Header (node 85:2222) */}
+                <div className="pb-3 border-b border-[#1f2735]">
+                  <span className="text-[10px] font-bold text-[#89929b] uppercase tracking-wider block">
+                    DISPATCH ENTITY &amp; FLEET OPERATOR
+                  </span>
+                  <h4 className="text-base font-extrabold text-[#dfe2ee] m-0 mt-0.5">
+                    {cData.companyName || 'Island Express Delivery Ltd.'}
+                  </h4>
+                </div>
+
+                {/* Information Grid (node 85:2226) */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 text-xs">
+                  
+                  {/* Field 1: Operational Zone / Island (node 85:2227) */}
+                  <div className="p-3 rounded-xl bg-[#141a24] border border-[#222c3b]">
+                    <span className="text-[10px] font-bold text-[#89929b] uppercase tracking-wider block">
+                      OPERATIONAL ZONE / ISLAND
+                    </span>
+                    <div className="flex items-center gap-1.5 mt-1">
+                      <svg className="w-3.5 h-3.5 text-[#4cd7f6] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                      </svg>
+                      <span className="text-xs font-bold text-[#dfe2ee] truncate">
+                        {cData.primaryServiceHub}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Field 2: Official Work Email (node 85:2236) */}
+                  <div className="p-3 rounded-xl bg-[#141a24] border border-[#222c3b]">
+                    <span className="text-[10px] font-bold text-[#89929b] uppercase tracking-wider block">
+                      OFFICIAL WORK EMAIL
+                    </span>
+                    <div className="flex items-center gap-1.5 mt-1">
+                      <svg className="w-3.5 h-3.5 text-[#4cd7f6] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                      </svg>
+                      <span className="text-xs font-semibold text-[#4cd7f6] truncate">{provider.email}</span>
+                    </div>
+                  </div>
+
+                  {/* Field 3: Registered Full Legal Name (node 85:2241) */}
+                  <div className="p-3 rounded-xl bg-[#141a24] border border-[#222c3b]">
+                    <span className="text-[10px] font-bold text-[#89929b] uppercase tracking-wider block">
+                      REGISTERED FULL LEGAL NAME
+                    </span>
+                    <span className="text-xs font-bold text-[#dfe2ee] mt-1 block">
+                      {cData.fullLegalName || provider.name}
+                    </span>
+                  </div>
+
+                  {/* Field 4: Direct Business Phone (node 85:2246) */}
+                  <div className="p-3 rounded-xl bg-[#141a24] border border-[#222c3b]">
+                    <span className="text-[10px] font-bold text-[#89929b] uppercase tracking-wider block">
+                      DIRECT BUSINESS PHONE
+                    </span>
+                    <div className="flex items-center gap-1.5 mt-1">
+                      <svg className="w-3.5 h-3.5 text-[#4cd7f6] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                      </svg>
+                      <span className="text-xs font-bold text-[#dfe2ee]">{provider.phone}</span>
+                    </div>
+                  </div>
+
+                  {/* Field 5: Fleet & Transport Specification (node 85:2251) */}
+                  <div className="p-3 rounded-xl bg-[#141a24] border border-[#222c3b] sm:col-span-2">
+                    <div className="flex justify-between items-center mb-1">
+                      <span className="text-[10px] font-bold text-[#89929b] uppercase tracking-wider">
+                        FLEET &amp; TRANSPORT SPECIFICATION
+                      </span>
+                      <span className="text-[10px] font-mono text-[#4cd7f6]">{cData.vehiclePlate}</span>
+                    </div>
+                    <span className="text-xs font-semibold text-[#dfe2ee] block">
+                      {cData.dispatchVehicleType} ({cData.maxPayloadKg}kg Max Capacity)
+                    </span>
+                  </div>
+
+                </div>
+
+                {/* License & Clearance Micro-Panels (node 85:2257) */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                  
+                  {/* Card 1: Port Authority Authorization (node 85:2259) */}
+                  <div className="p-3.5 rounded-xl bg-[#141a24] border border-[#4cd7f6]/30 flex items-center justify-between">
+                    <div>
+                      <span className="text-[10px] font-bold text-[#89929b] uppercase tracking-wider block">
+                        PORT AUTHORITY AUTHORIZATION
+                      </span>
+                      <span className="text-xs font-mono font-bold text-[#4cd7f6] mt-0.5 block">
+                        {cData.portAuthorityAuthNumber}
+                      </span>
+                      <span className="text-[10px] text-emerald-400 font-medium">
+                        ✓ Active Dispatch Authority
+                      </span>
+                    </div>
+                    <span className="text-xl">⚓</span>
+                  </div>
+
+                  {/* Card 2: Commercial Transit Insurance (node 85:2263) */}
+                  <div className="p-3.5 rounded-xl bg-[#141a24] border border-emerald-500/30 flex items-center justify-between">
+                    <div>
+                      <span className="text-[10px] font-bold text-[#89929b] uppercase tracking-wider block">
+                        COMMERCIAL TRANSIT INSURANCE
+                      </span>
+                      <span className="text-xs font-mono font-bold text-emerald-400 mt-0.5 block">
+                        Policy #{cData.transitInsurancePolicy}
+                      </span>
+                      <span className="text-[10px] text-[#89929b]">
+                        Full Goods in Transit Coverage
+                      </span>
+                    </div>
+                    <span className="text-xl">🛡️</span>
+                  </div>
+
+                </div>
+
               </div>
             </div>
           </div>
 
-          <button
-            type="button"
-            onClick={onClose}
-            className="p-2 rounded-xl text-[#89929b] hover:text-[#dfe2ee] hover:bg-[#1f2635] border border-transparent hover:border-[#313a4d] transition-colors cursor-pointer self-start sm:self-auto"
-            aria-label="Close modal"
-          >
-            <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
-        </div>
-
-        {/* Tab Navigation Navigation Bar */}
-        <div className="flex items-center gap-2 px-6 pt-3 bg-[#111620] border-b border-[#222834] overflow-x-auto no-scrollbar">
-          <button
-            type="button"
-            onClick={() => setActiveTab('profile')}
-            className={`px-4 py-2.5 text-xs font-bold rounded-t-lg transition-all border-b-2 cursor-pointer ${
-              activeTab === 'profile'
-                ? 'border-[#4cd7f6] text-[#4cd7f6] bg-[#1a2130]'
-                : 'border-transparent text-[#89929b] hover:text-[#dfe2ee] hover:bg-[#161c28]'
-            }`}
-          >
-            Courier Identity
-          </button>
-          <button
-            type="button"
-            onClick={() => setActiveTab('transit')}
-            className={`px-4 py-2.5 text-xs font-bold rounded-t-lg transition-all border-b-2 cursor-pointer ${
-              activeTab === 'transit'
-                ? 'border-[#4cd7f6] text-[#4cd7f6] bg-[#1a2130]'
-                : 'border-transparent text-[#89929b] hover:text-[#dfe2ee] hover:bg-[#161c28]'
-            }`}
-          >
-            Transit Equipment &amp; Vehicle
-          </button>
-          <button
-            type="button"
-            onClick={() => setActiveTab('authorization')}
-            className={`px-4 py-2.5 text-xs font-bold rounded-t-lg transition-all border-b-2 cursor-pointer ${
-              activeTab === 'authorization'
-                ? 'border-[#4cd7f6] text-[#4cd7f6] bg-[#1a2130]'
-                : 'border-transparent text-[#89929b] hover:text-[#dfe2ee] hover:bg-[#161c28]'
-            }`}
-          >
-            Authorizations &amp; Insurance
-          </button>
-          <button
-            type="button"
-            onClick={() => setActiveTab('zones')}
-            className={`px-4 py-2.5 text-xs font-bold rounded-t-lg transition-all border-b-2 cursor-pointer ${
-              activeTab === 'zones'
-                ? 'border-[#4cd7f6] text-[#4cd7f6] bg-[#1a2130]'
-                : 'border-transparent text-[#89929b] hover:text-[#dfe2ee] hover:bg-[#161c28]'
-            }`}
-          >
-            Service Zones &amp; Hours
-          </button>
-        </div>
-
-        {/* Modal Body */}
-        <div className="flex-1 overflow-y-auto p-6 space-y-6 text-left">
-          
-          {/* TAB 1: PROFILE */}
-          {activeTab === 'profile' && (
-            <div className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="p-4 rounded-xl bg-[#0f141e] border border-[#222834] space-y-3">
-                  <h4 className="text-xs font-bold text-[#4cd7f6] uppercase tracking-wider m-0">
-                    Courier Personnel Info
-                  </h4>
-                  <div className="space-y-2 text-xs">
-                    <div className="flex justify-between py-1 border-b border-[#1c2230]">
-                      <span className="text-[#89929b]">Legal Name:</span>
-                      <span className="font-semibold text-[#dfe2ee]">{provider.name}</span>
-                    </div>
-                    <div className="flex justify-between py-1 border-b border-[#1c2230]">
-                      <span className="text-[#89929b]">Courier Classification:</span>
-                      <span className="font-semibold text-[#dfe2ee]">{cData.courierType}</span>
-                    </div>
-                    <div className="flex justify-between py-1 border-b border-[#1c2230]">
-                      <span className="text-[#89929b]">Primary Phone:</span>
-                      <span className="font-semibold text-[#dfe2ee]">{provider.phone}</span>
-                    </div>
-                    <div className="flex justify-between py-1">
-                      <span className="text-[#89929b]">Email:</span>
-                      <span className="font-semibold text-[#4cd7f6]">{provider.email}</span>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="p-4 rounded-xl bg-[#0f141e] border border-[#222834] space-y-3">
-                  <h4 className="text-xs font-bold text-[#ffb95f] uppercase tracking-wider m-0">
-                    Emergency &amp; Dispatch Contact
-                  </h4>
-                  <div className="space-y-2 text-xs">
-                    <div className="flex justify-between py-1 border-b border-[#1c2230]">
-                      <span className="text-[#89929b]">Emergency Contact:</span>
-                      <span className="font-semibold text-[#dfe2ee]">{cData.emergencyContact}</span>
-                    </div>
-                    <div className="flex justify-between py-1 border-b border-[#1c2230]">
-                      <span className="text-[#89929b]">Hub Assignment:</span>
-                      <span className="font-semibold text-[#dfe2ee]">{provider.hub}</span>
-                    </div>
-                    <div className="flex justify-between py-1">
-                      <span className="text-[#89929b]">Port Authority License:</span>
-                      <span className="font-mono text-[#4cd7f6]">{cData.portAuthorityAuthNumber}</span>
-                    </div>
-                  </div>
-                </div>
+          {/* ═══ DOCUMENTS INSPECTION SECTION (node 85:2268) ══════════════════ */}
+          <div className="space-y-3.5">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <svg className="w-4 h-4 text-[#4cd7f6]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                </svg>
+                <h4 className="text-xs font-bold text-[#dfe2ee] uppercase tracking-wider m-0">
+                  OFFICIAL COMPLIANCE &amp; DRIVER CREDENTIALS
+                </h4>
               </div>
+              <span className="text-[11px] font-semibold text-emerald-400">
+                All 3 Required Documents Verified
+              </span>
             </div>
-          )}
 
-          {/* TAB 2: TRANSIT */}
-          {activeTab === 'transit' && (
-            <div className="space-y-4">
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                <div className="p-3.5 rounded-xl bg-[#0f141e] border border-[#222834] text-center">
-                  <span className="text-[10px] uppercase font-bold text-[#89929b]">Vehicle Type</span>
-                  <p className="text-xs font-extrabold text-[#dfe2ee] mt-1 mb-0">{cData.dispatchVehicleType}</p>
-                </div>
-                <div className="p-3.5 rounded-xl bg-[#0f141e] border border-[#222834] text-center">
-                  <span className="text-[10px] uppercase font-bold text-[#89929b]">Plate Number</span>
-                  <p className="text-xs font-mono font-extrabold text-[#4cd7f6] mt-1 mb-0">{cData.vehiclePlate}</p>
-                </div>
-                <div className="p-3.5 rounded-xl bg-[#0f141e] border border-[#222834] text-center">
-                  <span className="text-[10px] uppercase font-bold text-[#89929b]">Max Payload</span>
-                  <p className="text-sm font-extrabold text-[#ffb95f] mt-1 mb-0">{cData.maxPayloadKg} KG</p>
-                </div>
-                <div className="p-3.5 rounded-xl bg-[#0f141e] border border-[#222834] text-center">
-                  <span className="text-[10px] uppercase font-bold text-[#89929b]">Thermal Box</span>
-                  <p className="text-sm font-extrabold text-emerald-400 mt-1 mb-0">Equipped</p>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* TAB 3: AUTHORIZATION */}
-          {activeTab === 'authorization' && (
-            <div className="space-y-4">
-              <div className="p-4 rounded-xl bg-[#0f141e] border border-[#222834] space-y-3">
-                <div className="flex items-center justify-between">
-                  <h4 className="text-xs font-bold text-[#4cd7f6] uppercase tracking-wider m-0">
-                    Grand Bahama Port Authority Dispatch Authorization
-                  </h4>
-                  <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-950/60 border border-emerald-500/40 text-emerald-400">
-                    Verified
-                  </span>
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
-                  <div className="p-3 rounded-lg bg-[#141a26] border border-[#1f2738]">
-                    <span className="text-[#89929b] block text-[10px] uppercase font-bold">Transit Insurance Policy</span>
-                    <span className="font-mono text-xs font-semibold text-[#dfe2ee]">{cData.transitInsurancePolicy}</span>
+            {/* 3 Document Cards Row (node 85:2277) */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              
+              {/* Document 1: Commercial Driving License (node 85:2278) */}
+              <div className="p-4 rounded-2xl bg-[#0d1118] border border-[#1f2735] flex flex-col justify-between shadow-md space-y-3">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-[#18202d] border border-[#2e3b4e] flex items-center justify-center text-lg text-[#4cd7f6]">
+                    🪪
                   </div>
-                  <div className="p-3 rounded-lg bg-[#141a26] border border-[#1f2738]">
-                    <span className="text-[#89929b] block text-[10px] uppercase font-bold">Police Clearance</span>
-                    <span className="text-xs font-semibold text-emerald-400">{cData.policeRecordClearance}</span>
+                  <div>
+                    <h5 className="text-xs font-bold text-[#dfe2ee] m-0">
+                      Bahamas Driving License
+                    </h5>
+                    <span className="text-[10px] text-[#89929b]">
+                      Commercial Class B • PSV Endorsed
+                    </span>
                   </div>
-                </div>
-              </div>
-
-              <div className="flex items-center justify-between p-3 rounded-xl bg-[#141a26] border border-[#1f2738] text-xs">
-                <div>
-                  <span className="font-bold text-[#dfe2ee] block">Commercial Motorbike Dispatch Authorization PDF</span>
-                  <span className="text-[11px] text-[#89929b]">{cData.portAuthorityAuthNumber}</span>
                 </div>
                 <button
                   type="button"
-                  onClick={() => setDocPreview('Commercial Dispatch Authorization Permit')}
-                  className="px-3 py-1 rounded-md bg-[#1f2636] text-[#4cd7f6] text-xs font-bold border border-[#2a3750] cursor-pointer"
+                  onClick={() => setDocPreview('Official Bahamas Commercial Driver License (Class B & PSV Endorsement)')}
+                  className="w-full py-2 px-3 rounded-lg bg-[#18202d] hover:bg-[#222c3d] text-[#4cd7f6] text-xs font-bold border border-[#263347] transition-colors cursor-pointer flex items-center justify-center gap-1.5"
                 >
-                  View
+                  <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                  </svg>
+                  <span>Inspect License</span>
                 </button>
               </div>
 
-              {docPreview && (
-                <div className="p-3 rounded-xl bg-[#172030] border border-[#4cd7f6]/40 flex items-center justify-between text-xs">
-                  <span className="text-[#4cd7f6] font-semibold">📄 Viewing: {docPreview}</span>
-                  <button type="button" onClick={() => setDocPreview(null)} className="text-[#89929b] hover:text-white bg-transparent border-0 cursor-pointer">
-                    Close
-                  </button>
+              {/* Document 2: Dispatch Permit (node 85:2294) */}
+              <div className="p-4 rounded-2xl bg-[#0d1118] border border-[#1f2735] flex flex-col justify-between shadow-md space-y-3">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-[#18202d] border border-[#2e3b4e] flex items-center justify-center text-lg text-emerald-400">
+                    📜
+                  </div>
+                  <div>
+                    <h5 className="text-xs font-bold text-[#dfe2ee] m-0">
+                      Courier Dispatch Permit
+                    </h5>
+                    <span className="text-[10px] text-[#89929b]">
+                      GBPA Authorization #{cData.portAuthorityAuthNumber}
+                    </span>
+                  </div>
                 </div>
-              )}
+                <button
+                  type="button"
+                  onClick={() => setDocPreview('Grand Bahama Port Authority Commercial Courier Dispatch Authorization Permit')}
+                  className="w-full py-2 px-3 rounded-lg bg-[#18202d] hover:bg-[#222c3d] text-[#4cd7f6] text-xs font-bold border border-[#263347] transition-colors cursor-pointer flex items-center justify-center gap-1.5"
+                >
+                  <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                  <span>View Permit</span>
+                </button>
+              </div>
+
+              {/* Document 3: Police Character Certificate (node 85:2309) */}
+              <div className="p-4 rounded-2xl bg-[#0d1118] border border-[#1f2735] flex flex-col justify-between shadow-md space-y-3">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-[#18202d] border border-[#2e3b4e] overflow-hidden shrink-0 flex items-center justify-center">
+                    <img
+                      src={imgPoliceRecordThumb}
+                      alt="Police Certificate Thumbnail"
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        const target = e.currentTarget
+                        target.style.display = 'none'
+                        if (target.parentElement) {
+                          target.parentElement.innerHTML = '<span class="text-lg">👮‍♂️</span>'
+                        }
+                      }}
+                    />
+                  </div>
+                  <div>
+                    <h5 className="text-xs font-bold text-[#dfe2ee] m-0">
+                      Police Record (RBPF)
+                    </h5>
+                    <span className="text-[10px] text-emerald-400">
+                      Clean Clearance Certificate
+                    </span>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setDocPreview('Royal Bahamas Police Force (RBPF) Official Character & Background Clearance Certificate')}
+                  className="w-full py-2 px-3 rounded-lg bg-[#18202d] hover:bg-[#222c3d] text-[#4cd7f6] text-xs font-bold border border-[#263347] transition-colors cursor-pointer flex items-center justify-center gap-1.5"
+                >
+                  <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                  </svg>
+                  <span>View Police Record</span>
+                </button>
+              </div>
+
+            </div>
+          </div>
+
+          {/* Interactive Document Preview Box */}
+          {docPreview && (
+            <div className="p-4 rounded-xl bg-[#141e2c] border border-[#4cd7f6]/40 flex items-center justify-between text-xs animate-fadeIn">
+              <div className="flex items-center gap-2 text-[#4cd7f6]">
+                <span className="text-base">📄</span>
+                <span className="font-bold">Viewing Document: {docPreview}</span>
+              </div>
+              <button
+                type="button"
+                onClick={() => setDocPreview(null)}
+                className="text-[#89929b] hover:text-white bg-transparent border-0 cursor-pointer font-bold"
+              >
+                Close Preview
+              </button>
             </div>
           )}
 
-          {/* TAB 4: ZONES */}
-          {activeTab === 'zones' && (
-            <div className="space-y-4">
-              <div className="p-4 rounded-xl bg-[#0f141e] border border-[#222834] space-y-2">
-                <span className="text-[10px] uppercase font-bold text-[#89929b]">Designated Delivery Hub</span>
-                <p className="text-sm font-bold text-[#dfe2ee] m-0">{cData.primaryServiceHub}</p>
-              </div>
-              <div className="p-4 rounded-xl bg-[#0f141e] border border-[#222834] space-y-2">
-                <span className="text-[10px] uppercase font-bold text-[#89929b]">Operating Hours</span>
-                <p className="text-sm font-bold text-[#4cd7f6] m-0">{cData.availabilityHours}</p>
-              </div>
-            </div>
-          )}
-
-          {/* Conditional Rejection Form */}
+          {/* Rejection Form Box */}
           {showRejectBox && (
-            <div className="p-4 rounded-xl bg-red-950/40 border border-red-600/40 space-y-3">
+            <div className="p-4 rounded-xl bg-red-950/40 border border-red-600/40 space-y-3 animate-fadeIn">
               <h4 className="text-xs font-bold text-red-300 uppercase tracking-wider m-0">
-                Reason for Courier Rejection
+                Reason for Application Rejection
               </h4>
               <textarea
                 value={rejectionReason}
                 onChange={(e) => setRejectionReason(e.target.value)}
-                placeholder="Reason for declining courier application..."
+                placeholder="Specify reasons for rejecting this courier (e.g. Incomplete Port Authority authorization, expired vehicle transit insurance)..."
                 rows={3}
-                className="w-full p-3 rounded-lg bg-[#0e121a] border border-red-800/60 text-xs text-[#dfe2ee] outline-none"
+                className="w-full p-3 rounded-lg bg-[#0d1118] border border-red-800/60 text-xs text-[#dfe2ee] placeholder-[#89929b] outline-none"
               />
               <div className="flex justify-end gap-2">
-                <button type="button" onClick={() => setShowRejectBox(false)} className="px-3 py-1.5 rounded-lg bg-[#222834] text-xs font-semibold">
+                <button
+                  type="button"
+                  onClick={() => setShowRejectBox(false)}
+                  className="px-3 py-1.5 rounded-lg bg-[#222834] text-[#dfe2ee] text-xs font-semibold border-0 cursor-pointer"
+                >
                   Cancel
                 </button>
-                <button type="button" onClick={() => onReject(provider.id, rejectionReason)} className="px-4 py-1.5 rounded-lg bg-red-600 text-white text-xs font-bold">
+                <button
+                  type="button"
+                  onClick={() => onReject(provider.id, rejectionReason)}
+                  className="px-4 py-1.5 rounded-lg bg-red-600 hover:bg-red-500 text-white text-xs font-bold border-0 cursor-pointer"
+                >
                   Confirm Rejection
                 </button>
               </div>
             </div>
           )}
 
-          {/* Conditional Request Info Form */}
+          {/* Request Info Box */}
           {showInfoBox && (
-            <div className="p-4 rounded-xl bg-[#ca8100]/20 border border-[#ca8100]/40 space-y-3">
+            <div className="p-4 rounded-xl bg-[#ca8100]/20 border border-[#ca8100]/40 space-y-3 animate-fadeIn">
               <h4 className="text-xs font-bold text-[#ffb95f] uppercase tracking-wider m-0">
-                Request Courier Documentation
+                Request Additional Documentation
               </h4>
               <textarea
                 value={infoNote}
                 onChange={(e) => setInfoNote(e.target.value)}
-                placeholder="Specify missing courier permits or insurance details..."
+                placeholder="Explain what updated dispatch permits or insurance certificates are required from this courier..."
                 rows={3}
-                className="w-full p-3 rounded-lg bg-[#0e121a] border border-[#ca8100]/60 text-xs text-[#dfe2ee] outline-none"
+                className="w-full p-3 rounded-lg bg-[#0d1118] border border-[#ca8100]/60 text-xs text-[#dfe2ee] placeholder-[#89929b] outline-none"
               />
               <div className="flex justify-end gap-2">
-                <button type="button" onClick={() => setShowInfoBox(false)} className="px-3 py-1.5 rounded-lg bg-[#222834] text-xs font-semibold">
+                <button
+                  type="button"
+                  onClick={() => setShowInfoBox(false)}
+                  className="px-3 py-1.5 rounded-lg bg-[#222834] text-[#dfe2ee] text-xs font-semibold border-0 cursor-pointer"
+                >
                   Cancel
                 </button>
                 <button
@@ -373,25 +525,26 @@ export default function CourierReviewModal({
                     if (onRequestInfo) onRequestInfo(provider.id, infoNote)
                     setShowInfoBox(false)
                   }}
-                  className="px-4 py-1.5 rounded-lg bg-[#ca8100] text-black text-xs font-bold"
+                  className="px-4 py-1.5 rounded-lg bg-[#ca8100] hover:bg-[#df9000] text-black text-xs font-bold border-0 cursor-pointer"
                 >
-                  Send Request
+                  Send Notice to Courier
                 </button>
               </div>
             </div>
           )}
+
         </div>
 
-        {/* Modal Action Footer */}
-        <div className="flex flex-wrap items-center justify-between gap-3 px-6 py-4 bg-[#0a0e16] border-t border-[#222834]">
-          <button
-            type="button"
-            onClick={onClose}
-            className="px-4 py-2.5 rounded-xl bg-[#1c2230] hover:bg-[#262e40] text-[#dfe2ee] text-xs font-bold border border-[#2a3548] cursor-pointer"
-          >
-            Close
-          </button>
+        {/* ═══ 4. MODAL FOOTER ACTION BANNER (node 85:2324) ══════════════════ */}
+        <div className="flex flex-wrap items-center justify-between gap-3 px-6 py-4 bg-[#0a0e16] border-t border-[#1f2735]">
+          
+          {/* Left: Informational Dispatch Note (node 85:2325) */}
+          <div className="flex items-center gap-2 text-xs text-[#89929b] font-medium">
+            <span className="text-emerald-400 font-bold">✓</span>
+            <span>Grand Bahama Port Authority (GBPA) &amp; Road Traffic Department Authorized Dispatcher</span>
+          </div>
 
+          {/* Right: Primary Review Action Buttons (node 85:2331) */}
           <div className="flex items-center gap-2.5">
             {provider.status === 'Pending' && (
               <>
@@ -401,26 +554,36 @@ export default function CourierReviewModal({
                     setShowInfoBox(!showInfoBox)
                     setShowRejectBox(false)
                   }}
-                  className="px-3.5 py-2.5 rounded-xl bg-[#202736] hover:bg-[#2b354a] text-[#ffb95f] border border-[#ffb95f]/30 text-xs font-bold cursor-pointer"
+                  className="px-3.5 py-2.5 rounded-xl bg-[#1f2838] hover:bg-[#283449] text-[#ffb95f] border border-[#ffb95f]/30 text-xs font-bold cursor-pointer transition-colors"
                 >
                   Request Info
                 </button>
+
+                {/* Reject Application Button (node 85:2332) */}
                 <button
                   type="button"
                   onClick={() => {
                     setShowRejectBox(!showRejectBox)
                     setShowInfoBox(false)
                   }}
-                  className="px-3.5 py-2.5 rounded-xl bg-red-950/60 hover:bg-red-900/80 text-red-300 border border-red-800 text-xs font-bold cursor-pointer"
+                  className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-red-950/60 hover:bg-red-900/80 text-red-300 border border-red-800 text-xs font-bold cursor-pointer transition-colors"
                 >
-                  Reject
+                  <svg className="w-4 h-4 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                  <span>Reject Application</span>
                 </button>
+
+                {/* Approve Courier Button (node 85:2336) */}
                 <button
                   type="button"
                   onClick={() => onApprove(provider.id)}
-                  className="px-5 py-2.5 rounded-xl bg-[#3198dc] hover:bg-[#45a4e3] text-[#002c47] text-xs font-extrabold border-0 cursor-pointer shadow-lg shadow-[#3198dc]/20"
+                  className="flex items-center gap-1.5 px-5 py-2.5 rounded-xl bg-[#3198dc] hover:bg-[#45a4e3] text-[#002c47] text-xs font-extrabold border-0 cursor-pointer transition-colors shadow-lg shadow-[#3198dc]/20"
                 >
-                  Approve Courier
+                  <svg className="w-4 h-4 text-[#002c47]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+                  </svg>
+                  <span>Approve Courier</span>
                 </button>
               </>
             )}
