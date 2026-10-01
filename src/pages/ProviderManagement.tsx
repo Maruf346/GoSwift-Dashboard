@@ -26,11 +26,22 @@ const imgAvatar2 = '/logo.png'
 const imgAvatar3 = '/logo.png'
 const imgAvatar4 = '/logo.png'
 const imgLogo = '/logo.png'
-const imgCatDriver = '/favicon.svg'
-const imgCatVendor = '/favicon.svg'
-const imgCatCourier = '/favicon.svg'
-const imgCatRental = '/favicon.svg'
-const imgCatProperty = '/favicon.svg'
+
+function ProviderCategoryIcon({ category }: { category: ProviderCategory }) {
+  switch (category) {
+    case 'Driver':
+    case 'Car Rental Provider':
+      return <Car className="w-3 h-3" aria-hidden="true" />
+    case 'Food Vendor':
+      return <Store className="w-3 h-3" aria-hidden="true" />
+    case 'Courier':
+      return <Truck className="w-3 h-3" aria-hidden="true" />
+    case 'Property Owner':
+      return <Home className="w-3 h-3" aria-hidden="true" />
+    default:
+      return <Handshake className="w-3 h-3" aria-hidden="true" />
+  }
+}
 
 // ── Types & Provider Data ──────────────────────────────────────────────────
 export type ProviderStatus = 'Pending' | 'Approved' | 'Rejected'
@@ -46,7 +57,6 @@ const initialProviderRecords: ProviderItem[] = [
     avatarImage: imgAvatar1,
     hasPendingBadge: true,
     category: 'Driver',
-    categoryIcon: imgCatDriver,
     phone: '+1 (242) 555-0192',
     email: 'm.rolle@bahamasnet.bs',
     hub: 'Nassau',
@@ -82,7 +92,6 @@ const initialProviderRecords: ProviderItem[] = [
     providerId: 'SWIFT-VEN-4109',
     avatarImage: imgAvatar2,
     category: 'Food Vendor',
-    categoryIcon: imgCatVendor,
     phone: '+1 (242) 328-5600',
     email: 'orders@twinbrothersbahamas.com',
     hub: 'Nassau',
@@ -120,7 +129,6 @@ const initialProviderRecords: ProviderItem[] = [
     avatarColor: '#4cd7f6',
     hasPendingBadge: true,
     category: 'Courier',
-    categoryIcon: imgCatCourier,
     phone: '+1 (242) 555-9018',
     email: 'd.bethel@gblogistics.com',
     hub: 'Grand Bahama',
@@ -152,7 +160,6 @@ const initialProviderRecords: ProviderItem[] = [
     avatarBg: '#31353e',
     avatarColor: '#89929b',
     category: 'Car Rental Provider',
-    categoryIcon: imgCatRental,
     phone: '+1 (242) 367-2890',
     email: 'fleet@abacoreefrentals.bs',
     hub: 'Abaco',
@@ -184,7 +191,6 @@ const initialProviderRecords: ProviderItem[] = [
     providerId: 'SWIFT-PROP-7193',
     avatarImage: imgAvatar3,
     category: 'Property Owner',
-    categoryIcon: imgCatProperty,
     phone: '+1 (242) 336-2241',
     email: 'concierge@tarbayvillas.com',
     hub: 'Exuma',
@@ -236,7 +242,6 @@ const initialProviderRecords: ProviderItem[] = [
     providerId: 'SWIFT-DRV-5512',
     avatarImage: imgAvatar4,
     category: 'Driver',
-    categoryIcon: imgCatDriver,
     phone: '+1 (242) 555-8831',
     email: 'k.christie@eleutherataxi.bs',
     hub: 'Eleuthera',
@@ -275,7 +280,6 @@ const initialProviderRecords: ProviderItem[] = [
     avatarColor: '#ffb95f',
     hasPendingBadge: true,
     category: 'Food Vendor',
-    categoryIcon: imgCatVendor,
     phone: '+1 (242) 393-2483',
     email: 'ops@islandbitesbahamas.com',
     hub: 'Nassau',
@@ -312,7 +316,6 @@ const initialProviderRecords: ProviderItem[] = [
     avatarColor: '#4cd7f6',
     hasPendingBadge: true,
     category: 'Car Rental Provider',
-    categoryIcon: imgCatRental,
     phone: '+1 (242) 363-1188',
     email: 'info@bahamadrift.com',
     hub: 'Nassau',
@@ -347,7 +350,6 @@ const initialProviderRecords: ProviderItem[] = [
     avatarColor: '#ffddb8',
     hasPendingBadge: true,
     category: 'Property Owner',
-    categoryIcon: imgCatProperty,
     phone: '+1 (242) 336-2009',
     email: 'bookings@coralsandsexuma.com',
     hub: 'Exuma',
@@ -401,7 +403,6 @@ const initialProviderRecords: ProviderItem[] = [
     avatarBg: '#31353e',
     avatarColor: '#dfe2ee',
     category: 'Courier',
-    categoryIcon: imgCatCourier,
     phone: '+1 (242) 352-9901',
     email: 'dispatch@lucayaexpress.bs',
     hub: 'Grand Bahama',
@@ -955,11 +956,7 @@ export default function ProviderManagement() {
                         {/* Category */}
                         <td className="py-4 px-4 align-middle">
                           <div className="flex items-center gap-2">
-                            <img
-                              src={provider.categoryIcon}
-                              alt=""
-                              className="w-3.5 h-3.5 object-contain shrink-0"
-                            />
+                            <ProviderCategoryIcon category={provider.category} />
                             <span className="text-xs sm:text-[13px] font-medium text-[#dfe2ee]">
                               {provider.category}
                             </span>

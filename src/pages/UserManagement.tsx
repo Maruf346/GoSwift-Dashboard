@@ -2,6 +2,7 @@ import { useState, useMemo, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import {
   Car,
+  BadgeCheck,
   ChevronLeft,
   ChevronRight,
   EllipsisVertical,
@@ -22,13 +23,22 @@ import { useAuth } from '../hooks/useAuth'
 
 // ── Asset URLs (Figma-sourced) ─────────────────────────────────────────────
 const imgLogo = '/logo.png'
-const imgRoleCustomer = '/favicon.svg'
-const imgVerifiedBadge = '/favicon.svg'
-const imgRoleDriver = '/favicon.svg'
-const imgRoleVendor = '/favicon.svg'
-const imgRoleCourier = '/favicon.svg'
-const imgRoleRental = '/favicon.svg'
-const imgRoleProperty = '/favicon.svg'
+
+function UserCategoryIcon({ category }: { category: DirectoryUser['category'] }) {
+  switch (category) {
+    case 'Driver':
+    case 'Car Rental Provider':
+      return <Car className="w-3 h-3" aria-hidden="true" />
+    case 'Food Vendor':
+      return <Store className="w-3 h-3" aria-hidden="true" />
+    case 'Courier':
+      return <Truck className="w-3 h-3" aria-hidden="true" />
+    case 'Property Owner':
+      return <Home className="w-3 h-3" aria-hidden="true" />
+    default:
+      return <Users className="w-3 h-3" aria-hidden="true" />
+  }
+}
 
 // ── Directory Mock Data (Multi-page realistic data) ────────────────────────
 export interface DirectoryUser {
@@ -42,7 +52,6 @@ export interface DirectoryUser {
   category: 'Customer' | 'Driver' | 'Food Vendor' | 'Courier' | 'Car Rental Provider' | 'Property Owner'
   categoryBg: string
   categoryColor: string
-  categoryIcon: string
   phone: string
   email: string
   location: string
@@ -60,7 +69,6 @@ const directoryUsers: DirectoryUser[] = [
     category: 'Customer',
     categoryBg: 'rgba(147,204,255,0.1)',
     categoryColor: '#93ccff',
-    categoryIcon: imgRoleCustomer,
     phone: '+242 552-3901',
     email: 'k.pratt@nassaumarine.bs',
     location: 'Nassau / New Providence',
@@ -77,7 +85,6 @@ const directoryUsers: DirectoryUser[] = [
     category: 'Driver',
     categoryBg: 'rgba(3,181,211,0.2)',
     categoryColor: '#acedff',
-    categoryIcon: imgRoleDriver,
     phone: '+242 429-8734',
     email: 'mrolle.swift@gmail.com',
     location: 'Nassau / New Providence',
@@ -93,7 +100,6 @@ const directoryUsers: DirectoryUser[] = [
     category: 'Customer',
     categoryBg: 'rgba(147,204,255,0.1)',
     categoryColor: '#93ccff',
-    categoryIcon: imgRoleCustomer,
     phone: '+242 361-9022',
     email: 'asweeting@bahamaslaw.org',
     location: 'Cable Beach / Nassau',
@@ -109,7 +115,6 @@ const directoryUsers: DirectoryUser[] = [
     category: 'Food Vendor',
     categoryBg: 'rgba(255,185,95,0.15)',
     categoryColor: '#ffb95f',
-    categoryIcon: imgRoleVendor,
     phone: '+242 393-2483',
     email: 'orders@islandbitesbahamas.com',
     location: 'Bay St, Nassau',
@@ -125,7 +130,6 @@ const directoryUsers: DirectoryUser[] = [
     category: 'Courier',
     categoryBg: 'rgba(204,229,255,0.2)',
     categoryColor: '#93ccff',
-    categoryIcon: imgRoleCourier,
     phone: '+242 352-7819',
     email: 'dstrachan.courier@swift.bs',
     location: 'Freeport / Grand Bahama',
@@ -141,7 +145,6 @@ const directoryUsers: DirectoryUser[] = [
     category: 'Car Rental Provider',
     categoryBg: 'rgba(172,237,255,0.15)',
     categoryColor: '#4cd7f6',
-    categoryIcon: imgRoleRental,
     phone: '+242 363-1188',
     email: 'fleet@bahamadrift.com',
     location: 'Paradise Island, Nassau',
@@ -157,7 +160,6 @@ const directoryUsers: DirectoryUser[] = [
     category: 'Property Owner',
     categoryBg: 'rgba(255,221,184,0.15)',
     categoryColor: '#ffb95f',
-    categoryIcon: imgRoleProperty,
     phone: '+242 336-2009',
     email: 'villas@coralsandsexuma.com',
     location: 'George Town / Exuma',
@@ -173,7 +175,6 @@ const directoryUsers: DirectoryUser[] = [
     category: 'Property Owner',
     categoryBg: 'rgba(255,221,184,0.15)',
     categoryColor: '#ffb95f',
-    categoryIcon: imgRoleProperty,
     phone: '+242 332-2114',
     email: 'stay@blueoceanretreats.bs',
     location: "Governor's Harbour / Eleuthera",
@@ -189,7 +190,6 @@ const directoryUsers: DirectoryUser[] = [
     category: 'Customer',
     categoryBg: 'rgba(147,204,255,0.1)',
     categoryColor: '#93ccff',
-    categoryIcon: imgRoleCustomer,
     phone: '+242 367-4590',
     email: 'tricia.ferguson@abacorealty.com',
     location: 'Marsh Harbour / Abaco',
@@ -206,7 +206,6 @@ const directoryUsers: DirectoryUser[] = [
     category: 'Driver',
     categoryBg: 'rgba(3,181,211,0.2)',
     categoryColor: '#acedff',
-    categoryIcon: imgRoleDriver,
     phone: '+242 351-6623',
     email: 'kmajor.swiftfleet@yahoo.com',
     location: 'Freeport / Grand Bahama',
@@ -223,7 +222,6 @@ const directoryUsers: DirectoryUser[] = [
     category: 'Driver',
     categoryBg: 'rgba(3,181,211,0.2)',
     categoryColor: '#acedff',
-    categoryIcon: imgRoleDriver,
     phone: '+242 431-9082',
     email: 'leroy.j@swiftbahamas.bs',
     location: 'Nassau / New Providence',
@@ -239,7 +237,6 @@ const directoryUsers: DirectoryUser[] = [
     category: 'Food Vendor',
     categoryBg: 'rgba(255,185,95,0.15)',
     categoryColor: '#ffb95f',
-    categoryIcon: imgRoleVendor,
     phone: '+242 328-9941',
     email: 'info@tropicalspicebahamas.com',
     location: 'Arawak Cay, Nassau',
@@ -255,7 +252,6 @@ const directoryUsers: DirectoryUser[] = [
     category: 'Courier',
     categoryBg: 'rgba(204,229,255,0.2)',
     categoryColor: '#93ccff',
-    categoryIcon: imgRoleCourier,
     phone: '+242 462-1190',
     email: 'rwilliams.deliveries@fastswift.bs',
     location: 'Nassau / New Providence',
@@ -271,7 +267,6 @@ const directoryUsers: DirectoryUser[] = [
     category: 'Car Rental Provider',
     categoryBg: 'rgba(172,237,255,0.15)',
     categoryColor: '#4cd7f6',
-    categoryIcon: imgRoleRental,
     phone: '+242 336-8800',
     email: 'rentals@exumaprestige.com',
     location: 'George Town / Exuma',
@@ -287,7 +282,6 @@ const directoryUsers: DirectoryUser[] = [
     category: 'Property Owner',
     categoryBg: 'rgba(255,221,184,0.15)',
     categoryColor: '#ffb95f',
-    categoryIcon: imgRoleProperty,
     phone: '+242 333-2890',
     email: 'reservations@harbourbreeze.bs',
     location: 'Dunmore Town / Harbour Island',
@@ -303,7 +297,6 @@ const directoryUsers: DirectoryUser[] = [
     category: 'Customer',
     categoryBg: 'rgba(147,204,255,0.1)',
     categoryColor: '#93ccff',
-    categoryIcon: imgRoleCustomer,
     phone: '+242 394-1188',
     email: 'mculmer@centralbankbahamas.org',
     location: 'Eastern District / Nassau',
@@ -320,7 +313,6 @@ const directoryUsers: DirectoryUser[] = [
     category: 'Driver',
     categoryBg: 'rgba(3,181,211,0.2)',
     categoryColor: '#acedff',
-    categoryIcon: imgRoleDriver,
     phone: '+242 422-9901',
     email: 'dmoss.rides@swift.bs',
     location: 'Nassau / New Providence',
@@ -336,7 +328,6 @@ const directoryUsers: DirectoryUser[] = [
     category: 'Food Vendor',
     categoryBg: 'rgba(255,185,95,0.15)',
     categoryColor: '#ffb95f',
-    categoryIcon: imgRoleVendor,
     phone: '+242 325-4491',
     email: 'pastries@bahamiabreeze.com',
     location: 'Shirley St, Nassau',
@@ -352,7 +343,6 @@ const directoryUsers: DirectoryUser[] = [
     category: 'Courier',
     categoryBg: 'rgba(204,229,255,0.2)',
     categoryColor: '#93ccff',
-    categoryIcon: imgRoleCourier,
     phone: '+242 373-8902',
     email: 'cjones@swiftgrandbahama.bs',
     location: 'Lucaya / Grand Bahama',
@@ -368,7 +358,6 @@ const directoryUsers: DirectoryUser[] = [
     category: 'Car Rental Provider',
     categoryBg: 'rgba(172,237,255,0.15)',
     categoryColor: '#4cd7f6',
-    categoryIcon: imgRoleRental,
     phone: '+242 327-9002',
     email: 'bookings@nassauwheels.com',
     location: 'Lynden Pindling Intl / Nassau',
@@ -834,11 +823,9 @@ export default function UserManagement() {
                                   {user.name}
                                 </span>
                                 {user.verified && (
-                                  <img
-                                    src={imgVerifiedBadge}
-                                    alt="Verified"
-                                    className="w-3.5 h-3.5 object-contain"
-                                    title="Verified Driver"
+                                  <BadgeCheck
+                                    className="w-3.5 h-3.5 text-[#4cd7f6]"
+                                    aria-label="Verified"
                                   />
                                 )}
                               </div>
@@ -859,11 +846,7 @@ export default function UserManagement() {
                               border: `1px solid ${user.categoryColor}30`,
                             }}
                           >
-                            <img
-                              src={user.categoryIcon}
-                              alt=""
-                              className="w-2.5 h-2.5 object-contain"
-                            />
+                            <UserCategoryIcon category={user.category} />
                             <span>{user.category}</span>
                           </span>
                         </td>

@@ -1,20 +1,29 @@
 import React, { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { LayoutDashboard, LifeBuoy, Lock, LogOut, Mail, Phone, Settings, User, Users, Handshake } from 'lucide-react'
+import {
+  Check,
+  Eye,
+  IdCard,
+  Info,
+  KeyRound,
+  LayoutDashboard,
+  LifeBuoy,
+  Lock,
+  LogOut,
+  Mail,
+  Phone,
+  Save,
+  Settings,
+  ShieldCheck,
+  User,
+  UserRound,
+  Users,
+  Handshake,
+} from 'lucide-react'
 import { useAuth } from '../hooks/useAuth'
 
 // ── Asset URLs (Figma-sourced) ─────────────────────────────────────────────
 const imgLogo = '/logo.png'
-const imgIdentityBadge = '/favicon.svg'
-const imgAdminCardIcon = '/favicon.svg'
-const imgInfoNote = '/favicon.svg'
-const imgSaveIcon = '/favicon.svg'
-const imgPasswordCardIcon = '/favicon.svg'
-const imgEyeToggle = '/favicon.svg'
-const imgHintInfo = '/favicon.svg'
-const imgUpdatePassBtn = '/favicon.svg'
-const imgHeaderAvatar = '/favicon.svg'
-const imgToastCheck = '/favicon.svg'
 
 export default function AdminSettings() {
   const auth = useAuth()
@@ -251,7 +260,7 @@ export default function AdminSettings() {
             </span>
           </div>
           <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-[#93ccff] text-[#002c47] font-bold shrink-0 shadow-inner">
-            <img src={imgHeaderAvatar} alt="" className="w-3.5 h-3.5" />
+            <UserRound className="w-3.5 h-3.5" aria-hidden="true" />
           </div>
         </div>
       </header>
@@ -287,7 +296,7 @@ export default function AdminSettings() {
               {/* Quick Session Badge / Micro-stat */}
               <div className="bg-[#0a0e16]/80 backdrop-blur-sm border border-[#262b35] flex items-center gap-3.5 p-2 rounded-xl shrink-0 self-start sm:self-auto shadow-inner">
                 <div className="bg-[#262a33] flex items-center justify-center rounded-lg size-10 shrink-0">
-                  <img src={imgIdentityBadge} alt="" className="w-5 h-5" />
+                  <IdCard className="w-5 h-5 text-[#4cd7f6]" aria-hidden="true" />
                 </div>
                 <div className="flex flex-col items-start pr-2 text-left">
                   <span className="font-semibold text-[#89929b] text-[11px] tracking-[0.55px] uppercase">
@@ -311,7 +320,7 @@ export default function AdminSettings() {
               {/* Card Header */}
               <div className="flex items-center gap-3 pb-5 border-b border-[#262b35]">
                 <div className="bg-[#262a33] flex items-center justify-center rounded-lg size-10 shrink-0">
-                  <img src={imgAdminCardIcon} alt="" className="w-4 h-4" />
+                  <ShieldCheck className="w-4 h-4 text-[#4cd7f6]" aria-hidden="true" />
                 </div>
                 <div className="flex flex-col items-start">
                   <h2 className="font-semibold text-[#dfe2ee] text-lg sm:text-xl tracking-tight m-0">
@@ -404,7 +413,7 @@ export default function AdminSettings() {
 
                 {/* Status Note */}
                 <div className="bg-[#0a0e16]/60 border border-[#262b35] flex items-start gap-2.5 p-2.5 rounded-lg mt-1">
-                  <img src={imgInfoNote} alt="" className="w-4 h-4 shrink-0 mt-0.5 opacity-80" />
+                  <Info className="w-4 h-4 shrink-0 mt-0.5 opacity-80 text-[#93ccff]" aria-hidden="true" />
                   <p className="font-normal text-[#bfc7d2] text-xs leading-relaxed m-0">
                     Changes take effect immediately across the GO SWIFT BAHAMAS Admin console.
                   </p>
@@ -417,7 +426,7 @@ export default function AdminSettings() {
                     disabled={isSavingAccount}
                     className="flex items-center justify-center gap-2 w-full sm:w-auto h-11 px-6 rounded-lg bg-[#3198dc] hover:bg-[#43a4e5] text-[#002c47] font-semibold text-sm transition-all cursor-pointer border-0 shadow-md disabled:opacity-50"
                   >
-                    <img src={imgSaveIcon} alt="" className="w-3.5 h-3.5 brightness-0" />
+                    <Save className="w-3.5 h-3.5" aria-hidden="true" />
                     <span>{isSavingAccount ? 'Saving...' : 'Save Account Details'}</span>
                   </button>
                 </div>
@@ -432,7 +441,7 @@ export default function AdminSettings() {
               {/* Card Header */}
               <div className="flex items-center gap-3 pb-5 border-b border-[#262b35]">
                 <div className="bg-[#262a33] flex items-center justify-center rounded-lg size-10 shrink-0">
-                  <img src={imgPasswordCardIcon} alt="" className="w-4.5 h-4.5" />
+                  <KeyRound className="w-5 h-5 text-[#4cd7f6]" aria-hidden="true" />
                 </div>
                 <div className="flex flex-col items-start">
                   <h2 className="font-semibold text-[#dfe2ee] text-lg sm:text-xl tracking-tight m-0">
@@ -475,7 +484,7 @@ export default function AdminSettings() {
                       className="absolute right-3 p-1 text-[#89929b] hover:text-[#dfe2ee] transition-colors border-0 bg-transparent cursor-pointer"
                       title={showCurrentPass ? 'Hide password' : 'Show password'}
                     >
-                      <img src={imgEyeToggle} alt="" className="w-4 h-3.5 opacity-70" />
+                      <Eye className="w-4 h-4 opacity-70" aria-hidden="true" />
                     </button>
                   </div>
                 </div>
@@ -504,7 +513,7 @@ export default function AdminSettings() {
                       className="absolute right-3 p-1 text-[#89929b] hover:text-[#dfe2ee] transition-colors border-0 bg-transparent cursor-pointer"
                       title={showNewPass ? 'Hide password' : 'Show password'}
                     >
-                      <img src={imgEyeToggle} alt="" className="w-4 h-3.5 opacity-70" />
+                      <Eye className="w-4 h-4 opacity-70" aria-hidden="true" />
                     </button>
                   </div>
                 </div>
@@ -533,14 +542,14 @@ export default function AdminSettings() {
                       className="absolute right-3 p-1 text-[#89929b] hover:text-[#dfe2ee] transition-colors border-0 bg-transparent cursor-pointer"
                       title={showConfirmPass ? 'Hide password' : 'Show password'}
                     >
-                      <img src={imgEyeToggle} alt="" className="w-4 h-3.5 opacity-70" />
+                      <Eye className="w-4 h-4 opacity-70" aria-hidden="true" />
                     </button>
                   </div>
                 </div>
 
                 {/* Requirement Hints */}
                 <div className="bg-[#0a0e16]/60 border border-[#262b35] flex items-center gap-2.5 px-3 py-2 rounded-lg">
-                  <img src={imgHintInfo} alt="" className="w-3.5 h-3.5 shrink-0 opacity-80" />
+                  <Info className="w-3.5 h-3.5 shrink-0 opacity-80 text-[#93ccff]" aria-hidden="true" />
                   <span className="font-semibold text-[#bfc7d2] text-[11px] tracking-wide leading-tight">
                     Minimum 8 characters with at least one number and special character.
                   </span>
@@ -553,7 +562,7 @@ export default function AdminSettings() {
                     disabled={isUpdatingPassword}
                     className="flex items-center justify-center gap-2 w-full sm:w-auto h-11 px-6 rounded-lg bg-[#3198dc] hover:bg-[#43a4e5] text-[#002c47] font-semibold text-sm transition-all cursor-pointer border-0 shadow-md disabled:opacity-50"
                   >
-                    <img src={imgUpdatePassBtn} alt="" className="w-3.5 h-4 brightness-0" />
+                    <KeyRound className="w-4 h-4" aria-hidden="true" />
                     <span>{isUpdatingPassword ? 'Updating...' : 'Update Password'}</span>
                   </button>
                 </div>
@@ -567,7 +576,7 @@ export default function AdminSettings() {
       {toastMessage && (
         <div className="fixed bottom-6 right-6 bg-[#262a33] border border-[#31353e] text-[#dfe2ee] text-xs sm:text-sm font-medium px-4 py-3 rounded-xl shadow-2xl z-50 flex items-center gap-3 animate-slide-up">
           <div className="bg-[#03b5d3] flex items-center justify-center rounded-full size-6 shrink-0 shadow-md">
-            <img src={imgToastCheck} alt="" className="w-3 h-2.5 brightness-0" />
+            <Check className="w-3.5 h-3.5" aria-hidden="true" />
           </div>
           <span>{toastMessage}</span>
         </div>

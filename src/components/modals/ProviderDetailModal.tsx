@@ -15,7 +15,6 @@ export interface ProviderDetailItem {
   avatarColor?: string
   hasPendingBadge?: boolean
   category: ProviderCategory
-  categoryIcon: string
   phone: string
   email: string
   hub: string

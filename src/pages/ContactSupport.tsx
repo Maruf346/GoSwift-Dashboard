@@ -1,17 +1,24 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { LayoutDashboard, LifeBuoy, LogOut, Settings, Users, Handshake } from 'lucide-react'
+import {
+  Check,
+  CheckCircle2,
+  ClipboardCheck,
+  Clock3,
+  LayoutDashboard,
+  LifeBuoy,
+  LogOut,
+  MapPin,
+  Phone,
+  Settings,
+  UserRound,
+  Users,
+  Handshake,
+} from 'lucide-react'
 import { useAuth } from '../hooks/useAuth'
 
 // ── Asset URLs (Figma-sourced) ─────────────────────────────────────────────
 const imgLogo = '/logo.png'
-const imgPhone = '/favicon.svg'
-const imgPin = '/favicon.svg'
-const imgInspect = '/favicon.svg'
-const imgCheckmark = '/favicon.svg'
-const imgTerritoryPin = '/favicon.svg'
-const imgClock = '/favicon.svg'
-const imgAvatar = '/favicon.svg'
 
 // ── Types & Support Inquiries Data ──────────────────────────────────────────
 export type TicketStatus = 'Pending Review' | 'Reviewed'
@@ -337,7 +344,7 @@ export default function ContactSupportSubmissions() {
             </span>
           </div>
           <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-[#93ccff] text-[#002c47] font-bold shrink-0 shadow-inner">
-            <img src={imgAvatar} alt="" className="w-3.5 h-3.5" />
+            <UserRound className="w-3.5 h-3.5" aria-hidden="true" />
           </div>
         </div>
       </header>
@@ -352,7 +359,7 @@ export default function ContactSupportSubmissions() {
           {/* Toast Notification */}
           {copiedNotification && (
             <div className="fixed top-20 right-6 bg-[#3198dc] text-[#002c47] text-xs font-bold px-4 py-2 rounded-lg shadow-lg z-50 animate-bounce flex items-center gap-2">
-              <img src={imgCheckmark} alt="" className="w-3 h-3 brightness-0" />
+              <Check className="w-3 h-3" aria-hidden="true" />
               <span>{copiedNotification}</span>
             </div>
           )}
@@ -498,11 +505,11 @@ export default function ContactSupportSubmissions() {
                       <div className="flex items-center justify-between gap-3 pt-1 flex-wrap text-xs">
                         <div className="flex items-center gap-4 text-[#89929b]">
                           <div className="flex items-center gap-1.5">
-                            <img src={imgPhone} alt="" className="w-3 h-3 shrink-0 opacity-70" />
+                            <Phone className="w-3 h-3 shrink-0 opacity-70" aria-hidden="true" />
                             <span className="text-[12.5px] font-medium">{ticket.phone}</span>
                           </div>
                           <div className="flex items-center gap-1.5">
-                            <img src={imgPin} alt="" className="w-2.5 h-3 shrink-0 opacity-70" />
+                            <MapPin className="w-3 h-3 shrink-0 opacity-70" aria-hidden="true" />
                             <span className="text-[12.5px] font-medium">{ticket.region}</span>
                           </div>
                         </div>
@@ -533,7 +540,7 @@ export default function ContactSupportSubmissions() {
               {/* 1. Action Header Box */}
               <div className="bg-[#181c24] border border-[#262b35] flex items-center justify-between p-4 rounded-xl shadow-lg drop-shadow-sm">
                 <div className="flex items-center gap-2 text-left">
-                  <img src={imgInspect} alt="" className="w-4 h-4 shrink-0" />
+                  <ClipboardCheck className="w-4 h-4 shrink-0 text-[#4cd7f6]" aria-hidden="true" />
                   <span className="font-semibold text-[#dfe2ee] text-base tracking-tight">
                     Inspection Console
                   </span>
@@ -548,7 +555,7 @@ export default function ContactSupportSubmissions() {
                       : 'bg-[#ca8100]/20 hover:bg-[#ca8100]/30 text-[#ffb95f] border-[#ca8100]/40'
                   }`}
                 >
-                  <img src={imgCheckmark} alt="" className="w-3.5 h-3 shrink-0" />
+                  <CheckCircle2 className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
                   <span>
                     {selectedTicket.status === 'Pending Review'
                       ? 'Mark as Reviewed'
@@ -616,7 +623,7 @@ export default function ContactSupportSubmissions() {
                       OPERATIONAL TERRITORY / LOCATION
                     </span>
                     <div className="flex items-center gap-2">
-                      <img src={imgTerritoryPin} alt="" className="w-3.5 h-3.5 shrink-0 opacity-80" />
+                      <MapPin className="w-3.5 h-3.5 shrink-0 opacity-80" aria-hidden="true" />
                       <span className="font-medium text-[#dfe2ee] text-[13px] tracking-tight">
                         {selectedTicket.fullLocation}
                       </span>
@@ -636,7 +643,7 @@ export default function ContactSupportSubmissions() {
                     {selectedTicket.subject}
                   </h3>
                   <div className="flex items-center gap-2 text-[#89929b] text-xs mt-0.5">
-                    <img src={imgClock} alt="" className="w-3 h-3 shrink-0 opacity-70" />
+                    <Clock3 className="w-3 h-3 shrink-0 opacity-70" aria-hidden="true" />
                     <span>{selectedTicket.fullTimestamp}</span>
                   </div>
                 </div>
