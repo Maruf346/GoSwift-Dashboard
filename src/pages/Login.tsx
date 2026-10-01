@@ -1,16 +1,9 @@
 import { useState, type FormEvent } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import { ArrowRight, CheckCircle2, Eye, KeyRound, Lock, Mail, ShieldAlert } from 'lucide-react'
 import { useAuth } from '../hooks/useAuth'
 
 // ── Asset URLs (Figma-sourced) ─────────────────────────────────────────────
-const imgBrandLogo = 'https://www.figma.com/api/mcp/asset/588ab493-fbb5-4467-9779-994f31440ee9.png'
-const imgIconEmail = 'https://www.figma.com/api/mcp/asset/4074ae74-a4bd-4213-8b44-3f9fe8a1a57f.svg'
-const imgIconLock = 'https://www.figma.com/api/mcp/asset/d8be3c6f-3144-4439-94c4-4cdc5bed7d05.svg'
-const imgIconEye = 'https://www.figma.com/api/mcp/asset/7a4e9772-2c4f-48fb-8f21-0c3608023304.svg'
-const imgIconKey = 'https://www.figma.com/api/mcp/asset/b85370b6-7f8f-4291-8abe-acd2eaec000c.svg'
-const imgIconArrowRight = 'https://www.figma.com/api/mcp/asset/e8639e3f-5b26-4073-a1a9-efc12e0eed9f.svg'
-const imgIconToast = 'https://www.figma.com/api/mcp/asset/7b224567-144d-4b5f-99bc-f35e4f620086.svg'
-
 export default function Login() {
   const [email, setEmail] = useState('admin.officer@goswiftbahamas.com')
   const [password, setPassword] = useState('GS-BS-889241-ALPHA')
@@ -35,7 +28,7 @@ export default function Login() {
       } else {
         setShowToast(true)
         setTimeout(() => {
-          nav('/')
+          nav('/dashboard')
         }, 800)
       }
     }, 400)
@@ -82,7 +75,7 @@ export default function Login() {
               {/* Brand Logo */}
               <div className="relative w-36 h-36 sm:w-44 sm:h-44 shrink-0 flex items-center justify-center">
                 <img
-                  src={imgBrandLogo}
+                  src="/logo.png"
                   alt="GoSwift Bahamas"
                   className="w-full h-full object-contain pointer-events-none drop-shadow-[0_10px_20px_rgba(0,0,0,0.5)]"
                 />
@@ -109,7 +102,7 @@ export default function Login() {
                 </label>
                 <div className="relative flex items-center w-full">
                   <div className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none flex items-center justify-center">
-                    <img src={imgIconEmail} alt="" className="w-4 h-4 object-contain" />
+                    <Mail className="w-4 h-4 text-[#89929b]" aria-hidden="true" />
                   </div>
                   <input
                     type="email"
@@ -129,7 +122,7 @@ export default function Login() {
                 </label>
                 <div className="relative flex items-center w-full">
                   <div className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none flex items-center justify-center">
-                    <img src={imgIconLock} alt="" className="w-4 h-4 object-contain" />
+                    <Lock className="w-4 h-4 text-[#89929b]" aria-hidden="true" />
                   </div>
                   <input
                     type={showPassword ? 'text' : 'password'}
@@ -147,7 +140,7 @@ export default function Login() {
                       className="p-1.5 text-[#89929b] hover:text-[#dfe2ee] rounded transition-colors border-0 bg-transparent cursor-pointer flex items-center justify-center"
                       title={showPassword ? 'Hide password' : 'Show password'}
                     >
-                      <img src={imgIconEye} alt="toggle view" className="w-4 h-3.5 opacity-80 hover:opacity-100" />
+                      <Eye className="w-4 h-4 opacity-80 hover:opacity-100" aria-hidden="true" />
                     </button>
                   </div>
                 </div>
@@ -166,9 +159,7 @@ export default function Login() {
               {/* Error Message */}
               {error && (
                 <div className="p-3 bg-red-950/40 border border-red-800/50 rounded-md text-red-300 text-xs flex items-center gap-2">
-                  <svg className="w-4 h-4 shrink-0 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
+                  <ShieldAlert className="w-4 h-4 shrink-0 text-red-400" aria-hidden="true" />
                   <span>{error}</span>
                 </div>
               )}
@@ -180,9 +171,9 @@ export default function Login() {
                   disabled={loading}
                   className="relative flex items-center justify-center gap-2 w-full h-12 rounded-md bg-[#3198dc] hover:bg-[#43a4e5] active:bg-[#2882be] disabled:opacity-70 text-[#003351] font-bold text-base tracking-tight transition-all duration-150 cursor-pointer border-0 shadow-[0px_4px_6px_-1px_rgba(0,0,0,0.2),0px_2px_4px_-2px_rgba(0,0,0,0.2)]"
                 >
-                  <img src={imgIconKey} alt="" className="w-3.5 h-4 object-contain" />
+                  <KeyRound className="w-4 h-4" aria-hidden="true" />
                   <span>{loading ? 'Authenticating...' : 'Log In'}</span>
-                  <img src={imgIconArrowRight} alt="" className="w-3 h-3 object-contain" />
+                  <ArrowRight className="w-4 h-4" aria-hidden="true" />
                 </button>
               </div>
             </form>
@@ -196,7 +187,7 @@ export default function Login() {
           showToast ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'
         }`}
       >
-        <img src={imgIconToast} alt="" className="w-4 h-4 object-contain shrink-0" />
+        <CheckCircle2 className="w-4 h-4 shrink-0 text-[#4cd7f6]" aria-hidden="true" />
         <span className="text-xs font-semibold tracking-wide">Session Initialized</span>
       </div>
     </div>

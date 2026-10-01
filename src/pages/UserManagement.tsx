@@ -1,34 +1,34 @@
 import { useState, useMemo, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import {
+  Car,
+  ChevronLeft,
+  ChevronRight,
+  EllipsisVertical,
+  Home,
+  LayoutDashboard,
+  LifeBuoy,
+  LogOut,
+  MapPin,
+  Search,
+  Settings,
+  Store,
+  Truck,
+  UserRound,
+  Users,
+  Handshake,
+} from 'lucide-react'
 import { useAuth } from '../hooks/useAuth'
 
 // ── Asset URLs (Figma-sourced) ─────────────────────────────────────────────
-const imgLogo = 'https://www.figma.com/api/mcp/asset/e2f26c28-43b9-473d-876c-82bb640c1017.png'
-const imgIconSearch = 'https://www.figma.com/api/mcp/asset/46d4393c-59cc-45ea-a303-76c6329da47c.svg'
-const imgCatCustomers = 'https://www.figma.com/api/mcp/asset/5f7774a6-37bd-442e-9516-f1cce3ab563a.svg'
-const imgCatDrivers = 'https://www.figma.com/api/mcp/asset/51db503e-9a6d-4945-a088-fe51c28b10b0.svg'
-const imgCatVendors = 'https://www.figma.com/api/mcp/asset/a90edae2-f005-4d00-89c1-48408a0eb845.svg'
-const imgCatCouriers = 'https://www.figma.com/api/mcp/asset/f5152ba3-d951-4b78-abae-8c87d09bf8f7.svg'
-const imgCatRentals = 'https://www.figma.com/api/mcp/asset/7af729bc-63ae-4645-99dd-2fc73404a91f.svg'
-const imgCatProperties = 'https://www.figma.com/api/mcp/asset/3bf2e328-11dd-4ce1-a4bd-b47397276518.svg'
-const imgRoleCustomer = 'https://www.figma.com/api/mcp/asset/3055fde0-7bfa-4826-afe7-90d4be361ff6.svg'
-const imgIconLocation = 'https://www.figma.com/api/mcp/asset/79d72ba5-4c73-4e93-8469-82a97895a2e2.svg'
-const imgIconActions = 'https://www.figma.com/api/mcp/asset/392c42a8-f0bd-497d-a75a-f453391a6743.svg'
-const imgVerifiedBadge = 'https://www.figma.com/api/mcp/asset/08f5e9f5-ee37-4f44-aff3-55f91041ce98.svg'
-const imgRoleDriver = 'https://www.figma.com/api/mcp/asset/af3c559d-3a31-4b8a-be82-b7550dd7772b.svg'
-const imgRoleVendor = 'https://www.figma.com/api/mcp/asset/a87bea1d-b0a1-4a65-b5dd-bb5ee7799340.svg'
-const imgRoleCourier = 'https://www.figma.com/api/mcp/asset/3e6bc66d-4e39-440f-8ef9-89f0a47ca65a.svg'
-const imgRoleRental = 'https://www.figma.com/api/mcp/asset/d73d4ae8-da29-4b6d-b508-246a77cd337c.svg'
-const imgRoleProperty = 'https://www.figma.com/api/mcp/asset/36c1b9d4-95e2-44fb-ae57-a96cc3110d90.svg'
-const imgPagPrev = 'https://www.figma.com/api/mcp/asset/2d9bd095-6780-431d-b4e7-c47a2303467e.svg'
-const imgPagNext = 'https://www.figma.com/api/mcp/asset/e701733e-c09e-488b-bda5-4d4dc6214d8e.svg'
-const imgIconAvatar = 'https://www.figma.com/api/mcp/asset/1e727b4c-076b-4596-914b-fae0fd52eb86.svg'
-const imgNavDashboard = 'https://www.figma.com/api/mcp/asset/49bcbf1a-5720-491c-9784-e1009dcfabc6.svg'
-const imgNavUsers = 'https://www.figma.com/api/mcp/asset/592bf8ac-ad4e-4e37-a484-b7fb96fde13d.svg'
-const imgNavProviders = 'https://www.figma.com/api/mcp/asset/0d835d4a-7dbd-4836-9b1a-678337f5d1be.svg'
-const imgNavSupport = 'https://www.figma.com/api/mcp/asset/cf18051e-89ad-44f4-aa75-2bac3695051a.svg'
-const imgNavSettings = 'https://www.figma.com/api/mcp/asset/e111c561-1a42-4dca-9ec6-f174a09cde76.svg'
-const imgNavLogout = 'https://www.figma.com/api/mcp/asset/d6fde674-9c24-409e-9f86-29e22e93ee1d.svg'
+const imgLogo = '/logo.png'
+const imgRoleCustomer = '/favicon.svg'
+const imgVerifiedBadge = '/favicon.svg'
+const imgRoleDriver = '/favicon.svg'
+const imgRoleVendor = '/favicon.svg'
+const imgRoleCourier = '/favicon.svg'
+const imgRoleRental = '/favicon.svg'
+const imgRoleProperty = '/favicon.svg'
 
 // ── Directory Mock Data (Multi-page realistic data) ────────────────────────
 export interface DirectoryUser {
@@ -389,25 +389,25 @@ export default function UserManagement() {
 
   function handleLogout() {
     auth.logout()
-    nav('/login')
+    nav('/')
   }
 
   const navItems = [
-    { icon: imgNavDashboard, label: 'Dashboard', path: '/', active: false },
-    { icon: imgNavUsers, label: 'User Management', path: '/users', active: true },
-    { icon: imgNavProviders, label: 'Provider Management', path: '/providers', active: false },
-    { icon: imgNavSupport, label: 'Contact Support', path: '/support', active: false },
-    { icon: imgNavSettings, label: 'Settings', path: '/settings', active: false },
+    { Icon: LayoutDashboard, label: 'Dashboard', path: '/dashboard', active: false },
+    { Icon: Users, label: 'User Management', path: '/users', active: true },
+    { Icon: Handshake, label: 'Provider Management', path: '/providers', active: false },
+    { Icon: LifeBuoy, label: 'Contact Support', path: '/support', active: false },
+    { Icon: Settings, label: 'Settings', path: '/settings', active: false },
   ]
 
   const categories = [
     { id: 'All', label: 'All Categories', count: '1,428' },
-    { id: 'Customer', label: 'Customers', count: '1,120', icon: imgCatCustomers },
-    { id: 'Driver', label: 'Drivers', count: '142', icon: imgCatDrivers },
-    { id: 'Food Vendor', label: 'Food Vendors', count: '56', icon: imgCatVendors },
-    { id: 'Courier', label: 'Couriers', count: '48', icon: imgCatCouriers },
-    { id: 'Car Rental Provider', label: 'Car Rental Providers', count: '28', icon: imgCatRentals },
-    { id: 'Property Owner', label: 'Property Owners', count: '34', icon: imgCatProperties },
+    { id: 'Customer', label: 'Customers', count: '1,120', Icon: Users },
+    { id: 'Driver', label: 'Drivers', count: '142', Icon: Car },
+    { id: 'Food Vendor', label: 'Food Vendors', count: '56', Icon: Store },
+    { id: 'Courier', label: 'Couriers', count: '48', Icon: Truck },
+    { id: 'Car Rental Provider', label: 'Car Rental Providers', count: '28', Icon: Car },
+    { id: 'Property Owner', label: 'Property Owners', count: '34', Icon: Home },
   ]
 
   // Filtered rows based on category and live search query
@@ -578,11 +578,7 @@ export default function UserManagement() {
                     : 'text-[#bfc7d2] hover:bg-[#1c2028] hover:text-white'
                 } ${isCollapsed ? 'lg:justify-center lg:p-2.5 gap-3 px-3.5 py-2.5' : 'gap-3 px-3.5 py-2.5'}`}
               >
-                <img
-                  src={item.icon}
-                  alt=""
-                  className={`w-4 h-4 shrink-0 ${item.active ? 'brightness-0' : ''}`}
-                />
+                <item.Icon className="w-4 h-4 shrink-0" aria-hidden="true" />
                 <span className={`text-[13.5px] leading-5 truncate ${isCollapsed ? 'lg:hidden' : ''}`}>
                   {item.label}
                 </span>
@@ -600,7 +596,7 @@ export default function UserManagement() {
               isCollapsed ? 'lg:justify-center lg:p-2.5 gap-3 px-3.5 py-2.5' : 'gap-3 px-3.5 py-2.5'
             }`}
           >
-            <img src={imgNavLogout} alt="" className="w-4 h-4 shrink-0" />
+            <LogOut className="w-4 h-4 shrink-0" aria-hidden="true" />
             <span className={`text-[13.5px] font-semibold tracking-wide ${isCollapsed ? 'lg:hidden' : ''}`}>
               Logout
             </span>
@@ -651,7 +647,7 @@ export default function UserManagement() {
             </span>
           </div>
           <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-[#93ccff] text-[#002c47] font-bold shrink-0 shadow-inner">
-            <img src={imgIconAvatar} alt="" className="w-3.5 h-3.5" />
+            <UserRound className="w-3.5 h-3.5" aria-hidden="true" />
           </div>
         </div>
       </header>
@@ -724,7 +720,7 @@ export default function UserManagement() {
             {/* Search Input Bar */}
             <div className="relative flex items-center w-full">
               <div className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none flex items-center justify-center">
-                <img src={imgIconSearch} alt="" className="w-3.5 h-3.5 object-contain" />
+                <Search className="w-3.5 h-3.5 text-[#89929b]" aria-hidden="true" />
               </div>
               <input
                 type="text"
@@ -759,12 +755,8 @@ export default function UserManagement() {
                         : 'bg-[#0a0e16] text-[#bfc7d2] border-[#262b35] hover:bg-[#262b35] hover:text-white'
                     }`}
                   >
-                    {cat.icon && (
-                      <img
-                        src={cat.icon}
-                        alt=""
-                        className={`w-3.5 h-3.5 object-contain ${isSelected ? 'brightness-0' : ''}`}
-                      />
+                    {'Icon' in cat && cat.Icon && (
+                      <cat.Icon className="w-3.5 h-3.5" aria-hidden="true" />
                     )}
                     <span>{cat.label}</span>
                     <span
@@ -891,11 +883,7 @@ export default function UserManagement() {
                         {/* Location */}
                         <td className="py-4 px-4 align-middle">
                           <div className="flex items-center gap-1.5">
-                            <img
-                              src={imgIconLocation}
-                              alt=""
-                              className="w-2.5 h-3.5 object-contain shrink-0 opacity-70"
-                            />
+                            <MapPin className="w-3.5 h-3.5 shrink-0 opacity-70" aria-hidden="true" />
                             <span className="text-xs sm:text-[13px] font-medium text-[#bfc7d2] leading-snug">
                               {user.location}
                             </span>
@@ -918,7 +906,7 @@ export default function UserManagement() {
                             title="Actions"
                             aria-label="User actions"
                           >
-                            <img src={imgIconActions} alt="" className="w-1 h-3.5 object-contain" />
+                            <EllipsisVertical className="w-4 h-4" aria-hidden="true" />
                           </button>
 
                           {/* Actions Dropdown Menu */}
@@ -1008,7 +996,7 @@ export default function UserManagement() {
                     title="Previous page"
                     aria-label="Previous page"
                   >
-                    <img src={imgPagPrev} alt="" className="w-1.5 h-2.5 object-contain" />
+                    <ChevronLeft className="w-4 h-4" aria-hidden="true" />
                   </button>
 
                   {/* Page number buttons */}
@@ -1048,7 +1036,7 @@ export default function UserManagement() {
                     title="Next page"
                     aria-label="Next page"
                   >
-                    <img src={imgPagNext} alt="" className="w-1.5 h-2.5 object-contain" />
+                    <ChevronRight className="w-4 h-4" aria-hidden="true" />
                   </button>
                 </div>
               </div>

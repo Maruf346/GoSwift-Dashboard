@@ -1,9 +1,9 @@
 import { useState } from 'react'
 
 // ── Asset URLs (Figma-sourced) ─────────────────────────────────────────────
-const imgVillaEmblem = 'https://www.figma.com/api/mcp/asset/886cd796-e4d9-44bf-b3ae-21409b1a1774'
-const imgTinCertificate = 'https://www.figma.com/api/mcp/asset/cf7fe035-b0d8-4e3f-82e3-677932943e24'
-const imgPassportPreview = 'https://www.figma.com/api/mcp/asset/6087df06-034e-40c8-a1df-f4c4dd2fe71f'
+const imgVillaEmblem = '/logo.png'
+const imgTinCertificate = '/logo.png'
+const imgPassportPreview = '/logo.png'
 
 export interface PropertyOwnerData {
   ownerName: string

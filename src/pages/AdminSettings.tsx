@@ -1,31 +1,20 @@
 import React, { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import { LayoutDashboard, LifeBuoy, Lock, LogOut, Mail, Phone, Settings, User, Users, Handshake } from 'lucide-react'
 import { useAuth } from '../hooks/useAuth'
 
 // ── Asset URLs (Figma-sourced) ─────────────────────────────────────────────
-const imgLogo = 'https://www.figma.com/api/mcp/asset/0d8cca00-6570-49dc-9592-30a3a271de86.png'
-const imgIdentityBadge = 'https://www.figma.com/api/mcp/asset/6c7b6a6d-702e-48d7-851d-2bf8fed353eb.svg'
-const imgAdminCardIcon = 'https://www.figma.com/api/mcp/asset/a56b9d3d-7618-4b97-b9b7-15bcb74be36a.svg'
-const imgIconUser = 'https://www.figma.com/api/mcp/asset/f76536f6-d645-4c16-8834-bfe60b26f70d.svg'
-const imgIconMail = 'https://www.figma.com/api/mcp/asset/0abed612-8283-4b36-b802-bbedcc42dad2.svg'
-const imgIconPhone = 'https://www.figma.com/api/mcp/asset/f12eaaa6-fb95-4eac-b213-32bee287ffca.svg'
-const imgInfoNote = 'https://www.figma.com/api/mcp/asset/df204b8f-ea97-49f6-8113-cdc324b9353b.svg'
-const imgSaveIcon = 'https://www.figma.com/api/mcp/asset/d125cad7-2bd7-4a5b-b97f-8185cfefd376.svg'
-const imgPasswordCardIcon = 'https://www.figma.com/api/mcp/asset/c1a36d8f-8ba1-4e30-98ca-8aef37506092.svg'
-const imgIconLockCurrent = 'https://www.figma.com/api/mcp/asset/8b543ee6-157b-4c7a-b2dd-c98c2b26ab1e.svg'
-const imgEyeToggle = 'https://www.figma.com/api/mcp/asset/13f53ab0-d12e-442d-b666-1a3c16bf4d48.svg'
-const imgIconLockNew = 'https://www.figma.com/api/mcp/asset/ec940e13-46e6-49d8-a0da-9070cc5684f9.svg'
-const imgIconLockConfirm = 'https://www.figma.com/api/mcp/asset/1d45e84a-c2e4-43bd-a4ca-d691486c0c8b.svg'
-const imgHintInfo = 'https://www.figma.com/api/mcp/asset/7823f700-f1cd-444b-88fb-a7b9a8053b39.svg'
-const imgUpdatePassBtn = 'https://www.figma.com/api/mcp/asset/7acb2ef6-6d67-4975-b24a-fdb5fd9ae30a.svg'
-const imgHeaderAvatar = 'https://www.figma.com/api/mcp/asset/b2eac7f3-f54a-477a-833a-f7cb57a4cc7d.svg'
-const imgNavDashboard = 'https://www.figma.com/api/mcp/asset/ba8f11d1-861f-4137-b267-053167055b3c.svg'
-const imgNavUsers = 'https://www.figma.com/api/mcp/asset/cd603275-85c8-4efb-8304-796d501935ce.svg'
-const imgNavProviders = 'https://www.figma.com/api/mcp/asset/5da72fad-f1ef-4346-a801-75eca5bbd957.svg'
-const imgNavSupport = 'https://www.figma.com/api/mcp/asset/bf27a3b8-7bd1-40ab-ac1f-076e2f63b328.svg'
-const imgNavSettings = 'https://www.figma.com/api/mcp/asset/b93ac31c-d78c-48a1-99a6-3044fe377aee.svg'
-const imgNavLogout = 'https://www.figma.com/api/mcp/asset/5a367e20-b1eb-4f88-8882-88aff2c373c6.svg'
-const imgToastCheck = 'https://www.figma.com/api/mcp/asset/fcde5e5a-3bf8-4300-980e-886838129f17.svg'
+const imgLogo = '/logo.png'
+const imgIdentityBadge = '/favicon.svg'
+const imgAdminCardIcon = '/favicon.svg'
+const imgInfoNote = '/favicon.svg'
+const imgSaveIcon = '/favicon.svg'
+const imgPasswordCardIcon = '/favicon.svg'
+const imgEyeToggle = '/favicon.svg'
+const imgHintInfo = '/favicon.svg'
+const imgUpdatePassBtn = '/favicon.svg'
+const imgHeaderAvatar = '/favicon.svg'
+const imgToastCheck = '/favicon.svg'
 
 export default function AdminSettings() {
   const auth = useAuth()
@@ -94,15 +83,15 @@ export default function AdminSettings() {
 
   function handleLogout() {
     auth.logout()
-    nav('/login')
+    nav('/')
   }
 
   const navItems = [
-    { icon: imgNavDashboard, label: 'Dashboard', path: '/', active: false },
-    { icon: imgNavUsers, label: 'User Management', path: '/users', active: false },
-    { icon: imgNavProviders, label: 'Provider Management', path: '/providers', active: false },
-    { icon: imgNavSupport, label: 'Contact Support', path: '/support', active: false },
-    { icon: imgNavSettings, label: 'Settings', path: '/settings', active: true },
+    { Icon: LayoutDashboard, label: 'Dashboard', path: '/dashboard', active: false },
+    { Icon: Users, label: 'User Management', path: '/users', active: false },
+    { Icon: Handshake, label: 'Provider Management', path: '/providers', active: false },
+    { Icon: LifeBuoy, label: 'Contact Support', path: '/support', active: false },
+    { Icon: Settings, label: 'Settings', path: '/settings', active: true },
   ]
 
   return (
@@ -195,11 +184,7 @@ export default function AdminSettings() {
                     : 'text-[#bfc7d2] hover:bg-[#1c2028] hover:text-white'
                 } ${isCollapsed ? 'lg:justify-center lg:p-2.5 gap-3 px-3.5 py-2.5' : 'gap-3 px-3.5 py-2.5'}`}
               >
-                <img
-                  src={item.icon}
-                  alt=""
-                  className={`w-4 h-4 shrink-0 ${item.active ? 'brightness-0' : ''}`}
-                />
+                <item.Icon className="w-4 h-4 shrink-0" aria-hidden="true" />
                 <span className={`text-[13.5px] leading-5 truncate ${isCollapsed ? 'lg:hidden' : ''}`}>
                   {item.label}
                 </span>
@@ -217,7 +202,7 @@ export default function AdminSettings() {
               isCollapsed ? 'lg:justify-center lg:p-2.5 gap-3 px-3.5 py-2.5' : 'gap-3 px-3.5 py-2.5'
             }`}
           >
-            <img src={imgNavLogout} alt="" className="w-4 h-4 shrink-0" />
+            <LogOut className="w-4 h-4 shrink-0" aria-hidden="true" />
             <span className={`text-[13.5px] font-semibold tracking-wide ${isCollapsed ? 'lg:hidden' : ''}`}>
               Logout
             </span>
@@ -352,7 +337,7 @@ export default function AdminSettings() {
                   </div>
                   <div className="relative flex items-center">
                     <div className="absolute left-3.5 pointer-events-none">
-                      <img src={imgIconUser} alt="" className="w-4 h-4 opacity-80" />
+                      <User className="w-4 h-4 opacity-80" aria-hidden="true" />
                     </div>
                     <input
                       id="fullNameInput"
@@ -378,7 +363,7 @@ export default function AdminSettings() {
                   </div>
                   <div className="relative flex items-center">
                     <div className="absolute left-3.5 pointer-events-none">
-                      <img src={imgIconMail} alt="" className="w-4 h-3.5 opacity-80" />
+                      <Mail className="w-4 h-4 opacity-80" aria-hidden="true" />
                     </div>
                     <input
                       id="emailInput"
@@ -404,7 +389,7 @@ export default function AdminSettings() {
                   </div>
                   <div className="relative flex items-center">
                     <div className="absolute left-3.5 pointer-events-none">
-                      <img src={imgIconPhone} alt="" className="w-4 h-4 opacity-80" />
+                      <Phone className="w-4 h-4 opacity-80" aria-hidden="true" />
                     </div>
                     <input
                       id="phoneInput"
@@ -473,7 +458,7 @@ export default function AdminSettings() {
                   </div>
                   <div className="relative flex items-center">
                     <div className="absolute left-3.5 pointer-events-none">
-                      <img src={imgIconLockCurrent} alt="" className="w-4 h-3.5 opacity-80" />
+                      <Lock className="w-4 h-4 opacity-80" aria-hidden="true" />
                     </div>
                     <input
                       id="currentPassInput"
@@ -502,7 +487,7 @@ export default function AdminSettings() {
                   </label>
                   <div className="relative flex items-center">
                     <div className="absolute left-3.5 pointer-events-none">
-                      <img src={imgIconLockNew} alt="" className="w-3.5 h-4 opacity-80" />
+                      <Lock className="w-4 h-4 opacity-80" aria-hidden="true" />
                     </div>
                     <input
                       id="newPassInput"
@@ -531,7 +516,7 @@ export default function AdminSettings() {
                   </label>
                   <div className="relative flex items-center">
                     <div className="absolute left-3.5 pointer-events-none">
-                      <img src={imgIconLockConfirm} alt="" className="w-3.5 h-4 opacity-80" />
+                      <Lock className="w-4 h-4 opacity-80" aria-hidden="true" />
                     </div>
                     <input
                       id="confirmPassInput"

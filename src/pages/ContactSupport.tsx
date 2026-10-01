@@ -1,22 +1,17 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import { LayoutDashboard, LifeBuoy, LogOut, Settings, Users, Handshake } from 'lucide-react'
 import { useAuth } from '../hooks/useAuth'
 
 // ── Asset URLs (Figma-sourced) ─────────────────────────────────────────────
-const imgLogo = 'https://www.figma.com/api/mcp/asset/f31cb0bb-f4dd-44bc-8a1a-52663c79b6fc.png'
-const imgPhone = 'https://www.figma.com/api/mcp/asset/d0748e19-db56-4b99-b4b4-fa4c037239fe.svg'
-const imgPin = 'https://www.figma.com/api/mcp/asset/a8333193-a423-457e-a7dc-67419de5c069.svg'
-const imgInspect = 'https://www.figma.com/api/mcp/asset/202d4a76-b974-4860-829b-2ce6c09f5c7b.svg'
-const imgCheckmark = 'https://www.figma.com/api/mcp/asset/d6a9ad6d-be9c-4109-b7b5-057321d45c0b.svg'
-const imgTerritoryPin = 'https://www.figma.com/api/mcp/asset/d87df22a-5868-49f2-bd4d-62fb62c4af5e.svg'
-const imgClock = 'https://www.figma.com/api/mcp/asset/1f7b40e6-2a57-4cef-bfdd-f7d9a37fc7b0.svg'
-const imgAvatar = 'https://www.figma.com/api/mcp/asset/6b82aff7-22fb-4ed7-9555-21ff1bddb189.svg'
-const imgNavDashboard = 'https://www.figma.com/api/mcp/asset/f943a667-157e-4219-9705-28c24f1ec1dd.svg'
-const imgNavUsers = 'https://www.figma.com/api/mcp/asset/f001819c-3f38-494f-9054-788191506cdf.svg'
-const imgNavProviders = 'https://www.figma.com/api/mcp/asset/c5867c05-81f9-4fd3-9297-05e4adac551a.svg'
-const imgNavSupport = 'https://www.figma.com/api/mcp/asset/30ab51f2-9f35-402b-91a0-bbb8a057d9da.svg'
-const imgNavSettings = 'https://www.figma.com/api/mcp/asset/0784ba40-946a-4a4e-98fb-c6a795fd3e32.svg'
-const imgNavLogout = 'https://www.figma.com/api/mcp/asset/f385369b-e955-4804-8b7c-178744f689ff.svg'
+const imgLogo = '/logo.png'
+const imgPhone = '/favicon.svg'
+const imgPin = '/favicon.svg'
+const imgInspect = '/favicon.svg'
+const imgCheckmark = '/favicon.svg'
+const imgTerritoryPin = '/favicon.svg'
+const imgClock = '/favicon.svg'
+const imgAvatar = '/favicon.svg'
 
 // ── Types & Support Inquiries Data ──────────────────────────────────────────
 export type TicketStatus = 'Pending Review' | 'Reviewed'
@@ -146,7 +141,7 @@ export default function ContactSupportSubmissions() {
 
   function handleLogout() {
     auth.logout()
-    nav('/login')
+    nav('/')
   }
 
   // Selected ticket object
@@ -178,11 +173,11 @@ export default function ContactSupportSubmissions() {
   }
 
   const navItems = [
-    { icon: imgNavDashboard, label: 'Dashboard', path: '/', active: false },
-    { icon: imgNavUsers, label: 'User Management', path: '/users', active: false },
-    { icon: imgNavProviders, label: 'Provider Management', path: '/providers', active: false },
-    { icon: imgNavSupport, label: 'Contact Support', path: '/support', active: true },
-    { icon: imgNavSettings, label: 'Settings', path: '/settings', active: false },
+    { Icon: LayoutDashboard, label: 'Dashboard', path: '/dashboard', active: false },
+    { Icon: Users, label: 'User Management', path: '/users', active: false },
+    { Icon: Handshake, label: 'Provider Management', path: '/providers', active: false },
+    { Icon: LifeBuoy, label: 'Contact Support', path: '/support', active: true },
+    { Icon: Settings, label: 'Settings', path: '/settings', active: false },
   ]
 
   return (
@@ -275,11 +270,7 @@ export default function ContactSupportSubmissions() {
                     : 'text-[#bfc7d2] hover:bg-[#1c2028] hover:text-white'
                 } ${isCollapsed ? 'lg:justify-center lg:p-2.5 gap-3 px-3.5 py-2.5' : 'gap-3 px-3.5 py-2.5'}`}
               >
-                <img
-                  src={item.icon}
-                  alt=""
-                  className={`w-4 h-4 shrink-0 ${item.active ? 'brightness-0' : ''}`}
-                />
+                <item.Icon className="w-4 h-4 shrink-0" aria-hidden="true" />
                 <span className={`text-[13.5px] leading-5 truncate ${isCollapsed ? 'lg:hidden' : ''}`}>
                   {item.label}
                 </span>
@@ -297,7 +288,7 @@ export default function ContactSupportSubmissions() {
               isCollapsed ? 'lg:justify-center lg:p-2.5 gap-3 px-3.5 py-2.5' : 'gap-3 px-3.5 py-2.5'
             }`}
           >
-            <img src={imgNavLogout} alt="" className="w-4 h-4 shrink-0" />
+            <LogOut className="w-4 h-4 shrink-0" aria-hidden="true" />
             <span className={`text-[13.5px] font-semibold tracking-wide ${isCollapsed ? 'lg:hidden' : ''}`}>
               Logout
             </span>

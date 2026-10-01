@@ -1,8 +1,8 @@
 import { useState } from 'react'
 
 // ── Asset URLs (Figma-sourced) ─────────────────────────────────────────────
-const imgCourierPortrait = 'https://www.figma.com/api/mcp/asset/55f0bfbc-ea88-4b0f-9df7-73f9dace489b'
-const imgPoliceRecordThumb = 'https://www.figma.com/api/mcp/asset/49bf6797-f491-4b31-b594-29b0814a68ad'
+const imgCourierPortrait = '/logo.png'
+const imgPoliceRecordThumb = '/logo.png'
 
 export interface CourierData {
   courierType: string

@@ -126,7 +126,7 @@ export default function ForgotPassword() {
     setLoading(false)
     if (res.ok) {
       setMessage('Password updated successfully')
-      setTimeout(() => nav('/login'), 1200)
+      setTimeout(() => nav('/'), 1200)
     }
   }
 

@@ -1,9 +1,9 @@
 import { useState } from 'react'
 
 // ── Asset URLs (Figma-sourced) ─────────────────────────────────────────────
-const imgCarRentalBrand = 'https://www.figma.com/api/mcp/asset/f94103e3-4cd2-416b-ada8-34361d50cea6'
-const imgLicensePreview = 'https://www.figma.com/api/mcp/asset/d3ddf3d6-168f-484d-843b-effe0dc29d82'
-const imgRoadworthyPreview = 'https://www.figma.com/api/mcp/asset/cb9ad0e2-e7ff-4368-8114-190e9b1d581c'
+const imgCarRentalBrand = '/logo.png'
+const imgLicensePreview = '/logo.png'
+const imgRoadworthyPreview = '/logo.png'
 
 export interface CarRentalData {
   companyLegalName: string

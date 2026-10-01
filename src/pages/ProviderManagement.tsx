@@ -1,30 +1,36 @@
 import { useState, useMemo, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import {
+  Car,
+  ChevronLeft,
+  ChevronRight,
+  LayoutDashboard,
+  LifeBuoy,
+  LogOut,
+  MapPin,
+  Search,
+  Settings,
+  Store,
+  Truck,
+  UserRound,
+  Users,
+  Handshake,
+  Home,
+} from 'lucide-react'
 import { useAuth } from '../hooks/useAuth'
 import ProviderDetailModal, { type ProviderDetailItem } from '../components/modals/ProviderDetailModal'
 
 // ── Asset URLs (Figma-sourced) ─────────────────────────────────────────────
-const imgAvatar1 = 'https://www.figma.com/api/mcp/asset/dac17cf5-a03c-48ae-9ca7-dd6e0fe1d2e1.png'
-const imgAvatar2 = 'https://www.figma.com/api/mcp/asset/81afa7b5-2fd1-462a-8d54-dab436515e7b.png'
-const imgAvatar3 = 'https://www.figma.com/api/mcp/asset/886b7006-3a8e-461c-a0fc-f81f07e446d8.png'
-const imgAvatar4 = 'https://www.figma.com/api/mcp/asset/dabb2025-b170-478d-a90b-f70c33843935.png'
-const imgLogo = 'https://www.figma.com/api/mcp/asset/3d4b3337-7f15-4d35-85e8-14f6d98598b3.png'
-const imgIconSearch = 'https://www.figma.com/api/mcp/asset/b30ccf05-b3a1-4ee3-bbbb-d9c6023c1e73.svg'
-const imgCatDriver = 'https://www.figma.com/api/mcp/asset/d7713a7a-a789-4156-afc8-da75491c5f00.svg'
-const imgIconPin = 'https://www.figma.com/api/mcp/asset/701593bb-41a0-408b-bf21-bb9d113a0f6b.svg'
-const imgCatVendor = 'https://www.figma.com/api/mcp/asset/a2e714d4-30d7-4b1b-8e97-1180ba13ee80.svg'
-const imgCatCourier = 'https://www.figma.com/api/mcp/asset/4e66d714-9652-467a-a2b2-939fe6fa9af1.svg'
-const imgCatRental = 'https://www.figma.com/api/mcp/asset/4a7f8f7b-4ecc-46aa-97ff-8733744fbd5f.svg'
-const imgCatProperty = 'https://www.figma.com/api/mcp/asset/9e442b7a-9f5d-4a5b-86ea-81702ac7de6c.svg'
-const imgPagPrev = 'https://www.figma.com/api/mcp/asset/00073a0b-28e0-4ca5-8d00-25586d412a47.svg'
-const imgPagNext = 'https://www.figma.com/api/mcp/asset/f0affb0c-2075-4609-a756-f80852e2ffed.svg'
-const imgIconAvatar = 'https://www.figma.com/api/mcp/asset/151e2f63-5e75-4360-9782-a9bacacde4eb.svg'
-const imgNavDashboard = 'https://www.figma.com/api/mcp/asset/ab71d768-6977-403e-a9c9-3d1b442d4460.svg'
-const imgNavUsers = 'https://www.figma.com/api/mcp/asset/4a5230f6-5d87-4f7d-b2d6-d51334cd5427.svg'
-const imgNavProviders = 'https://www.figma.com/api/mcp/asset/7d37b528-88b2-4425-8aa4-46a6c1033bce.svg'
-const imgNavSupport = 'https://www.figma.com/api/mcp/asset/779dbc22-62f5-4365-9ff9-179b4e0970e9.svg'
-const imgNavSettings = 'https://www.figma.com/api/mcp/asset/c12df44c-04d7-428c-b8c9-1c0096750612.svg'
-const imgNavLogout = 'https://www.figma.com/api/mcp/asset/073b8ddc-b8ae-4ada-a0da-b44090b244ff.svg'
+const imgAvatar1 = '/logo.png'
+const imgAvatar2 = '/logo.png'
+const imgAvatar3 = '/logo.png'
+const imgAvatar4 = '/logo.png'
+const imgLogo = '/logo.png'
+const imgCatDriver = '/favicon.svg'
+const imgCatVendor = '/favicon.svg'
+const imgCatCourier = '/favicon.svg'
+const imgCatRental = '/favicon.svg'
+const imgCatProperty = '/favicon.svg'
 
 // ── Types & Provider Data ──────────────────────────────────────────────────
 export type ProviderStatus = 'Pending' | 'Approved' | 'Rejected'
@@ -453,7 +459,7 @@ export default function ProviderManagement() {
 
   function handleLogout() {
     auth.logout()
-    nav('/login')
+    nav('/')
   }
 
   // Handle Approve
@@ -503,20 +509,20 @@ export default function ProviderManagement() {
   }
 
   const navItems = [
-    { icon: imgNavDashboard, label: 'Dashboard', path: '/', active: false },
-    { icon: imgNavUsers, label: 'User Management', path: '/users', active: false },
-    { icon: imgNavProviders, label: 'Provider Management', path: '/providers', active: true },
-    { icon: imgNavSupport, label: 'Contact Support', path: '/support', active: false },
-    { icon: imgNavSettings, label: 'Settings', path: '/settings', active: false },
+    { Icon: LayoutDashboard, label: 'Dashboard', path: '/dashboard', active: false },
+    { Icon: Users, label: 'User Management', path: '/users', active: false },
+    { Icon: Handshake, label: 'Provider Management', path: '/providers', active: true },
+    { Icon: LifeBuoy, label: 'Contact Support', path: '/support', active: false },
+    { Icon: Settings, label: 'Settings', path: '/settings', active: false },
   ]
 
   const categories = [
     { id: 'All', label: 'All Providers' },
-    { id: 'Driver', label: 'Drivers (142)' },
-    { id: 'Food Vendor', label: 'Food Vendors (56)' },
-    { id: 'Courier', label: 'Couriers (48)' },
-    { id: 'Car Rental Provider', label: 'Car Rental Providers (28)' },
-    { id: 'Property Owner', label: 'Property Owners (34)' },
+    { id: 'Driver', label: 'Drivers (142)', Icon: Car },
+    { id: 'Food Vendor', label: 'Food Vendors (56)', Icon: Store },
+    { id: 'Courier', label: 'Couriers (48)', Icon: Truck },
+    { id: 'Car Rental Provider', label: 'Car Rental Providers (28)', Icon: Car },
+    { id: 'Property Owner', label: 'Property Owners (34)', Icon: Home },
   ]
 
   // Filtered providers
@@ -676,11 +682,7 @@ export default function ProviderManagement() {
                     : 'text-[#bfc7d2] hover:bg-[#1c2028] hover:text-white'
                 } ${isCollapsed ? 'lg:justify-center lg:p-2.5 gap-3 px-3.5 py-2.5' : 'gap-3 px-3.5 py-2.5'}`}
               >
-                <img
-                  src={item.icon}
-                  alt=""
-                  className={`w-4 h-4 shrink-0 ${item.active ? 'brightness-0' : ''}`}
-                />
+                <item.Icon className="w-4 h-4 shrink-0" aria-hidden="true" />
                 <span className={`text-[13.5px] leading-5 truncate ${isCollapsed ? 'lg:hidden' : ''}`}>
                   {item.label}
                 </span>
@@ -698,7 +700,7 @@ export default function ProviderManagement() {
               isCollapsed ? 'lg:justify-center lg:p-2.5 gap-3 px-3.5 py-2.5' : 'gap-3 px-3.5 py-2.5'
             }`}
           >
-            <img src={imgNavLogout} alt="" className="w-4 h-4 shrink-0" />
+            <LogOut className="w-4 h-4 shrink-0" aria-hidden="true" />
             <span className={`text-[13.5px] font-semibold tracking-wide ${isCollapsed ? 'lg:hidden' : ''}`}>
               Logout
             </span>
@@ -747,7 +749,7 @@ export default function ProviderManagement() {
             </span>
           </div>
           <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-[#93ccff] text-[#002c47] font-bold shrink-0 shadow-inner">
-            <img src={imgIconAvatar} alt="" className="w-3.5 h-3.5" />
+            <UserRound className="w-3.5 h-3.5" aria-hidden="true" />
           </div>
         </div>
       </header>
@@ -793,12 +795,13 @@ export default function ProviderManagement() {
                     key={cat.id}
                     type="button"
                     onClick={() => setSelectedCategory(cat.id)}
-                    className={`px-4 py-2 rounded-md text-xs font-semibold whitespace-nowrap transition-all duration-150 border cursor-pointer ${
+                    className={`inline-flex items-center gap-2 px-4 py-2 rounded-md text-xs font-semibold whitespace-nowrap transition-all duration-150 border cursor-pointer ${
                       isSelected
                         ? 'bg-[#3198dc] text-[#002c47] border-[#3198dc] shadow-md font-bold'
                         : 'bg-[#1c2028] text-[#bfc7d2] border-transparent hover:bg-[#262b35] hover:text-white'
                     }`}
                   >
+                    {'Icon' in cat && cat.Icon && <cat.Icon className="w-3.5 h-3.5" aria-hidden="true" />}
                     {cat.label}
                   </button>
                 )
@@ -811,7 +814,7 @@ export default function ProviderManagement() {
               {/* Search input */}
               <div className="relative flex items-center flex-1 max-w-[576px]">
                 <div className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none flex items-center justify-center">
-                  <img src={imgIconSearch} alt="" className="w-3.5 h-3.5 object-contain" />
+                  <Search className="w-3.5 h-3.5 text-[#89929b]" aria-hidden="true" />
                 </div>
                 <input
                   type="text"
@@ -978,11 +981,7 @@ export default function ProviderManagement() {
                         {/* Hub Location */}
                         <td className="py-4 px-4 align-middle">
                           <div className="flex items-center gap-1.5">
-                            <img
-                              src={imgIconPin}
-                              alt=""
-                              className="w-2.5 h-3.5 object-contain shrink-0 opacity-70"
-                            />
+                            <MapPin className="w-3.5 h-3.5 shrink-0 opacity-70" aria-hidden="true" />
                             <span className="text-xs sm:text-[13px] font-medium text-[#dfe2ee]">
                               {provider.hub}
                             </span>
@@ -1072,7 +1071,7 @@ export default function ProviderManagement() {
                     className="flex items-center justify-center w-8 h-8 rounded bg-[#1c2028] border border-[#262b35] text-[#dfe2ee] hover:bg-[#262b35] disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer transition-colors"
                     aria-label="Previous page"
                   >
-                    <img src={imgPagPrev} alt="" className="w-1.5 h-2.5 object-contain" />
+                    <ChevronLeft className="w-4 h-4" aria-hidden="true" />
                   </button>
 
                   <div className="flex items-center justify-center px-3 h-8 rounded bg-[#3198dc] text-[#002c47] font-bold text-xs shadow-sm">
@@ -1086,7 +1085,7 @@ export default function ProviderManagement() {
                     className="flex items-center justify-center w-8 h-8 rounded bg-[#1c2028] border border-[#262b35] text-[#dfe2ee] hover:bg-[#262b35] disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer transition-colors"
                     aria-label="Next page"
                   >
-                    <img src={imgPagNext} alt="" className="w-1.5 h-2.5 object-contain" />
+                    <ChevronRight className="w-4 h-4" aria-hidden="true" />
                   </button>
                 </div>
               </div>

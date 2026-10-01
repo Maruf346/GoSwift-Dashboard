@@ -1,11 +1,11 @@
 import { useState } from 'react'
 
 // ── Asset URLs (Figma-sourced) ─────────────────────────────────────────────
-const imgDriverHeadshot = 'https://www.figma.com/api/mcp/asset/f5b1b1c6-2828-4d84-aa30-2bbb86864936'
-const imgNationalIdPreview = 'https://www.figma.com/api/mcp/asset/2b45a522-6340-415e-b081-03e36d25a129'
-const imgLicensePreview = 'https://www.figma.com/api/mcp/asset/8b7bca00-f9fb-4abe-a6a1-7357e288a85f'
-const imgVehiclePhoto = 'https://www.figma.com/api/mcp/asset/9c9c6d74-7e5c-4dec-a094-12c6725d38fe'
-const imgInspectionDisc = 'https://www.figma.com/api/mcp/asset/fa3901c1-94b8-47a3-8cc2-d8db2fac2377'
+const imgDriverHeadshot = '/logo.png'
+const imgNationalIdPreview = '/logo.png'
+const imgLicensePreview = '/logo.png'
+const imgVehiclePhoto = '/logo.png'
+const imgInspectionDisc = '/logo.png'
 
 export interface DriverData {
   driverLicenseNumber: string

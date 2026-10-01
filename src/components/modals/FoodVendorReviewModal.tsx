@@ -1,8 +1,8 @@
 import { useState } from 'react'
 
 // ── Asset URLs (Figma-sourced) ─────────────────────────────────────────────
-const imgChefPortrait = 'https://www.figma.com/api/mcp/asset/16004b10-81a1-4a99-9ed1-60fb11722828'
-const imgRestaurantAmbience = 'https://www.figma.com/api/mcp/asset/f3a9e106-88e4-4ebe-a062-e1a695b0f78d'
+const imgChefPortrait = '/logo.png'
+const imgRestaurantAmbience = '/logo.png'
 
 export interface FoodVendorData {
   businessLegalName: string
