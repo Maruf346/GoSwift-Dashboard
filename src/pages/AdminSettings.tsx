@@ -21,6 +21,7 @@ import {
   Handshake,
 } from 'lucide-react'
 import { useAuth } from '../hooks/useAuth'
+import { changePassword, updateCurrentUserProfile } from '../api/auth'
 
 // ── Asset URLs (Figma-sourced) ─────────────────────────────────────────────
 const imgLogo = '/logo.png'
@@ -49,6 +50,13 @@ export default function AdminSettings() {
   const [isSavingAccount, setIsSavingAccount] = useState(false)
   const [isUpdatingPassword, setIsUpdatingPassword] = useState(false)
 
+  React.useEffect(() => {
+    if (!auth.user) return
+    setFullName(auth.user.full_name || '')
+    setEmail(auth.user.email || '')
+    setPhone(auth.user.phone_number || '')
+  }, [auth.user])
+
   function showToast(message: string) {
     setToastMessage(message)
     setTimeout(() => {
@@ -56,16 +64,25 @@ export default function AdminSettings() {
     }, 3000)
   }
 
-  function handleSaveAccount(e: React.FormEvent) {
+  async function handleSaveAccount(e: React.FormEvent) {
     e.preventDefault()
     setIsSavingAccount(true)
-    setTimeout(() => {
+
+    try {
+      await updateCurrentUserProfile({
+        full_name: fullName,
+        phone_number: phone,
+      })
+      await auth.refreshUser()
       setIsSavingAccount(false)
       showToast('Account details saved successfully.')
-    }, 400)
+    } catch (err) {
+      setIsSavingAccount(false)
+      showToast(err instanceof Error ? err.message : 'Unable to save account details.')
+    }
   }
 
-  function handleUpdatePassword(e: React.FormEvent) {
+  async function handleUpdatePassword(e: React.FormEvent) {
     e.preventDefault()
     if (!currentPassword) {
       showToast('Please enter your current password.')
@@ -81,13 +98,17 @@ export default function AdminSettings() {
     }
 
     setIsUpdatingPassword(true)
-    setTimeout(() => {
+    try {
+      await changePassword(currentPassword, newPassword, confirmPassword)
       setIsUpdatingPassword(false)
       setCurrentPassword('')
       setNewPassword('')
       setConfirmPassword('')
       showToast('Password updated successfully.')
-    }, 500)
+    } catch (err) {
+      setIsUpdatingPassword(false)
+      showToast(err instanceof Error ? err.message : 'Unable to update password.')
+    }
   }
 
   function handleLogout() {

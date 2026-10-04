@@ -1,7 +1,11 @@
 import { useState, useRef, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import '../styles/auth.tailwind.css'
-import { sendOtpMock, verifyOtpMock, updatePasswordMock } from '../data/authService'
+import {
+  completePasswordReset,
+  initiatePasswordReset,
+  verifyPasswordResetOtp,
+} from '../api/auth'
 
 // ── SVG icons inlined so no external asset dependency ─────────────────────
 const InfoIcon = () => (
@@ -62,6 +66,7 @@ export default function ForgotPassword() {
   const [email, setEmail] = useState('admin.officer@goswiftbahamas.com')
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState('')
+  const [resetToken, setResetToken] = useState('')
 
   const [otp, setOtp] = useState<string[]>(['', '', '', '', '', ''])
   const inputsRef = useRef<Array<HTMLInputElement | null>>([])
@@ -77,15 +82,18 @@ export default function ForgotPassword() {
 
   async function sendOtp() {
     setLoading(true)
-    const res = await sendOtpMock(email)
-    setLoading(false)
-    if (res.ok) {
+    try {
+      const res = await initiatePasswordReset(email)
       setMessage('')
       setStep('otp')
       setOtp(['', '', '', '', '', ''])
-      expiry.reset()
+      expiry.reset(res.expires_in_seconds || 282)
       resend.reset()
       setTimeout(() => inputsRef.current[0]?.focus(), 100)
+    } catch (err) {
+      setMessage(err instanceof Error ? err.message : 'Unable to send OTP')
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -108,12 +116,16 @@ export default function ForgotPassword() {
       return
     }
     setLoading(true)
-    const res = await verifyOtpMock(email, code)
-    setLoading(false)
-    if (res.ok) {
-      setMessage('Code verified. Enter your new password.')
+    try {
+      const res = await verifyPasswordResetOtp(email, code)
+      setResetToken(res.reset_token)
+      setMessage(res.message || 'Code verified. Enter your new password.')
       setStep('reset')
-    } else setMessage(res.message || 'Verification failed')
+    } catch (err) {
+      setMessage(err instanceof Error ? err.message : 'Verification failed')
+    } finally {
+      setLoading(false)
+    }
   }
 
   async function updatePassword() {
@@ -122,11 +134,14 @@ export default function ForgotPassword() {
       return
     }
     setLoading(true)
-    const res = await updatePasswordMock(email, password)
-    setLoading(false)
-    if (res.ok) {
+    try {
+      await completePasswordReset(resetToken, password, confirm)
       setMessage('Password updated successfully')
       setTimeout(() => nav('/'), 1200)
+    } catch (err) {
+      setMessage(err instanceof Error ? err.message : 'Unable to update password')
+    } finally {
+      setLoading(false)
     }
   }
 

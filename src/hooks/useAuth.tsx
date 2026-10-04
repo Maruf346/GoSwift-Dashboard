@@ -1,6 +1,6 @@
 import { createContext, useContext, useMemo, useState, type ReactNode } from 'react'
-import { clearAuthTokens, setAuthTokens } from '../api/client'
-import { getCurrentUser, loginAdmin, type AdminUser } from '../api/auth'
+import { clearAuthTokens, getRefreshToken, setAuthTokens } from '../api/client'
+import { getCurrentUser, loginAdmin, logoutSession, type AdminUser } from '../api/auth'
 
 const USER_STORAGE_KEY = 'goswift_admin_user'
 
@@ -34,6 +34,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   function logout() {
+    const refresh = getRefreshToken()
+    if (refresh) {
+      void logoutSession(refresh).catch(() => undefined)
+    }
     setUser(null)
     clearAuthTokens()
     window.localStorage.removeItem(USER_STORAGE_KEY)

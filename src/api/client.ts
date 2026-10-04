@@ -24,6 +24,10 @@ export function getAccessToken() {
   return window.localStorage.getItem(ACCESS_TOKEN_KEY)
 }
 
+export function getRefreshToken() {
+  return window.localStorage.getItem(REFRESH_TOKEN_KEY)
+}
+
 export function setAuthTokens(access: string, refresh: string) {
   window.localStorage.setItem(ACCESS_TOKEN_KEY, access)
   window.localStorage.setItem(REFRESH_TOKEN_KEY, refresh)
