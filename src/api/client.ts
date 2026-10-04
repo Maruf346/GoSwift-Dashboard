@@ -18,6 +18,7 @@ export class ApiError extends Error {
 type ApiRequestOptions = Omit<RequestInit, 'body'> & {
   body?: unknown
   auth?: boolean
+  skipRefresh?: boolean
 }
 
 export function getAccessToken() {
@@ -43,6 +44,33 @@ export async function apiRequest<T>(path: string, options: ApiRequestOptions = {
     throw new ApiError('VITE_API_BASE_URL is not configured.', 0, null)
   }
 
+  const response = await sendRequest(path, options)
+  const data = await parseResponse(response)
+
+  if (response.status === 401 && options.auth !== false && !options.skipRefresh) {
+    const refreshed = await refreshAccessToken()
+    if (refreshed) {
+      const retryResponse = await sendRequest(path, { ...options, skipRefresh: true })
+      const retryData = await parseResponse(retryResponse)
+
+      if (!retryResponse.ok) {
+        throw new ApiError(resolveErrorMessage(retryData, retryResponse.statusText), retryResponse.status, retryData)
+      }
+
+      return retryData as T
+    }
+
+    clearAuthTokens()
+  }
+
+  if (!response.ok) {
+    throw new ApiError(resolveErrorMessage(data, response.statusText), response.status, data)
+  }
+
+  return data as T
+}
+
+async function sendRequest(path: string, options: ApiRequestOptions) {
   const headers = new Headers(options.headers)
   const hasJsonBody = options.body !== undefined && !(options.body instanceof FormData)
 
@@ -57,20 +85,37 @@ export async function apiRequest<T>(path: string, options: ApiRequestOptions = {
     }
   }
 
-  const response = await fetch(`${API_BASE_URL}${path}`, {
+  return fetch(`${API_BASE_URL}${path}`, {
     ...options,
     headers,
     body: hasJsonBody ? JSON.stringify(options.body) : (options.body as BodyInit | undefined),
   })
+}
 
+async function parseResponse(response: Response) {
   const contentType = response.headers.get('content-type') || ''
-  const data = contentType.includes('application/json') ? await response.json() : await response.text()
+  return contentType.includes('application/json') ? response.json() : response.text()
+}
 
-  if (!response.ok) {
-    throw new ApiError(resolveErrorMessage(data, response.statusText), response.status, data)
-  }
+async function refreshAccessToken() {
+  const refresh = getRefreshToken()
+  if (!refresh) return false
 
-  return data as T
+  const response = await fetch(`${API_BASE_URL}/api/auth/refresh/`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ refresh }),
+  })
+
+  if (!response.ok) return false
+
+  const data = (await parseResponse(response)) as { access?: string; refresh?: string }
+  if (!data.access) return false
+
+  setAuthTokens(data.access, data.refresh || refresh)
+  return true
 }
 
 function resolveErrorMessage(data: unknown, fallback: string) {
