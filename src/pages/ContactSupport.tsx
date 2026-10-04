@@ -1,6 +1,8 @@
-import { useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import {
+  ChevronLeft,
+  ChevronRight,
   Check,
   CheckCircle2,
   ClipboardCheck,
@@ -8,41 +10,42 @@ import {
   LayoutDashboard,
   LifeBuoy,
   LogOut,
-  MapPin,
-  Phone,
+  Paperclip,
+  Search,
   Settings,
   UserRound,
   Users,
   Handshake,
 } from 'lucide-react'
 import { useAuth } from '../hooks/useAuth'
+import {
+  getSupportTicket,
+  listSupportTickets,
+  updateSupportTicketStatus,
+  type SupportTicketApi,
+  type SupportTicketStatus,
+} from '../api/support'
 
 // ── Asset URLs (Figma-sourced) ─────────────────────────────────────────────
 const imgLogo = '/logo.png'
 
 // ── Types & Support Inquiries Data ──────────────────────────────────────────
 export type TicketStatus = 'Pending Review' | 'Reviewed'
-export type UserRole = 'CUSTOMER' | 'FOOD VENDOR' | 'DRIVER' | 'COURIER' | 'PROPERTY OWNER'
 
 export interface SupportTicket {
   id: string
   ticketCode: string
   name: string
-  role: UserRole
-  roleColor: string
-  roleBg: string
   shortTime: string
   fullTimestamp: string
   subject: string
-  phone: string
-  region: string
-  fullLocation: string
   email: string
   status: TicketStatus
   message: string
+  attachment: string | null
 }
 
-const initialTickets: SupportTicket[] = [
+const initialTickets = [
   {
     id: '1',
     ticketCode: 'ID: GSB-SUB-8941',
@@ -135,6 +138,40 @@ const initialTickets: SupportTicket[] = [
   },
 ]
 
+void initialTickets
+
+function formatDateTime(value: string) {
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return value
+  return date.toLocaleString(undefined, {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+  })
+}
+
+function mapTicketStatus(status: SupportTicketStatus): TicketStatus {
+  return status === 'pending' ? 'Pending Review' : 'Reviewed'
+}
+
+function mapTicket(ticket: SupportTicketApi): SupportTicket {
+  const displayName = ticket.email?.split('@')[0]?.replace(/[._-]+/g, ' ') || 'Submitted Ticket'
+  return {
+    id: ticket.id,
+    ticketCode: `ID: ${ticket.id.slice(0, 8).toUpperCase()}`,
+    name: displayName,
+    shortTime: formatDateTime(ticket.created_at),
+    fullTimestamp: formatDateTime(ticket.created_at),
+    subject: ticket.subject,
+    email: ticket.email,
+    status: mapTicketStatus(ticket.status),
+    message: ticket.message,
+    attachment: ticket.attachment,
+  }
+}
+
 export default function ContactSupportSubmissions() {
   const auth = useAuth()
   const nav = useNavigate()
@@ -142,8 +179,15 @@ export default function ContactSupportSubmissions() {
   const [isMobileOpen, setIsMobileOpen] = useState(false)
 
   // State for tickets and selection
-  const [tickets, setTickets] = useState<SupportTicket[]>(initialTickets)
-  const [selectedTicketId, setSelectedTicketId] = useState<string>('1')
+  const [tickets, setTickets] = useState<SupportTicket[]>([])
+  const [selectedTicketId, setSelectedTicketId] = useState<string>('')
+  const [searchQuery, setSearchQuery] = useState('')
+  const [selectedStatus, setSelectedStatus] = useState<'all' | SupportTicketStatus>('all')
+  const [currentPage, setCurrentPage] = useState(1)
+  const [rowsPerPage, setRowsPerPage] = useState(10)
+  const [totalTickets, setTotalTickets] = useState(0)
+  const [isLoadingTickets, setIsLoadingTickets] = useState(false)
+  const [ticketError, setTicketError] = useState<string | null>(null)
   const [copiedNotification, setCopiedNotification] = useState<string | null>(null)
 
   function handleLogout() {
@@ -152,25 +196,108 @@ export default function ContactSupportSubmissions() {
   }
 
   // Selected ticket object
-  const selectedTicket = tickets.find((t) => t.id === selectedTicketId) || tickets[0]
+  const selectedTicket =
+    tickets.find((t) => t.id === selectedTicketId) ||
+    tickets[0] ||
+    ({
+      id: '',
+      ticketCode: 'ID: --',
+      name: 'No ticket selected',
+      shortTime: '--',
+      fullTimestamp: '--',
+      subject: 'No support ticket selected',
+      email: '--',
+      status: 'Reviewed',
+      message: isLoadingTickets ? 'Loading support tickets...' : 'No support tickets found.',
+      attachment: null,
+    } satisfies SupportTicket)
 
   // Stats calculation
-  const totalQueue = tickets.length
+  const totalQueue = totalTickets
   const pendingCount = tickets.filter((t) => t.status === 'Pending Review').length
   const reviewedCount = tickets.filter((t) => t.status === 'Reviewed').length
 
-  // Toggle ticket reviewed status
-  function toggleTicketStatus(ticketId: string) {
-    setTickets((prev) =>
-      prev.map((t) => {
-        if (t.id === ticketId) {
-          const nextStatus: TicketStatus =
-            t.status === 'Pending Review' ? 'Reviewed' : 'Pending Review'
-          return { ...t, status: nextStatus }
-        }
-        return t
+  const totalPages = Math.max(1, Math.ceil(totalTickets / rowsPerPage))
+  const startIndex = totalTickets === 0 ? 0 : (currentPage - 1) * rowsPerPage + 1
+  const endIndex = Math.min(currentPage * rowsPerPage, totalTickets)
+
+  const pageNumbers = useMemo(() => {
+    const pages: (number | string)[] = []
+    if (totalPages <= 5) {
+      for (let i = 1; i <= totalPages; i++) pages.push(i)
+    } else {
+      pages.push(1)
+      if (currentPage > 3) pages.push('...')
+      const start = Math.max(2, currentPage - 1)
+      const end = Math.min(totalPages - 1, currentPage + 1)
+      for (let i = start; i <= end; i++) pages.push(i)
+      if (currentPage < totalPages - 2) pages.push('...')
+      pages.push(totalPages)
+    }
+    return pages
+  }, [currentPage, totalPages])
+
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [searchQuery, selectedStatus, rowsPerPage])
+
+  useEffect(() => {
+    let isMounted = true
+    setIsLoadingTickets(true)
+    setTicketError(null)
+
+    listSupportTickets({
+      page: currentPage,
+      pageSize: rowsPerPage,
+      search: searchQuery,
+      status: selectedStatus === 'all' ? undefined : selectedStatus,
+    })
+      .then((response) => {
+        if (!isMounted) return
+        const mappedTickets = response.results.map(mapTicket)
+        setTickets(mappedTickets)
+        setTotalTickets(response.count)
+        setSelectedTicketId((current) => {
+          if (mappedTickets.some((ticket) => ticket.id === current)) return current
+          return mappedTickets[0]?.id ?? ''
+        })
       })
-    )
+      .catch((error: Error) => {
+        if (!isMounted) return
+        setTicketError(error.message)
+        setTickets([])
+        setTotalTickets(0)
+        setSelectedTicketId('')
+      })
+      .finally(() => {
+        if (isMounted) setIsLoadingTickets(false)
+      })
+
+    return () => {
+      isMounted = false
+    }
+  }, [currentPage, rowsPerPage, searchQuery, selectedStatus])
+
+  async function handleSelectTicket(ticketId: string) {
+    setSelectedTicketId(ticketId)
+    try {
+      const ticket = mapTicket(await getSupportTicket(ticketId))
+      setTickets((current) => current.map((item) => (item.id === ticketId ? ticket : item)))
+    } catch (error) {
+      setTicketError(error instanceof Error ? error.message : 'Unable to load ticket details.')
+    }
+  }
+
+  async function toggleTicketStatus(ticketId: string) {
+    const ticket = tickets.find((item) => item.id === ticketId)
+    if (!ticket) return
+    const nextStatus: SupportTicketStatus = ticket.status === 'Pending Review' ? 'resolved' : 'pending'
+    try {
+      const updated = mapTicket(await updateSupportTicketStatus(ticketId, nextStatus))
+      setTickets((prev) => prev.map((item) => (item.id === ticketId ? updated : item)))
+    } catch (error) {
+      setTicketError(error instanceof Error ? error.message : 'Unable to update ticket status.')
+    }
   }
 
   function handleCopyId(idText: string) {
@@ -447,20 +574,58 @@ export default function ContactSupportSubmissions() {
                   INCOMING COMMUNICATIONS
                 </span>
                 <span className="font-medium text-[#89929b] text-[13px] tracking-[0.13px]">
-                  Showing {tickets.length} records
+                  Showing {startIndex}-{endIndex} of {totalTickets}
                 </span>
               </div>
 
+              <div className="grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-3 px-3 pb-3">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[#89929b]" aria-hidden="true" />
+                  <input
+                    type="text"
+                    value={searchQuery}
+                    onChange={(event) => setSearchQuery(event.target.value)}
+                    placeholder="Search tickets by subject, email, or message..."
+                    className="w-full h-10 bg-[#0a0e16] border border-[#262b35] focus:border-[#4cd7f6] rounded-lg pl-9 pr-3 text-xs text-[#dfe2ee] placeholder-[#89929b] outline-none transition-colors"
+                  />
+                </div>
+                <select
+                  value={selectedStatus}
+                  onChange={(event) => setSelectedStatus(event.target.value as 'all' | SupportTicketStatus)}
+                  className="h-10 bg-[#0a0e16] border border-[#262b35] focus:border-[#4cd7f6] rounded-lg px-3 text-xs text-[#dfe2ee] outline-none cursor-pointer"
+                >
+                  <option value="all">All statuses</option>
+                  <option value="pending">Pending</option>
+                  <option value="resolved">Resolved</option>
+                </select>
+              </div>
+
+              {ticketError && (
+                <div className="mx-3 mb-3 rounded-lg border border-red-500/30 bg-red-950/20 px-3 py-2 text-xs text-red-200">
+                  {ticketError}
+                </div>
+              )}
+
               {/* Ticket Cards List */}
               <div className="flex flex-col gap-2.5">
-                {tickets.map((ticket) => {
+                {isLoadingTickets && (
+                  <div className="rounded-lg border border-[#262b35] bg-[#1c2028] px-4 py-8 text-center text-sm text-[#89929b]">
+                    Loading support tickets...
+                  </div>
+                )}
+                {!isLoadingTickets && tickets.length === 0 && (
+                  <div className="rounded-lg border border-[#262b35] bg-[#1c2028] px-4 py-8 text-center text-sm text-[#89929b]">
+                    No support tickets found.
+                  </div>
+                )}
+                {!isLoadingTickets && tickets.map((ticket) => {
                   const isSelected = ticket.id === selectedTicketId
                   const isPending = ticket.status === 'Pending Review'
 
                   return (
                     <div
                       key={ticket.id}
-                      onClick={() => setSelectedTicketId(ticket.id)}
+                      onClick={() => handleSelectTicket(ticket.id)}
                       className={`group flex flex-col gap-2 p-3.5 sm:p-4 rounded-lg cursor-pointer transition-all duration-150 border text-left ${
                         isSelected
                           ? 'bg-[#31353e] border-[#4cd7f6]/50 shadow-md ring-1 ring-[#4cd7f6]/30'
@@ -477,12 +642,6 @@ export default function ContactSupportSubmissions() {
                           />
                           <span className="font-semibold text-[#dfe2ee] text-base tracking-[-0.16px]">
                             {ticket.name}
-                          </span>
-                          <span
-                            className="font-semibold text-[10.5px] tracking-wider uppercase px-2 py-0.5 rounded-full"
-                            style={{ backgroundColor: ticket.roleBg, color: ticket.roleColor }}
-                          >
-                            {ticket.role}
                           </span>
                         </div>
                         <span className="font-medium text-[#bfc7d2] text-[12.5px]">
@@ -501,17 +660,16 @@ export default function ContactSupportSubmissions() {
                         </p>
                       </div>
 
-                      {/* Bottom Row: Phone, Island Location, Status Badge */}
+                      {/* Bottom Row: Email, Attachment, Status Badge */}
                       <div className="flex items-center justify-between gap-3 pt-1 flex-wrap text-xs">
                         <div className="flex flex-wrap items-center gap-3 sm:gap-4 text-[#89929b]">
-                          <div className="flex items-center gap-1.5">
-                            <Phone className="w-3 h-3 shrink-0 opacity-70" aria-hidden="true" />
-                            <span className="text-[12.5px] font-medium">{ticket.phone}</span>
-                          </div>
-                          <div className="flex items-center gap-1.5">
-                            <MapPin className="w-3 h-3 shrink-0 opacity-70" aria-hidden="true" />
-                            <span className="text-[12.5px] font-medium">{ticket.region}</span>
-                          </div>
+                          <span className="text-[12.5px] font-medium">{ticket.email}</span>
+                          {ticket.attachment && (
+                            <span className="inline-flex items-center gap-1.5 text-[12.5px] font-medium">
+                              <Paperclip className="w-3 h-3 shrink-0 opacity-70" aria-hidden="true" />
+                              Attachment
+                            </span>
+                          )}
                         </div>
 
                         {/* Status badge */}
@@ -533,6 +691,61 @@ export default function ContactSupportSubmissions() {
                   )
                 })}
               </div>
+
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-3 pt-4 mt-4 border-t border-[#262b35]">
+                <div className="flex items-center gap-2 text-xs text-[#89929b]">
+                  <span>Rows</span>
+                  <select
+                    value={rowsPerPage}
+                    onChange={(event) => setRowsPerPage(Number(event.target.value))}
+                    className="bg-[#0a0e16] border border-[#262b35] rounded px-2 py-1 text-xs text-[#dfe2ee] outline-none cursor-pointer"
+                  >
+                    <option value={5}>5</option>
+                    <option value={10}>10</option>
+                    <option value={20}>20</option>
+                  </select>
+                </div>
+                <div className="flex items-center gap-1 overflow-x-auto admin-scrollbar">
+                  <button
+                    type="button"
+                    disabled={currentPage === 1}
+                    onClick={() => setCurrentPage((page) => Math.max(1, page - 1))}
+                    className="flex items-center justify-center w-8 h-8 rounded bg-[#0a0e16] border border-[#262b35] text-[#dfe2ee] hover:bg-[#262b35] disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer transition-colors"
+                    aria-label="Previous support tickets page"
+                  >
+                    <ChevronLeft className="w-4 h-4" aria-hidden="true" />
+                  </button>
+                  {pageNumbers.map((page, index) =>
+                    page === '...' ? (
+                      <span key={`support-page-${index}`} className="px-1 text-xs text-[#89929b]">
+                        ...
+                      </span>
+                    ) : (
+                      <button
+                        key={page}
+                        type="button"
+                        onClick={() => setCurrentPage(Number(page))}
+                        className={`flex items-center justify-center w-8 h-8 rounded text-xs font-semibold cursor-pointer border-0 transition-all ${
+                          currentPage === page
+                            ? 'bg-[#3198dc] text-[#002c47] font-bold shadow-sm'
+                            : 'bg-[#0a0e16] text-[#dfe2ee] hover:bg-[#262b35]'
+                        }`}
+                      >
+                        {page}
+                      </button>
+                    )
+                  )}
+                  <button
+                    type="button"
+                    disabled={currentPage === totalPages}
+                    onClick={() => setCurrentPage((page) => Math.min(totalPages, page + 1))}
+                    className="flex items-center justify-center w-8 h-8 rounded bg-[#0a0e16] border border-[#262b35] text-[#dfe2ee] hover:bg-[#262b35] disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer transition-colors"
+                    aria-label="Next support tickets page"
+                  >
+                    <ChevronRight className="w-4 h-4" aria-hidden="true" />
+                  </button>
+                </div>
+              </div>
             </div>
 
             {/* Right Column: Submitted Details View Panel (Detail Inspector - 5 cols) */}
@@ -549,11 +762,12 @@ export default function ContactSupportSubmissions() {
                 <button
                   type="button"
                   onClick={() => toggleTicketStatus(selectedTicket.id)}
+                  disabled={!selectedTicket.id}
                   className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg font-semibold text-xs transition-all cursor-pointer border shadow-sm ${
                     selectedTicket.status === 'Pending Review'
                       ? 'bg-[#31353e] hover:bg-[#3f4850] text-[#dfe2ee] border-[#3f4850] hover:border-[#4cd7f6]/50'
                       : 'bg-[#ca8100]/20 hover:bg-[#ca8100]/30 text-[#ffb95f] border-[#ca8100]/40'
-                  }`}
+                  } disabled:opacity-40 disabled:cursor-not-allowed`}
                 >
                   <CheckCircle2 className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
                   <span>
@@ -576,20 +790,17 @@ export default function ContactSupportSubmissions() {
                       {selectedTicket.name}
                     </h2>
                   </div>
-                  <span
-                    className="font-semibold text-[11px] tracking-wider uppercase px-2.5 py-0.5 rounded-full border"
-                    style={{
-                      backgroundColor: selectedTicket.roleBg,
-                      color: selectedTicket.roleColor,
-                      borderColor: `${selectedTicket.roleColor}33`,
-                    }}
-                  >
-                    {selectedTicket.role}
+                  <span className={`font-semibold text-[11px] tracking-wider uppercase px-2.5 py-0.5 rounded-full border ${
+                    selectedTicket.status === 'Pending Review'
+                      ? 'bg-[#ffb95f]/15 border-[#ffb95f]/30 text-[#ffb95f]'
+                      : 'bg-[#262b35] border-[#3f4850] text-[#bfc7d2]'
+                  }`}>
+                    {selectedTicket.status}
                   </span>
                 </div>
 
                 {/* Contact Data Grid */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                <div className="grid grid-cols-1 gap-3 pt-1">
                   {/* Email */}
                   <div className="bg-[#0a0e16] border border-[#262b35] p-3 rounded-lg flex flex-col justify-center overflow-hidden">
                     <span className="font-semibold text-[#89929b] text-[10.5px] tracking-[0.55px] uppercase">
@@ -602,32 +813,6 @@ export default function ContactSupportSubmissions() {
                     >
                       {selectedTicket.email}
                     </a>
-                  </div>
-
-                  {/* Phone */}
-                  <div className="bg-[#0a0e16] border border-[#262b35] p-3 rounded-lg flex flex-col justify-center">
-                    <span className="font-semibold text-[#89929b] text-[10.5px] tracking-[0.55px] uppercase">
-                      PHONE
-                    </span>
-                    <a
-                      href={`tel:${selectedTicket.phone}`}
-                      className="font-medium text-[#dfe2ee] hover:text-[#4cd7f6] text-[13px] tracking-tight mt-1 block no-underline transition-colors"
-                    >
-                      {selectedTicket.phone}
-                    </a>
-                  </div>
-
-                  {/* Operational Territory / Location */}
-                  <div className="sm:col-span-2 bg-[#0a0e16] border border-[#262b35] p-3 rounded-lg flex flex-col justify-center">
-                    <span className="font-semibold text-[#89929b] text-[10.5px] tracking-[0.55px] uppercase mb-1">
-                      OPERATIONAL TERRITORY / LOCATION
-                    </span>
-                    <div className="flex items-center gap-2">
-                      <MapPin className="w-3.5 h-3.5 shrink-0 opacity-80" aria-hidden="true" />
-                      <span className="font-medium text-[#dfe2ee] text-[13px] tracking-tight">
-                        {selectedTicket.fullLocation}
-                      </span>
-                    </div>
                   </div>
                 </div>
               </div>
@@ -655,7 +840,19 @@ export default function ContactSupportSubmissions() {
                   </p>
                 </div>
 
-                {/* Direct Operational Outbound Trigger & Actions */}
+                {selectedTicket.attachment && (
+                  <a
+                    href={selectedTicket.attachment}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex w-fit items-center gap-2 px-3 py-2 rounded-lg bg-[#0a0e16] border border-[#262b35] text-[#93ccff] hover:text-[#4cd7f6] hover:border-[#4cd7f6]/40 text-xs font-semibold no-underline transition-colors"
+                  >
+                    <Paperclip className="w-3.5 h-3.5" aria-hidden="true" />
+                    <span>View Attachment</span>
+                  </a>
+                )}
+
+                {/* Ticket ID Actions */}
                 <div className="flex items-center justify-between gap-3 pt-1 border-t border-[#262b35] flex-wrap">
                   <div className="flex items-center gap-2">
                     <span className="font-mono text-xs text-[#89929b] bg-[#0a0e16] px-2.5 py-1 rounded border border-[#262b35]">
@@ -677,18 +874,6 @@ export default function ContactSupportSubmissions() {
                       </svg>
                     </button>
                   </div>
-
-                  <a
-                    href={`mailto:${selectedTicket.email}?subject=RE: ${encodeURIComponent(
-                      selectedTicket.subject
-                    )} [${selectedTicket.ticketCode}]`}
-                    className="flex items-center gap-1.5 px-3 py-1.5 bg-[#3198dc] hover:bg-[#43a4e5] text-[#002c47] font-semibold text-xs rounded-lg transition-colors cursor-pointer no-underline shadow-sm"
-                  >
-                    <span>Direct Reply</span>
-                    <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                    </svg>
-                  </a>
                 </div>
               </div>
             </div>

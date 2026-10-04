@@ -21,7 +21,8 @@ import {
   Handshake,
 } from 'lucide-react'
 import { useAuth } from '../hooks/useAuth'
-import { changePassword, updateCurrentUserProfile } from '../api/auth'
+import { changePassword } from '../api/auth'
+import { getSuperAdminProfile, updateSuperAdminProfile } from '../api/admin'
 
 // ── Asset URLs (Figma-sourced) ─────────────────────────────────────────────
 const imgLogo = '/logo.png'
@@ -36,6 +37,8 @@ export default function AdminSettings() {
   const [fullName, setFullName] = useState('Devante Turnquest')
   const [email, setEmail] = useState('admin@goswiftbahamas.com')
   const [phone, setPhone] = useState('+1 (242) 397-2000')
+  const [profileImage, setProfileImage] = useState<string | null>(null)
+  const [profileImageFile, setProfileImageFile] = useState<File | null>(null)
 
   // Password update form state
   const [currentPassword, setCurrentPassword] = useState('')
@@ -51,10 +54,27 @@ export default function AdminSettings() {
   const [isUpdatingPassword, setIsUpdatingPassword] = useState(false)
 
   React.useEffect(() => {
-    if (!auth.user) return
-    setFullName(auth.user.full_name || '')
-    setEmail(auth.user.email || '')
-    setPhone(auth.user.phone_number || '')
+    let cancelled = false
+    async function loadProfile() {
+      try {
+        const profile = await getSuperAdminProfile()
+        if (cancelled) return
+        setFullName(profile.full_name || '')
+        setEmail(profile.email || '')
+        setPhone(profile.phone_number || '')
+        setProfileImage(profile.profile_image)
+      } catch {
+        if (!auth.user || cancelled) return
+        setFullName(auth.user.full_name || '')
+        setEmail(auth.user.email || '')
+        setPhone(auth.user.phone_number || '')
+        setProfileImage(auth.user.profile_image)
+      }
+    }
+    loadProfile()
+    return () => {
+      cancelled = true
+    }
   }, [auth.user])
 
   function showToast(message: string) {
@@ -69,10 +89,13 @@ export default function AdminSettings() {
     setIsSavingAccount(true)
 
     try {
-      await updateCurrentUserProfile({
+      const updated = await updateSuperAdminProfile({
         full_name: fullName,
         phone_number: phone,
+        profile_image: profileImageFile,
       })
+      setProfileImage(updated.profile_image)
+      setProfileImageFile(null)
       await auth.refreshUser()
       setIsSavingAccount(false)
       showToast('Account details saved successfully.')
@@ -355,6 +378,31 @@ export default function AdminSettings() {
 
               {/* Form */}
               <form onSubmit={handleSaveAccount} className="flex flex-col gap-4.5 pt-5">
+                <div className="flex items-center gap-4 p-3 rounded-xl bg-[#0a0e16] border border-[#262b35]">
+                  <div className="flex items-center justify-center w-14 h-14 rounded-xl bg-[#262a33] overflow-hidden shrink-0">
+                    {profileImage ? (
+                      <img src={profileImage} alt={fullName || 'Admin'} className="w-full h-full object-cover" />
+                    ) : (
+                      <UserRound className="w-6 h-6 text-[#4cd7f6]" aria-hidden="true" />
+                    )}
+                  </div>
+                  <div className="flex flex-col gap-1.5 min-w-0">
+                    <label htmlFor="profileImageInput" className="font-medium text-[#dfe2ee] text-xs tracking-wide">
+                      Profile Image
+                    </label>
+                    <input
+                      id="profileImageInput"
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => setProfileImageFile(e.target.files?.[0] ?? null)}
+                      className="text-xs text-[#bfc7d2] file:mr-3 file:rounded-md file:border-0 file:bg-[#3198dc] file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-[#002c47]"
+                    />
+                    {profileImageFile && (
+                      <span className="text-[11px] text-[#89929b] truncate">{profileImageFile.name}</span>
+                    )}
+                  </div>
+                </div>
+
                 {/* Full Name Field */}
                 <div className="flex flex-col gap-1.5">
                   <div className="flex items-center justify-between">

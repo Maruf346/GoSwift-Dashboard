@@ -71,9 +71,10 @@ type PaginatedProviderApplications = {
 export type ProviderApplicationFilters = {
   page: number
   pageSize: number
-  serviceCategory?: ServiceCategory
+  serviceCategory: ServiceCategory
   onboardingStatus?: OnboardingStatus
   isActive?: boolean
+  search?: string
 }
 
 export async function listProviderApplications(filters: ProviderApplicationFilters) {
@@ -81,12 +82,12 @@ export async function listProviderApplications(filters: ProviderApplicationFilte
   params.set('page', String(filters.page))
   params.set('page_size', String(filters.pageSize))
 
-  if (filters.serviceCategory) params.set('service_category', filters.serviceCategory)
   if (filters.onboardingStatus) params.set('onboarding_status', filters.onboardingStatus)
   if (typeof filters.isActive === 'boolean') params.set('is_active', String(filters.isActive))
+  if (filters.search?.trim()) params.set('search', filters.search.trim())
 
   const response = await apiRequest<PaginatedProviderApplications>(
-    `/api/providers/applications/?${params.toString()}`
+    `${getProviderRequestBasePath(filters.serviceCategory)}/?${params.toString()}`
   )
 
   return {
@@ -97,7 +98,7 @@ export async function listProviderApplications(filters: ProviderApplicationFilte
 
 export async function getProviderApplication(serviceCategory: ServiceCategory, id: string) {
   const response = await apiRequest<ProviderApplicationApi>(
-    `/api/providers/applications/${serviceCategory}/${id}/`
+    `${getProviderRequestBasePath(serviceCategory)}/${id}/`
   )
   return mapProviderApplication(response)
 }
@@ -108,7 +109,7 @@ export async function approveProviderApplication(
   note?: string
 ) {
   const response = await apiRequest<ProviderApplicationApi>(
-    `/api/providers/applications/${serviceCategory}/${id}/approve/`,
+    `${getProviderRequestBasePath(serviceCategory)}/${id}/approve/`,
     {
       method: 'POST',
       body: note ? { note } : {},
@@ -123,13 +124,17 @@ export async function rejectProviderApplication(
   note?: string
 ) {
   const response = await apiRequest<ProviderApplicationApi>(
-    `/api/providers/applications/${serviceCategory}/${id}/reject/`,
+    `${getProviderRequestBasePath(serviceCategory)}/${id}/reject/`,
     {
       method: 'POST',
       body: note ? { note } : {},
     }
   )
   return mapProviderApplication(response)
+}
+
+function getProviderRequestBasePath(serviceCategory: ServiceCategory) {
+  return `/api/providers/admin/${serviceCategory}/requests`
 }
 
 export function mapCategoryToServiceCategory(category: string): ServiceCategory | undefined {

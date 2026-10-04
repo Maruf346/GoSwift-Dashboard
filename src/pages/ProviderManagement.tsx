@@ -453,7 +453,7 @@ export default function ProviderManagement() {
 
   // Filters state
   const [searchQuery, setSearchQuery] = useState('')
-  const [selectedCategory, setSelectedCategory] = useState<string>('All')
+  const [selectedCategory, setSelectedCategory] = useState<string>('Driver')
   const [selectedRegion, setSelectedRegion] = useState<string>('All')
   const [selectedStatus, setSelectedStatus] = useState<string>('All')
 
@@ -485,8 +485,9 @@ export default function ProviderManagement() {
       const response = await listProviderApplications({
         page: currentPage,
         pageSize: rowsPerPage,
-        serviceCategory: mapCategoryToServiceCategory(selectedCategory),
+        serviceCategory: mapCategoryToServiceCategory(selectedCategory) || 'rides',
         onboardingStatus: mapStatusToOnboardingStatus(selectedStatus),
+        search: searchQuery,
       })
       setRecords(response.results)
       setTotalRecords(response.count)
@@ -582,10 +583,7 @@ export default function ProviderManagement() {
   // Handle Request Info
   function handleRequestInfo(id: string, _note?: string) {
     const provider = records.find((r) => r.id === id)
-    if (provider?.apiCategory) {
-      showToast(`Request info API is not available yet for ${provider.name || 'this provider'}.`)
-      return
-    }
+    if (provider?.apiCategory) return
     const p = records.find((r) => r.id === id)
     showToast(`✉ Request for additional documents sent to ${p?.name || 'Provider'}.`)
   }
@@ -599,36 +597,21 @@ export default function ProviderManagement() {
   ]
 
   const categories = [
-    { id: 'All', label: 'All Providers' },
-    { id: 'Driver', label: 'Drivers (142)', Icon: Car },
-    { id: 'Food Vendor', label: 'Food Vendors (56)', Icon: Store },
-    { id: 'Courier', label: 'Couriers (48)', Icon: Truck },
-    { id: 'Car Rental Provider', label: 'Car Rental Providers (28)', Icon: Car },
-    { id: 'Property Owner', label: 'Property Owners (34)', Icon: Home },
+    { id: 'Driver', label: 'Drivers', Icon: Car },
+    { id: 'Food Vendor', label: 'Food Vendors', Icon: Store },
+    { id: 'Courier', label: 'Couriers', Icon: Truck },
+    { id: 'Car Rental Provider', label: 'Car Rental Providers', Icon: Car },
+    { id: 'Property Owner', label: 'Property Owners', Icon: Home },
   ]
 
   // Filtered providers
   const filteredProviders = useMemo(() => {
     return records.filter((provider) => {
-      const matchesCategory =
-        selectedCategory === 'All' || provider.category === selectedCategory
       const matchesRegion =
         selectedRegion === 'All' || provider.hub === selectedRegion
-      const matchesStatus =
-        selectedStatus === 'All' || provider.status === selectedStatus
-
-      const query = searchQuery.toLowerCase().trim()
-      const matchesSearch =
-        !query ||
-        provider.name.toLowerCase().includes(query) ||
-        provider.email.toLowerCase().includes(query) ||
-        provider.phone.toLowerCase().includes(query) ||
-        provider.providerId.toLowerCase().includes(query) ||
-        provider.hub.toLowerCase().includes(query)
-
-      return matchesCategory && matchesRegion && matchesStatus && matchesSearch
+      return matchesRegion
     })
-  }, [records, selectedCategory, selectedRegion, selectedStatus, searchQuery])
+  }, [records, selectedRegion])
 
   // Reset page when filter changes
   useEffect(() => {
@@ -637,10 +620,10 @@ export default function ProviderManagement() {
 
   useEffect(() => {
     loadProviderApplications()
-  }, [currentPage, rowsPerPage, selectedCategory, selectedStatus])
+  }, [currentPage, rowsPerPage, selectedCategory, selectedStatus, searchQuery])
 
   // Pagination computations
-  const hasLocalFilters = selectedRegion !== 'All' || searchQuery.trim().length > 0
+  const hasLocalFilters = selectedRegion !== 'All'
   const displayTotal = hasLocalFilters ? filteredProviders.length : totalRecords
   const totalPages = Math.max(1, Math.ceil(totalRecords / rowsPerPage))
   const startIndex = (currentPage - 1) * rowsPerPage

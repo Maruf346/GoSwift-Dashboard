@@ -1,40 +1,35 @@
 import { useState, useMemo, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import {
-  Car,
   BadgeCheck,
   ChevronLeft,
   ChevronRight,
   EllipsisVertical,
-  Home,
   LayoutDashboard,
   LifeBuoy,
   LogOut,
   MapPin,
   Search,
   Settings,
-  Store,
-  Truck,
   UserRound,
   Users,
   Handshake,
 } from 'lucide-react'
 import { useAuth } from '../hooks/useAuth'
+import {
+  listAdminUsers,
+  updateAdminUserStatus,
+  type AdminUserRecord,
+  type AdminUserRole,
+} from '../api/admin'
 
 // ── Asset URLs (Figma-sourced) ─────────────────────────────────────────────
 const imgLogo = '/logo.png'
 
 function UserCategoryIcon({ category }: { category: DirectoryUser['category'] }) {
   switch (category) {
-    case 'Driver':
-    case 'Car Rental Provider':
-      return <Car className="w-3 h-3" aria-hidden="true" />
-    case 'Food Vendor':
-      return <Store className="w-3 h-3" aria-hidden="true" />
-    case 'Courier':
-      return <Truck className="w-3 h-3" aria-hidden="true" />
-    case 'Property Owner':
-      return <Home className="w-3 h-3" aria-hidden="true" />
+    case 'Super Admin':
+      return <UserRound className="w-3 h-3" aria-hidden="true" />
     default:
       return <Users className="w-3 h-3" aria-hidden="true" />
   }
@@ -49,16 +44,17 @@ export interface DirectoryUser {
   name: string
   swiftId: string
   verified?: boolean
-  category: 'Customer' | 'Driver' | 'Food Vendor' | 'Courier' | 'Car Rental Provider' | 'Property Owner'
+  category: 'Customer' | 'Service Provider' | 'Super Admin'
   categoryBg: string
   categoryColor: string
   phone: string
   email: string
   location: string
   date: string
+  isActive: boolean
 }
 
-const directoryUsers: DirectoryUser[] = [
+const directoryUsers = [
   {
     id: '1',
     initials: 'KP',
@@ -365,6 +361,69 @@ const directoryUsers: DirectoryUser[] = [
   },
 ]
 
+void directoryUsers
+
+function formatDate(value?: string | null) {
+  if (!value) return '--'
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return value
+  return date.toLocaleDateString(undefined, {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  })
+}
+
+function getInitials(user: AdminUserRecord) {
+  const source = user.full_name || user.username || user.email
+  return source
+    .split(/\s+|@/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0]?.toUpperCase())
+    .join('') || 'U'
+}
+
+function getRoleLabel(role: AdminUserRole): DirectoryUser['category'] {
+  if (role === 'CUSTOMER') return 'Customer'
+  if (role === 'SUPER_ADMIN') return 'Super Admin'
+  return 'Service Provider'
+}
+
+function getRoleStyle(role: AdminUserRole) {
+  if (role === 'CUSTOMER') return { categoryBg: 'rgba(147,204,255,0.1)', categoryColor: '#93ccff' }
+  if (role === 'SUPER_ADMIN') return { categoryBg: 'rgba(255,185,95,0.15)', categoryColor: '#ffb95f' }
+  return { categoryBg: 'rgba(76,215,246,0.14)', categoryColor: '#4cd7f6' }
+}
+
+function mapUser(user: AdminUserRecord): DirectoryUser {
+  const roleStyle = getRoleStyle(user.role)
+  const location = [user.city, user.state, user.country].filter(Boolean).join(', ')
+  return {
+    id: String(user.id),
+    initials: getInitials(user),
+    avatarBg: user.is_active ? 'rgba(76,215,246,0.2)' : '#31353e',
+    avatarColor: user.is_active ? '#4cd7f6' : '#dfe2ee',
+    name: user.full_name || user.username || user.email,
+    swiftId: `ID: ${user.id}`,
+    verified: user.is_active,
+    category: getRoleLabel(user.role),
+    ...roleStyle,
+    phone: user.phone_number || '--',
+    email: user.email,
+    location: location || '--',
+    date: formatDate(user.date_joined || user.created_at),
+    isActive: user.is_active,
+  }
+}
+
+function mapCategoryToRole(category: string): AdminUserRole | undefined {
+  if (category === 'Customer') return 'CUSTOMER'
+  if (category === 'Service Provider') return 'SERVICE_PROVIDER'
+  if (category === 'Super Admin') return 'SUPER_ADMIN'
+  return undefined
+}
+
 export default function UserManagement() {
   const auth = useAuth()
   const nav = useNavigate()
@@ -375,6 +434,11 @@ export default function UserManagement() {
   const [currentPage, setCurrentPage] = useState(1)
   const [rowsPerPage, setRowsPerPage] = useState(10)
   const [openActionId, setOpenActionId] = useState<string | null>(null)
+  const [users, setUsers] = useState<DirectoryUser[]>([])
+  const [totalUsers, setTotalUsers] = useState(0)
+  const [activeUsers, setActiveUsers] = useState(0)
+  const [isLoadingUsers, setIsLoadingUsers] = useState(false)
+  const [userError, setUserError] = useState<string | null>(null)
 
   function handleLogout() {
     auth.logout()
@@ -390,32 +454,11 @@ export default function UserManagement() {
   ]
 
   const categories = [
-    { id: 'All', label: 'All Categories', count: '1,428' },
-    { id: 'Customer', label: 'Customers', count: '1,120', Icon: Users },
-    { id: 'Driver', label: 'Drivers', count: '142', Icon: Car },
-    { id: 'Food Vendor', label: 'Food Vendors', count: '56', Icon: Store },
-    { id: 'Courier', label: 'Couriers', count: '48', Icon: Truck },
-    { id: 'Car Rental Provider', label: 'Car Rental Providers', count: '28', Icon: Car },
-    { id: 'Property Owner', label: 'Property Owners', count: '34', Icon: Home },
+    { id: 'All', label: 'All Users', Icon: Users },
+    { id: 'Customer', label: 'Customers', Icon: Users },
+    { id: 'Service Provider', label: 'Service Providers', Icon: Handshake },
+    { id: 'Super Admin', label: 'Super Admins', Icon: UserRound },
   ]
-
-  // Filtered rows based on category and live search query
-  const filteredUsers = useMemo(() => {
-    return directoryUsers.filter((user) => {
-      const matchesCategory =
-        selectedCategory === 'All' || user.category === selectedCategory
-      const query = searchQuery.toLowerCase().trim()
-      const matchesSearch =
-        !query ||
-        user.name.toLowerCase().includes(query) ||
-        user.email.toLowerCase().includes(query) ||
-        user.phone.toLowerCase().includes(query) ||
-        user.swiftId.toLowerCase().includes(query) ||
-        user.location.toLowerCase().includes(query)
-
-      return matchesCategory && matchesSearch
-    })
-  }, [selectedCategory, searchQuery])
 
   // Reset to page 1 whenever filters change
   useEffect(() => {
@@ -423,14 +466,11 @@ export default function UserManagement() {
   }, [selectedCategory, searchQuery, rowsPerPage])
 
   // Total pages calculation
-  const totalPages = Math.max(1, Math.ceil(filteredUsers.length / rowsPerPage))
+  const totalPages = Math.max(1, Math.ceil(totalUsers / rowsPerPage))
 
-  // Paginated slice
-  const startIndex = (currentPage - 1) * rowsPerPage
-  const endIndex = Math.min(startIndex + rowsPerPage, filteredUsers.length)
-  const paginatedUsers = useMemo(() => {
-    return filteredUsers.slice(startIndex, endIndex)
-  }, [filteredUsers, startIndex, endIndex])
+  const startIndex = totalUsers === 0 ? 0 : (currentPage - 1) * rowsPerPage + 1
+  const endIndex = Math.min(currentPage * rowsPerPage, totalUsers)
+  const paginatedUsers = users
 
   // Generate pagination page items
   const pageNumbers = useMemo(() => {
@@ -452,6 +492,50 @@ export default function UserManagement() {
     }
     return pages
   }, [totalPages, currentPage])
+
+  useEffect(() => {
+    let isMounted = true
+    setIsLoadingUsers(true)
+    setUserError(null)
+
+    listAdminUsers({
+      page: currentPage,
+      pageSize: rowsPerPage,
+      search: searchQuery,
+      role: mapCategoryToRole(selectedCategory),
+    })
+      .then((response) => {
+        if (!isMounted) return
+        const mappedUsers = response.results.map(mapUser)
+        setUsers(mappedUsers)
+        setTotalUsers(response.count)
+        setActiveUsers(mappedUsers.filter((user) => user.isActive).length)
+      })
+      .catch((error: Error) => {
+        if (!isMounted) return
+        setUsers([])
+        setTotalUsers(0)
+        setActiveUsers(0)
+        setUserError(error.message)
+      })
+      .finally(() => {
+        if (isMounted) setIsLoadingUsers(false)
+      })
+
+    return () => {
+      isMounted = false
+    }
+  }, [currentPage, rowsPerPage, searchQuery, selectedCategory])
+
+  async function handleToggleUserStatus(user: DirectoryUser) {
+    try {
+      const updated = mapUser(await updateAdminUserStatus(Number(user.id), !user.isActive))
+      setUsers((current) => current.map((item) => (item.id === user.id ? updated : item)))
+      setOpenActionId(null)
+    } catch (error) {
+      setUserError(error instanceof Error ? error.message : 'Unable to update user status.')
+    }
+  }
 
   return (
     <div
@@ -677,7 +761,7 @@ export default function UserManagement() {
 
               {/* Subtitle */}
               <p className="text-xs sm:text-sm text-[#bfc7d2] leading-relaxed text-left m-0 pt-1">
-                Comprehensive central registry of all registered Customers, Drivers, Food Vendors, Couriers, Car Rental Providers, and Property Owners across the Commonwealth of The Bahamas.
+                Comprehensive central registry of registered customers, service providers, and super admins.
               </p>
             </div>
 
@@ -686,19 +770,19 @@ export default function UserManagement() {
               {/* TOTAL */}
               <div className="flex items-center gap-2 bg-[#1c2028] px-3.5 py-1.5 rounded-lg border border-[#262b35]/60">
                 <span className="text-[10.5px] font-bold text-[#89929b] uppercase tracking-wider">TOTAL</span>
-                <span className="text-base sm:text-lg font-extrabold text-[#dfe2ee]">1,428</span>
+                <span className="text-base sm:text-lg font-extrabold text-[#dfe2ee]">{totalUsers}</span>
               </div>
               {/* ACTIVE */}
               <div className="flex items-center gap-1.5 bg-[#1c2028] px-3.5 py-1.5 rounded-lg border border-[#262b35]/60">
                 <div className="w-2 h-2 rounded-full bg-[#4cd7f6]" />
-                <span className="text-[10.5px] font-bold text-[#89929b] uppercase tracking-wider">ACTIVE</span>
-                <span className="text-sm sm:text-base font-bold text-[#4cd7f6]">1,385</span>
+                <span className="text-[10.5px] font-bold text-[#89929b] uppercase tracking-wider">ACTIVE SHOWN</span>
+                <span className="text-sm sm:text-base font-bold text-[#4cd7f6]">{activeUsers}</span>
               </div>
-              {/* PENDING */}
+              {/* INACTIVE */}
               <div className="flex items-center gap-1.5 bg-[#1c2028] px-3.5 py-1.5 rounded-lg border border-[#262b35]/60">
                 <div className="w-2 h-2 rounded-full bg-[#ffb95f]" />
-                <span className="text-[10.5px] font-bold text-[#89929b] uppercase tracking-wider">PENDING</span>
-                <span className="text-sm sm:text-base font-bold text-[#ffb95f]">5</span>
+                <span className="text-[10.5px] font-bold text-[#89929b] uppercase tracking-wider">INACTIVE SHOWN</span>
+                <span className="text-sm sm:text-base font-bold text-[#ffb95f]">{Math.max(0, users.length - activeUsers)}</span>
               </div>
             </div>
           </div>
@@ -715,7 +799,7 @@ export default function UserManagement() {
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search by full name, email, phone (+242), or unique Swift ID..."
+                placeholder="Search by full name, email, phone, username, or ID..."
                 className="w-full h-11 bg-[#0a0e16] border border-[#262b35] focus:border-[#4cd7f6] focus:ring-1 focus:ring-[#4cd7f6] rounded-md pl-10 pr-16 text-xs sm:text-sm text-[#dfe2ee] placeholder-[#89929b] outline-none transition-all shadow-[inset_0px_2px_4px_0px_rgba(0,0,0,0.2)]"
               />
               {searchQuery && (
@@ -748,15 +832,6 @@ export default function UserManagement() {
                       <cat.Icon className="w-3.5 h-3.5" aria-hidden="true" />
                     )}
                     <span>{cat.label}</span>
-                    <span
-                      className={`px-1.5 py-0.5 rounded-full text-[11px] font-mono ${
-                        isSelected
-                          ? 'bg-black/20 text-[#003640] font-bold'
-                          : 'bg-[#262a33] text-[#bfc7d2]'
-                      }`}
-                    >
-                      {cat.count}
-                    </span>
                   </button>
                 )
               })}
@@ -793,7 +868,19 @@ export default function UserManagement() {
 
                 {/* Table Body */}
                 <tbody className="divide-y divide-[#222834]">
-                  {paginatedUsers.length === 0 ? (
+                  {isLoadingUsers ? (
+                    <tr>
+                      <td data-label="" colSpan={6} className="py-12 text-center text-[#89929b] text-sm">
+                        Loading users...
+                      </td>
+                    </tr>
+                  ) : userError ? (
+                    <tr>
+                      <td data-label="" colSpan={6} className="py-12 text-center text-red-200 text-sm">
+                        {userError}
+                      </td>
+                    </tr>
+                  ) : paginatedUsers.length === 0 ? (
                     <tr>
                       <td data-label="" colSpan={6} className="py-12 text-center text-[#89929b] text-sm">
                         No users found matching &quot;{searchQuery}&quot; in category &quot;{selectedCategory}&quot;.
@@ -897,32 +984,14 @@ export default function UserManagement() {
                             <div className="absolute right-6 top-12 z-30 w-44 bg-[#1c2028] border border-[#262b35] rounded-lg shadow-2xl p-1 text-left flex flex-col gap-0.5">
                               <button
                                 type="button"
-                                onClick={() => setOpenActionId(null)}
-                                className="px-3 py-1.5 text-xs text-[#dfe2ee] hover:bg-[#262b35] rounded transition-colors text-left border-0 bg-transparent cursor-pointer"
+                                onClick={() => handleToggleUserStatus(user)}
+                                className={`px-3 py-1.5 text-xs rounded transition-colors text-left border-0 bg-transparent cursor-pointer ${
+                                  user.isActive
+                                    ? 'text-red-400 hover:bg-red-950/40'
+                                    : 'text-[#4cd7f6] hover:bg-[#4cd7f6]/10'
+                                }`}
                               >
-                                View User Profile
-                              </button>
-                              <button
-                                type="button"
-                                onClick={() => setOpenActionId(null)}
-                                className="px-3 py-1.5 text-xs text-[#dfe2ee] hover:bg-[#262b35] rounded transition-colors text-left border-0 bg-transparent cursor-pointer"
-                              >
-                                View KYC Records
-                              </button>
-                              <button
-                                type="button"
-                                onClick={() => setOpenActionId(null)}
-                                className="px-3 py-1.5 text-xs text-[#dfe2ee] hover:bg-[#262b35] rounded transition-colors text-left border-0 bg-transparent cursor-pointer"
-                              >
-                                Edit Account Role
-                              </button>
-                              <div className="w-full h-px bg-[#262b35] my-0.5" />
-                              <button
-                                type="button"
-                                onClick={() => setOpenActionId(null)}
-                                className="px-3 py-1.5 text-xs text-red-400 hover:bg-red-950/40 rounded transition-colors text-left border-0 bg-transparent cursor-pointer"
-                              >
-                                Suspend Account
+                                {user.isActive ? 'Deactivate Account' : 'Activate Account'}
                               </button>
                             </div>
                           )}
@@ -942,9 +1011,9 @@ export default function UserManagement() {
                 <span className="text-xs text-[#89929b]">
                   Showing{' '}
                   <strong className="text-[#dfe2ee] font-semibold">
-                    {filteredUsers.length === 0 ? 0 : startIndex + 1} to {endIndex}
+                    {startIndex} to {endIndex}
                   </strong>{' '}
-                  of <strong className="text-[#dfe2ee] font-semibold">{filteredUsers.length}</strong> filtered users (Total Registry: 1,428)
+                  of <strong className="text-[#dfe2ee] font-semibold">{totalUsers}</strong> users
                 </span>
                 <div className="hidden sm:flex items-center gap-1.5 px-2 py-0.5 rounded bg-[#1c2028] border border-[#262b35]">
                   <div className="w-1.5 h-1.5 rounded-full bg-[#4cd7f6]" />

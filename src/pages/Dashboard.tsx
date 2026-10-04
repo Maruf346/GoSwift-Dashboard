@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { ArrowUpRight, Clock3, LayoutDashboard, LifeBuoy, LogOut, Settings, UserRound, Users, Handshake } from 'lucide-react'
 import { useAuth } from '../hooks/useAuth'
 import { listProviderApplications } from '../api/providers'
+import { getDashboardSummary, type DashboardSummary } from '../api/admin'
 import type { ProviderItem } from './ProviderManagement'
 
 // ── Asset URLs (Figma-sourced) ─────────────────────────────────────────────
@@ -127,6 +128,7 @@ export default function Dashboard() {
   const [isMobileOpen, setIsMobileOpen] = useState(false)
   const [pendingProviderRows, setPendingProviderRows] = useState(pendingRows)
   const [pendingProviderCount, setPendingProviderCount] = useState(0)
+  const [summary, setSummary] = useState<DashboardSummary | null>(null)
   const [isLoadingProviders, setIsLoadingProviders] = useState(false)
 
   function handleLogout() {
@@ -140,15 +142,20 @@ export default function Dashboard() {
     async function loadPendingProviders() {
       setIsLoadingProviders(true)
       try {
-        const response = await listProviderApplications({
-          page: 1,
-          pageSize: 5,
-          onboardingStatus: 'submitted',
-        })
+        const [summaryResponse, ...providerResponses] = await Promise.all([
+          getDashboardSummary(),
+          listProviderApplications({ page: 1, pageSize: 5, onboardingStatus: 'submitted', serviceCategory: 'rides' }),
+          listProviderApplications({ page: 1, pageSize: 5, onboardingStatus: 'submitted', serviceCategory: 'restaurants' }),
+          listProviderApplications({ page: 1, pageSize: 5, onboardingStatus: 'submitted', serviceCategory: 'courier' }),
+          listProviderApplications({ page: 1, pageSize: 5, onboardingStatus: 'submitted', serviceCategory: 'rentals' }),
+          listProviderApplications({ page: 1, pageSize: 5, onboardingStatus: 'submitted', serviceCategory: 'properties' }),
+        ])
 
         if (cancelled) return
-        setPendingProviderCount(response.count)
-        setPendingProviderRows(response.results.map(mapProviderToDashboardRow))
+        const providers = providerResponses.flatMap((response) => response.results).slice(0, 5)
+        setSummary(summaryResponse)
+        setPendingProviderCount(summaryResponse.pending_provider_registrations)
+        setPendingProviderRows(providers.map(mapProviderToDashboardRow))
       } catch {
         if (!cancelled) {
           setPendingProviderCount(0)
@@ -448,7 +455,7 @@ export default function Dashboard() {
               </div>
               <div className="flex flex-col items-start w-full gap-1">
                 <div className="flex items-baseline gap-2">
-                  <span className="text-3xl sm:text-4xl font-extrabold text-[#dfe2ee] tracking-tight">1,428</span>
+                  <span className="text-3xl sm:text-4xl font-extrabold text-[#dfe2ee] tracking-tight">{summary?.total_registered_users ?? 0}</span>
                   <span className="text-xs text-[#bfc7d2]">Active Accounts</span>
                 </div>
                 <h2 className="text-base font-semibold text-[#dfe2ee] m-0">
@@ -458,12 +465,12 @@ export default function Dashboard() {
                 {/* 6 Category Grid */}
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 pt-3 w-full">
                   {[
-                    ['Customers', '1,120'],
-                    ['Drivers', '142'],
-                    ['Food Vendors', '56'],
-                    ['Couriers', '48'],
-                    ['Car Rentals', '28'],
-                    ['Properties', '34'],
+                    ['Customers', String(summary?.customers ?? 0)],
+                    ['Drivers', String(summary?.drivers ?? 0)],
+                    ['Food Vendors', String(summary?.food_vendors ?? 0)],
+                    ['Couriers', String(summary?.couriers ?? 0)],
+                    ['Car Rentals', String(summary?.car_rentals ?? 0)],
+                    ['Properties', String(summary?.properties ?? 0)],
                   ].map(([label, val]) => (
                     <div key={label} className="bg-[#262b35]/70 border border-[#31353e] rounded-md p-2 text-left">
                       <span className="block text-[10.5px] font-semibold text-[#89929b] tracking-wider truncate">
@@ -504,7 +511,7 @@ export default function Dashboard() {
               </div>
               <div className="flex flex-col items-start w-full gap-1">
                 <div className="flex items-baseline gap-2">
-                  <span className="text-3xl sm:text-4xl font-extrabold text-[#dfe2ee] tracking-tight">3</span>
+                  <span className="text-3xl sm:text-4xl font-extrabold text-[#dfe2ee] tracking-tight">{summary?.new_support_tickets ?? 0}</span>
                   <span className="text-sm font-semibold text-[#4cd7f6]">New Tickets</span>
                 </div>
                 <h2 className="text-base font-semibold text-[#dfe2ee] m-0">
