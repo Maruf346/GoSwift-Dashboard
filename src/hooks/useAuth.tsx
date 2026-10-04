@@ -1,37 +1,45 @@
 import { createContext, useContext, useMemo, useState, type ReactNode } from 'react'
-import { mockUsers } from '../data/mockAuth'
+import { clearAuthTokens, setAuthTokens } from '../api/client'
+import { getCurrentUser, loginAdmin, type AdminUser } from '../api/auth'
 
-type AuthUser = (typeof mockUsers)[number]
+const USER_STORAGE_KEY = 'goswift_admin_user'
 
 type AuthContextValue = {
-  user: AuthUser | null
-  login: (email: string, password: string) => boolean
+  user: AdminUser | null
+  login: (email: string, password: string) => Promise<boolean>
   logout: () => void
+  refreshUser: () => Promise<void>
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null)
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<AuthUser | null>(() => {
-    const stored = window.localStorage.getItem('goswift_mock_user')
-    return stored ? (JSON.parse(stored) as AuthUser) : null
+  const [user, setUser] = useState<AdminUser | null>(() => {
+    const stored = window.localStorage.getItem(USER_STORAGE_KEY)
+    return stored ? (JSON.parse(stored) as AdminUser) : null
   })
 
-  function login(email: string, password: string) {
-    const found = mockUsers.find((u) => u.email === email && u.password === password) ?? null
-    setUser(found)
-    if (found) {
-      window.localStorage.setItem('goswift_mock_user', JSON.stringify(found))
-    }
-    return !!found
+  async function login(email: string, password: string) {
+    const response = await loginAdmin(email, password)
+    setAuthTokens(response.access, response.refresh)
+    setUser(response.user)
+    window.localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(response.user))
+    return true
+  }
+
+  async function refreshUser() {
+    const currentUser = await getCurrentUser()
+    setUser(currentUser)
+    window.localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(currentUser))
   }
 
   function logout() {
     setUser(null)
-    window.localStorage.removeItem('goswift_mock_user')
+    clearAuthTokens()
+    window.localStorage.removeItem(USER_STORAGE_KEY)
   }
 
-  const value = useMemo(() => ({ user, login, logout }), [user])
+  const value = useMemo(() => ({ user, login, logout, refreshUser }), [user])
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }

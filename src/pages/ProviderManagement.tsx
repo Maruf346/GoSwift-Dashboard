@@ -19,6 +19,15 @@ import {
 } from 'lucide-react'
 import { useAuth } from '../hooks/useAuth'
 import ProviderDetailModal, { type ProviderDetailItem } from '../components/modals/ProviderDetailModal'
+import {
+  approveProviderApplication,
+  getProviderApplication,
+  listProviderApplications,
+  mapCategoryToServiceCategory,
+  mapStatusToOnboardingStatus,
+  rejectProviderApplication,
+  type ServiceCategory,
+} from '../api/providers'
 
 // ── Asset URLs (Figma-sourced) ─────────────────────────────────────────────
 const imgAvatar1 = '/logo.png'
@@ -47,7 +56,9 @@ function ProviderCategoryIcon({ category }: { category: ProviderCategory }) {
 export type ProviderStatus = 'Pending' | 'Approved' | 'Rejected'
 export type ProviderCategory = 'Driver' | 'Food Vendor' | 'Courier' | 'Car Rental Provider' | 'Property Owner'
 
-export type ProviderItem = ProviderDetailItem
+export type ProviderItem = ProviderDetailItem & {
+  apiCategory?: ServiceCategory
+}
 
 const initialProviderRecords: ProviderItem[] = [
   {
@@ -435,7 +446,10 @@ export default function ProviderManagement() {
   const [isMobileOpen, setIsMobileOpen] = useState(false)
 
   // Records state
-  const [records, setRecords] = useState<ProviderItem[]>(initialProviderRecords)
+  const [records, setRecords] = useState<ProviderItem[]>(initialProviderRecords.slice(0, 0))
+  const [totalRecords, setTotalRecords] = useState(0)
+  const [isLoading, setIsLoading] = useState(false)
+  const [apiError, setApiError] = useState('')
 
   // Filters state
   const [searchQuery, setSearchQuery] = useState('')
@@ -463,8 +477,57 @@ export default function ProviderManagement() {
     nav('/')
   }
 
+  async function loadProviderApplications() {
+    setIsLoading(true)
+    setApiError('')
+
+    try {
+      const response = await listProviderApplications({
+        page: currentPage,
+        pageSize: rowsPerPage,
+        serviceCategory: mapCategoryToServiceCategory(selectedCategory),
+        onboardingStatus: mapStatusToOnboardingStatus(selectedStatus),
+      })
+      setRecords(response.results)
+      setTotalRecords(response.count)
+    } catch (err) {
+      setRecords([])
+      setTotalRecords(0)
+      setApiError(err instanceof Error ? err.message : 'Unable to load provider applications.')
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  async function handleOpenProvider(provider: ProviderItem) {
+    setApiError('')
+    setActiveModalProvider(provider)
+
+    if (!provider.apiCategory) return
+
+    try {
+      const detail = await getProviderApplication(provider.apiCategory, provider.id)
+      setActiveModalProvider(detail)
+    } catch (err) {
+      setApiError(err instanceof Error ? err.message : 'Unable to load provider details.')
+    }
+  }
+
   // Handle Approve
-  function handleApproveProvider(id: string) {
+  async function handleApproveProvider(id: string) {
+    const provider = records.find((r) => r.id === id) || activeModalProvider
+    if (provider?.apiCategory) {
+      try {
+        await approveProviderApplication(provider.apiCategory, id)
+        showToast(`Approved ${provider.name || 'provider'} successfully.`)
+        setActiveModalProvider(null)
+        await loadProviderApplications()
+      } catch (err) {
+        showToast(err instanceof Error ? err.message : 'Unable to approve provider.')
+      }
+      return
+    }
+
     setRecords((prev) =>
       prev.map((p) => {
         if (p.id === id) {
@@ -484,7 +547,20 @@ export default function ProviderManagement() {
   }
 
   // Handle Reject
-  function handleRejectProvider(id: string, reason?: string) {
+  async function handleRejectProvider(id: string, reason?: string) {
+    const provider = records.find((r) => r.id === id) || activeModalProvider
+    if (provider?.apiCategory) {
+      try {
+        await rejectProviderApplication(provider.apiCategory, id, reason)
+        showToast(`Rejected ${provider.name || 'provider'} application.`)
+        setActiveModalProvider(null)
+        await loadProviderApplications()
+      } catch (err) {
+        showToast(err instanceof Error ? err.message : 'Unable to reject provider.')
+      }
+      return
+    }
+
     setRecords((prev) =>
       prev.map((p) => {
         if (p.id === id) {
@@ -505,6 +581,11 @@ export default function ProviderManagement() {
 
   // Handle Request Info
   function handleRequestInfo(id: string, _note?: string) {
+    const provider = records.find((r) => r.id === id)
+    if (provider?.apiCategory) {
+      showToast(`Request info API is not available yet for ${provider.name || 'this provider'}.`)
+      return
+    }
     const p = records.find((r) => r.id === id)
     showToast(`✉ Request for additional documents sent to ${p?.name || 'Provider'}.`)
   }
@@ -554,13 +635,22 @@ export default function ProviderManagement() {
     setCurrentPage(1)
   }, [selectedCategory, selectedRegion, selectedStatus, searchQuery, rowsPerPage])
 
+  useEffect(() => {
+    loadProviderApplications()
+  }, [currentPage, rowsPerPage, selectedCategory, selectedStatus])
+
   // Pagination computations
-  const totalPages = Math.max(1, Math.ceil(filteredProviders.length / rowsPerPage))
+  const hasLocalFilters = selectedRegion !== 'All' || searchQuery.trim().length > 0
+  const displayTotal = hasLocalFilters ? filteredProviders.length : totalRecords
+  const totalPages = Math.max(1, Math.ceil(totalRecords / rowsPerPage))
   const startIndex = (currentPage - 1) * rowsPerPage
-  const endIndex = Math.min(startIndex + rowsPerPage, filteredProviders.length)
+  const endIndex = hasLocalFilters
+    ? filteredProviders.length
+    : Math.min(startIndex + records.length, totalRecords)
+  const displayStart = displayTotal === 0 ? 0 : hasLocalFilters ? 1 : startIndex + 1
   const paginatedProviders = useMemo(() => {
-    return filteredProviders.slice(startIndex, endIndex)
-  }, [filteredProviders, startIndex, endIndex])
+    return filteredProviders
+  }, [filteredProviders])
 
   return (
     <div
@@ -781,7 +871,7 @@ export default function ProviderManagement() {
                     Provider Management
                   </h1>
                   <span className="text-xs sm:text-sm font-medium text-[#bfc7d2]">
-                    {records.length} Registered Entities ({records.filter(r => r.status === 'Pending').length} Pending Review)
+                    {totalRecords} Registered Entities ({records.filter(r => r.status === 'Pending').length} Pending Review)
                   </span>
                 </div>
               </div>
@@ -906,7 +996,19 @@ export default function ProviderManagement() {
 
                 {/* Table Body */}
                 <tbody className="divide-y divide-[#222834]">
-                  {paginatedProviders.length === 0 ? (
+                  {isLoading ? (
+                    <tr>
+                      <td data-label="" colSpan={6} className="py-12 text-center text-[#89929b] text-sm">
+                        Loading provider applications...
+                      </td>
+                    </tr>
+                  ) : apiError ? (
+                    <tr>
+                      <td data-label="" colSpan={6} className="py-12 text-center text-[#ffb4ab] text-sm">
+                        {apiError}
+                      </td>
+                    </tr>
+                  ) : paginatedProviders.length === 0 ? (
                     <tr>
                       <td data-label="" colSpan={6} className="py-12 text-center text-[#89929b] text-sm">
                         No providers found matching current filters.
@@ -1015,7 +1117,7 @@ export default function ProviderManagement() {
                         <td data-label="Action" className="mobile-action-cell py-4 px-6 align-middle text-right">
                           <button
                             type="button"
-                            onClick={() => setActiveModalProvider(provider)}
+                            onClick={() => handleOpenProvider(provider)}
                             className={`inline-flex items-center justify-center px-3 py-1 rounded text-[11px] font-bold tracking-wider uppercase transition-colors cursor-pointer border-0 shadow-sm ${
                               provider.status === 'Pending'
                                 ? 'bg-[#03b5d3] hover:bg-[#20c8e4] text-[#00424e]'
@@ -1039,9 +1141,9 @@ export default function ProviderManagement() {
                 <span className="text-xs text-[#89929b]">
                   Displaying{' '}
                   <strong className="text-[#dfe2ee] font-semibold">
-                    {filteredProviders.length === 0 ? 0 : startIndex + 1} - {endIndex}
+                    {displayStart} - {endIndex}
                   </strong>{' '}
-                  of <strong className="text-[#dfe2ee] font-semibold">{filteredProviders.length}</strong> Registered Entities
+                  of <strong className="text-[#dfe2ee] font-semibold">{displayTotal}</strong> Registered Entities
                 </span>
               </div>
 

@@ -15,23 +15,27 @@ export default function Login() {
   const auth = useAuth()
   const nav = useNavigate()
 
-  function handleSubmit(e?: FormEvent) {
+  async function handleSubmit(e?: FormEvent) {
     if (e) e.preventDefault()
     setError('')
     setLoading(true)
 
-    setTimeout(() => {
-      const ok = auth.login(email, password)
+    try {
+      const ok = await auth.login(email, password)
       if (!ok) {
         setError('Invalid administrative credentials. Please verify and try again.')
         setLoading(false)
-      } else {
-        setShowToast(true)
-        setTimeout(() => {
-          nav('/dashboard')
-        }, 800)
+        return
       }
-    }, 400)
+
+      setShowToast(true)
+      setTimeout(() => {
+        nav('/dashboard')
+      }, 800)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Invalid administrative credentials. Please verify and try again.')
+      setLoading(false)
+    }
   }
 
   return (
