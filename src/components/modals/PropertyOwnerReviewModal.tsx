@@ -42,6 +42,7 @@ export interface PropertyOwnerModalProps {
     id: string
     name: string
     providerId: string
+    apiCategory?: string
     avatarImage?: string
     avatarInitials?: string
     avatarBg?: string
@@ -112,6 +113,7 @@ export default function PropertyOwnerReviewModal({
   }
 
   const pData = provider.propertyData || defaultPropertyData
+  const isApiBacked = Boolean(provider.apiCategory)
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 md:p-6 bg-black/85 backdrop-blur-md animate-fadeIn overflow-y-auto">
@@ -314,8 +316,8 @@ export default function PropertyOwnerReviewModal({
                     </span>
                   </div>
 
-                  {/* Field 6: Valuation & Size (node 85:1227) */}
-                  <div className="p-3 rounded-xl bg-[#141a24] border border-[#222c3b]">
+                  {/* Backend missing valuation, bedroom/bath, and nightly-rate fields. Uncomment after API adds property listing metrics. */}
+                  <div className={`p-3 rounded-xl bg-[#141a24] border border-[#222c3b] ${isApiBacked ? 'hidden' : ''}`}>
                     <span className="text-[10px] font-bold text-[#89929b] uppercase tracking-wider block">
                       PROPERTY VALUATION &amp; FOOTPRINT
                     </span>
@@ -334,7 +336,7 @@ export default function PropertyOwnerReviewModal({
           </div>
 
           {/* ═══ SECTION: COMPLIANCE VERIFICATION DOCUMENTS (node 85:1232) ════ */}
-          <div className="space-y-3.5">
+          <div className={`space-y-3.5 ${isApiBacked ? 'hidden' : ''}`}>
             <div className="flex items-center gap-2">
               <svg className="w-4 h-4 text-[#4cd7f6]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
@@ -543,7 +545,7 @@ export default function PropertyOwnerReviewModal({
         <div className="flex flex-wrap items-center justify-between gap-3 px-6 py-4 bg-[#0a0e16] border-t border-[#1f2735]">
           
           {/* Explanatory Status Note (node 85:1281) */}
-          <div className="flex items-center gap-2 text-xs text-[#89929b] font-medium">
+          <div className={`flex items-center gap-2 text-xs text-[#89929b] font-medium ${isApiBacked ? 'hidden' : ''}`}>
             <span className="text-emerald-400 font-bold">✓</span>
             <span>Bahamas Vacation Homes Act 2024 &amp; Ministry of Tourism Short-Term Rental Verified</span>
           </div>

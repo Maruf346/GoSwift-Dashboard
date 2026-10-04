@@ -34,6 +34,7 @@ export interface FoodVendorModalProps {
     id: string
     name: string
     providerId: string
+    apiCategory?: string
     avatarImage?: string
     avatarInitials?: string
     avatarBg?: string
@@ -90,6 +91,7 @@ export default function FoodVendorReviewModal({
   }
 
   const vData = provider.vendorData || defaultVendorData
+  const isApiBacked = Boolean(provider.apiCategory)
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 md:p-6 bg-black/85 backdrop-blur-md animate-fadeIn overflow-y-auto">
@@ -313,7 +315,8 @@ export default function FoodVendorReviewModal({
 
                 </div>
 
-                {/* Regulatory Badges Strip (node 85:2076) */}
+                {/* Backend missing sanitary/food-handler certification details. Uncomment after API adds these fields. */}
+                {!isApiBacked && (
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
                   
                   {/* Card 1: Ministry of Health Sanitary Certificate (node 85:2078) */}
@@ -349,12 +352,14 @@ export default function FoodVendorReviewModal({
                   </div>
 
                 </div>
+                )}
 
               </div>
             </div>
           </div>
 
-          {/* ═══ 3. DOCUMENTS & PERMITS PREVIEW SECTION (node 85:2086) ═══════ */}
+          {/* Backend file fields are not mapped into this UI yet. Uncomment after real document URLs are wired. */}
+          {!isApiBacked && (
           <div className="space-y-3.5">
             <div className="flex items-center gap-2">
               <svg className="w-4 h-4 text-[#4cd7f6]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -452,6 +457,7 @@ export default function FoodVendorReviewModal({
 
             </div>
           </div>
+          )}
 
           {/* Interactive Document Preview Box */}
           {docPreview && (

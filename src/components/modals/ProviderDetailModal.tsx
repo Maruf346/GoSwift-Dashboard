@@ -7,6 +7,7 @@ import type { ProviderCategory, ProviderStatus } from '../../pages/ProviderManag
 
 export interface ProviderDetailItem {
   id: string
+  apiCategory?: string
   name: string
   providerId: string
   avatarImage?: string

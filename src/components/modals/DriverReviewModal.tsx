@@ -35,6 +35,7 @@ export interface DriverModalProps {
     id: string
     name: string
     providerId: string
+    apiCategory?: string
     avatarImage?: string
     avatarInitials?: string
     avatarBg?: string
@@ -89,6 +90,7 @@ export default function DriverReviewModal({
   }
 
   const dData = provider.driverData || defaultDriverData
+  const isApiBacked = Boolean(provider.apiCategory)
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 md:p-6 bg-black/85 backdrop-blur-md animate-fadeIn overflow-y-auto">
@@ -189,10 +191,10 @@ export default function DriverReviewModal({
                     <h3 className="text-base font-black text-[#dfe2ee] m-0 mt-0.5">
                       {provider.name}
                     </h3>
-                    <div className="flex items-center gap-1.5 mt-1">
+                    <div className={`flex items-center gap-1.5 mt-1 ${isApiBacked ? 'hidden' : ''}`}>
                       <span className="text-xs font-bold text-[#ffb95f]">⭐ {dData.rating || 4.95}</span>
                       <span className="text-[#3f4850]">•</span>
-                      <span className="text-[11px] text-[#89929b] font-medium">{dData.completedTrips || 184} Rides</span>
+                      {!isApiBacked && <span className="text-[11px] text-[#89929b] font-medium">{dData.completedTrips || 184} Rides</span>}
                     </div>
                     <div className="inline-flex items-center gap-1 mt-1 text-[10px] font-bold text-emerald-400">
                       <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
@@ -255,11 +257,13 @@ export default function DriverReviewModal({
                     </div>
                     <div className="flex justify-between items-center mt-0.5">
                       <span className="text-xs font-mono font-bold text-[#dfe2ee]">{dData.driverLicenseNumber}</span>
-                      <span className="text-[10px] text-emerald-400">Exp: {dData.driverLicenseExpiry}</span>
+                      {/* Backend missing license expiry. Uncomment after API adds driver_license_expiry. */}
+                      {!isApiBacked && <span className="text-[10px] text-emerald-400">Exp: {dData.driverLicenseExpiry}</span>}
                     </div>
                   </div>
 
-                  {/* Bahamas National ID Number (node 85:2517) */}
+                  {/* Backend missing NIB number/status. Uncomment after API adds nib_number. */}
+                  {!isApiBacked && (
                   <div className="p-2.5 rounded-xl bg-[#141a24] border border-[#222c3b]">
                     <div className="flex justify-between items-center">
                       <span className="text-[10px] font-bold text-[#89929b] uppercase tracking-wider">
@@ -271,6 +275,7 @@ export default function DriverReviewModal({
                       {dData.nibNumber}
                     </span>
                   </div>
+                  )}
 
                 </div>
 
