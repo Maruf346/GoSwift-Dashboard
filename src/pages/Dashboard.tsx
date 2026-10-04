@@ -1,7 +1,9 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { ArrowUpRight, Clock3, LayoutDashboard, LifeBuoy, LogOut, Settings, UserRound, Users, Handshake } from 'lucide-react'
 import { useAuth } from '../hooks/useAuth'
+import { listProviderApplications } from '../api/providers'
+import type { ProviderItem } from './ProviderManagement'
 
 // ── Asset URLs (Figma-sourced) ─────────────────────────────────────────────
 const imgLogo = '/logo.png'
@@ -80,16 +82,89 @@ const pendingRows = [
   },
 ]
 
+function mapProviderToDashboardRow(provider: ProviderItem): (typeof pendingRows)[number] {
+  const { typeBg, typeColor } = getTypeStyle(provider.category)
+
+  return {
+    initials: provider.avatarInitials || getInitials(provider.name),
+    initialsColor: typeColor,
+    name: provider.name,
+    email: provider.email,
+    type: provider.category,
+    typeBg,
+    typeColor,
+    territory: provider.hub,
+    asset: provider.documentName || provider.providerId,
+    assetSub: provider.documentStatus || 'KYC Verification Required',
+    age: provider.submittedDate || 'N/A',
+    ageColor: '#ffb95f',
+  }
+}
+
+function getTypeStyle(category: ProviderItem['category']) {
+  if (category === 'Food Vendor') {
+    return { typeBg: 'rgba(202,129,0,0.25)', typeColor: '#ffb95f' }
+  }
+  if (category === 'Courier' || category === 'Driver') {
+    return { typeBg: 'rgba(147,204,255,0.12)', typeColor: '#93ccff' }
+  }
+  return { typeBg: 'rgba(76,215,246,0.12)', typeColor: '#4cd7f6' }
+}
+
+function getInitials(name: string) {
+  return name
+    .split(' ')
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0]?.toUpperCase())
+    .join('')
+}
+
 export default function Dashboard() {
   const auth = useAuth()
   const nav = useNavigate()
   const [isCollapsed, setIsCollapsed] = useState(false)
   const [isMobileOpen, setIsMobileOpen] = useState(false)
+  const [pendingProviderRows, setPendingProviderRows] = useState(pendingRows)
+  const [pendingProviderCount, setPendingProviderCount] = useState(0)
+  const [isLoadingProviders, setIsLoadingProviders] = useState(false)
 
   function handleLogout() {
     auth.logout()
     nav('/')
   }
+
+  useEffect(() => {
+    let cancelled = false
+
+    async function loadPendingProviders() {
+      setIsLoadingProviders(true)
+      try {
+        const response = await listProviderApplications({
+          page: 1,
+          pageSize: 5,
+          onboardingStatus: 'submitted',
+        })
+
+        if (cancelled) return
+        setPendingProviderCount(response.count)
+        setPendingProviderRows(response.results.map(mapProviderToDashboardRow))
+      } catch {
+        if (!cancelled) {
+          setPendingProviderCount(0)
+          setPendingProviderRows([])
+        }
+      } finally {
+        if (!cancelled) setIsLoadingProviders(false)
+      }
+    }
+
+    loadPendingProviders()
+
+    return () => {
+      cancelled = true
+    }
+  }, [])
 
   const navItems = [
     { Icon: LayoutDashboard, label: 'Dashboard', path: '/dashboard', active: true },
@@ -273,7 +348,7 @@ export default function Dashboard() {
           <div className="flex flex-col items-end text-right">
             <span className="text-xs font-semibold text-[#dfe2ee] leading-tight">Admin Officer</span>
             <span className="text-[10px] font-medium text-[#89929b] tracking-wider leading-tight hidden sm:inline">
-              admin@goswiftbahamas.com
+              {auth.user?.email || 'admin@goswiftbahamas.com'}
             </span>
           </div>
           <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-[#93ccff] text-[#002c47] font-bold shrink-0 shadow-inner">
@@ -303,10 +378,10 @@ export default function Dashboard() {
 
             {/* Welcome Title */}
             <h1 className="text-xl sm:text-2xl font-bold text-[#dfe2ee] tracking-tight m-0 text-left">
-              Welcome back, Admin Officer
+              Welcome back, {auth.user?.full_name || 'Admin Officer'}
             </h1>
             <p className="text-xs sm:text-sm text-[#bfc7d2] m-0 text-left">
-              Review 5 pending operational verifications and address 3 urgent inbound support tickets.
+              Review {pendingProviderCount} pending operational verifications and address urgent inbound support tickets.
             </p>
           </div>
 
@@ -314,7 +389,7 @@ export default function Dashboard() {
           <div className="flex items-center self-start sm:self-center gap-2 bg-[#ca8100]/20 border border-[#ca8100]/30 rounded-lg px-3 py-1.5 shrink-0 shadow-sm">
             <Clock3 className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
             <span className="text-xs font-semibold text-[#ffb95f] tracking-wide">
-              5 Pending Registrations
+              {pendingProviderCount} Pending Registrations
             </span>
           </div>
         </div>
@@ -336,7 +411,7 @@ export default function Dashboard() {
               </div>
               <div className="flex flex-col items-start w-full gap-1">
                 <div className="flex items-baseline gap-2">
-                  <span className="text-3xl sm:text-4xl font-extrabold text-[#dfe2ee] tracking-tight">5</span>
+                  <span className="text-3xl sm:text-4xl font-extrabold text-[#dfe2ee] tracking-tight">{pendingProviderCount}</span>
                   <span className="text-sm font-semibold text-[#ffb95f]">Awaiting Review</span>
                 </div>
                 <h2 className="text-base font-semibold text-[#dfe2ee] m-0">
@@ -466,7 +541,7 @@ export default function Dashboard() {
               </h2>
               <div className="bg-[#ca8100]/20 border border-[#ca8100]/30 rounded-full px-2.5 py-0.5 shrink-0">
                 <span className="text-[10.5px] font-bold text-[#ffb95f] tracking-wide">
-                  5 Pending Verification
+                  {pendingProviderCount} Pending Verification
                 </span>
               </div>
             </div>
@@ -505,7 +580,19 @@ export default function Dashboard() {
 
                 {/* Table Body */}
                 <tbody className="divide-y divide-[#222834]">
-                  {pendingRows.map((row) => (
+                  {isLoadingProviders ? (
+                    <tr>
+                      <td data-label="" colSpan={6} className="py-12 text-center text-[#89929b] text-sm">
+                        Loading pending provider registrations...
+                      </td>
+                    </tr>
+                  ) : pendingProviderRows.length === 0 ? (
+                    <tr>
+                      <td data-label="" colSpan={6} className="py-12 text-center text-[#89929b] text-sm">
+                        No pending provider registrations found.
+                      </td>
+                    </tr>
+                  ) : pendingProviderRows.map((row) => (
                     <tr
                       key={row.name}
                       className="hover:bg-[#1f242e]/70 transition-colors duration-150"
