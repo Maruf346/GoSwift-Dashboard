@@ -477,7 +477,7 @@ export default function UserManagement() {
           {/* Brand Header */}
           <div className="flex items-center justify-between px-3.5 sm:px-4 w-full h-16 shrink-0 bg-[#181c24]/50 border-b border-[#1c2028]">
             <Link
-              to="/"
+              to="/dashboard"
               className={`flex items-center gap-2.5 overflow-hidden no-underline ${
                 isCollapsed ? 'lg:justify-center w-full' : ''
               }`}
@@ -682,7 +682,7 @@ export default function UserManagement() {
             </div>
 
             {/* Live Registry KPI Badges */}
-            <div className="flex items-center gap-2 bg-[#0a0e16] border border-[#262b35] p-1.5 rounded-xl shadow-md shrink-0 self-start lg:self-auto">
+            <div className="flex flex-wrap items-center gap-2 bg-[#0a0e16] border border-[#262b35] p-1.5 rounded-xl shadow-md shrink-0 self-start lg:self-auto max-w-full">
               {/* TOTAL */}
               <div className="flex items-center gap-2 bg-[#1c2028] px-3.5 py-1.5 rounded-lg border border-[#262b35]/60">
                 <span className="text-[10.5px] font-bold text-[#89929b] uppercase tracking-wider">TOTAL</span>
@@ -765,8 +765,8 @@ export default function UserManagement() {
 
           {/* Section: Master User Data Table */}
           <div className="w-full bg-[#181c24] border border-[#262b35] rounded-xl shadow-xl overflow-hidden">
-            <div className="overflow-x-auto w-full">
-              <table className="w-full min-w-[980px] border-collapse text-left">
+            <div className="overflow-x-auto w-full admin-scrollbar">
+              <table className="responsive-table w-full min-w-[980px] border-collapse text-left">
                 {/* Table Header */}
                 <thead className="bg-[#0a0e16] border-b border-[#262b35]">
                   <tr>
@@ -795,7 +795,7 @@ export default function UserManagement() {
                 <tbody className="divide-y divide-[#222834]">
                   {paginatedUsers.length === 0 ? (
                     <tr>
-                      <td colSpan={6} className="py-12 text-center text-[#89929b] text-sm">
+                      <td data-label="" colSpan={6} className="py-12 text-center text-[#89929b] text-sm">
                         No users found matching &quot;{searchQuery}&quot; in category &quot;{selectedCategory}&quot;.
                       </td>
                     </tr>
@@ -806,7 +806,7 @@ export default function UserManagement() {
                         className="hover:bg-[#1f242e]/70 transition-colors duration-150 relative"
                       >
                         {/* User / Entity */}
-                        <td className="py-4 px-6 align-middle">
+                        <td data-label="User / Entity" className="py-4 px-6 align-middle">
                           <div className="flex items-center gap-3">
                             <div
                               className="flex items-center justify-center w-10 h-10 rounded-xl shrink-0 font-bold text-sm shadow-sm border border-white/5"
@@ -837,7 +837,7 @@ export default function UserManagement() {
                         </td>
 
                         {/* Category / Role */}
-                        <td className="py-4 px-4 align-middle">
+                        <td data-label="Category / Role" className="py-4 px-4 align-middle">
                           <span
                             className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold tracking-wide"
                             style={{
@@ -852,7 +852,7 @@ export default function UserManagement() {
                         </td>
 
                         {/* Contact Details */}
-                        <td className="py-4 px-4 align-middle">
+                        <td data-label="Contact Details" className="py-4 px-4 align-middle">
                           <div className="flex flex-col text-left">
                             <span className="text-xs sm:text-[13px] font-medium text-[#dfe2ee] leading-snug">
                               {user.phone}
@@ -864,7 +864,7 @@ export default function UserManagement() {
                         </td>
 
                         {/* Location */}
-                        <td className="py-4 px-4 align-middle">
+                        <td data-label="Location" className="py-4 px-4 align-middle">
                           <div className="flex items-center gap-1.5">
                             <MapPin className="w-3.5 h-3.5 shrink-0 opacity-70" aria-hidden="true" />
                             <span className="text-xs sm:text-[13px] font-medium text-[#bfc7d2] leading-snug">
@@ -874,14 +874,14 @@ export default function UserManagement() {
                         </td>
 
                         {/* Registration Date */}
-                        <td className="py-4 px-4 align-middle">
+                        <td data-label="Registration Date" className="py-4 px-4 align-middle">
                           <span className="text-xs sm:text-[13px] text-[#dfe2ee]">
                             {user.date}
                           </span>
                         </td>
 
                         {/* Actions */}
-                        <td className="py-4 px-6 align-middle text-right relative">
+                        <td data-label="Actions" className="mobile-action-cell py-4 px-6 align-middle text-right relative">
                           <button
                             type="button"
                             onClick={() => setOpenActionId(openActionId === user.id ? null : user.id)}
@@ -935,7 +935,7 @@ export default function UserManagement() {
             </div>
 
             {/* Pagination Toolbar */}
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-4 px-6 py-4 bg-[#0a0e16] border-t border-[#262b35]/60">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 px-4 sm:px-6 py-4 bg-[#0a0e16] border-t border-[#262b35]/60">
               
               {/* Records Counter */}
               <div className="flex flex-wrap items-center gap-3">
@@ -953,7 +953,7 @@ export default function UserManagement() {
               </div>
 
               {/* Pagination Controls */}
-              <div className="flex items-center gap-4">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 w-full md:w-auto">
                 {/* Rows Selector */}
                 <div className="flex items-center gap-2">
                   <span className="text-[11px] font-bold text-[#89929b] uppercase tracking-wider">ROWS:</span>
@@ -969,7 +969,7 @@ export default function UserManagement() {
                 </div>
 
                 {/* Page Navigation Buttons */}
-                <div className="flex items-center gap-1">
+                <div className="flex items-center gap-1 overflow-x-auto admin-scrollbar pb-1 sm:pb-0 max-w-full">
                   {/* Prev Button */}
                   <button
                     type="button"

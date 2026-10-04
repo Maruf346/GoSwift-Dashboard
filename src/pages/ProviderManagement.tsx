@@ -593,7 +593,7 @@ export default function ProviderManagement() {
           {/* Brand Header */}
           <div className="flex items-center justify-between px-3.5 sm:px-4 w-full h-16 shrink-0 bg-[#181c24]/50 border-b border-[#1c2028]">
             <Link
-              to="/"
+              to="/dashboard"
               className={`flex items-center gap-2.5 overflow-hidden no-underline ${
                 isCollapsed ? 'lg:justify-center w-full' : ''
               }`}
@@ -813,7 +813,7 @@ export default function ProviderManagement() {
             <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 w-full pt-1">
               
               {/* Search input */}
-              <div className="relative flex items-center flex-1 max-w-[576px]">
+              <div className="relative flex items-center flex-1 w-full md:max-w-[576px]">
                 <div className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none flex items-center justify-center">
                   <Search className="w-3.5 h-3.5 text-[#89929b]" aria-hidden="true" />
                 </div>
@@ -836,16 +836,16 @@ export default function ProviderManagement() {
               </div>
 
               {/* Region and Status Dropdown Filters */}
-              <div className="flex items-center gap-2">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-2 w-full md:w-auto">
                 {/* Region Filter */}
-                <div className="flex items-center bg-[#181c24] border border-[#262b35] rounded-lg px-2.5 py-1 text-xs">
+                <div className="flex items-center bg-[#181c24] border border-[#262b35] rounded-lg px-2.5 py-1 text-xs w-full sm:w-auto">
                   <span className="text-[10.5px] font-bold text-[#89929b] uppercase tracking-wider mr-2">
                     REGION:
                   </span>
                   <select
                     value={selectedRegion}
                     onChange={(e) => setSelectedRegion(e.target.value)}
-                    className="bg-transparent text-[#dfe2ee] font-medium text-xs outline-none cursor-pointer pr-1"
+                    className="bg-transparent text-[#dfe2ee] font-medium text-xs outline-none cursor-pointer pr-1 min-w-0 flex-1 sm:flex-none"
                   >
                     <option value="All" className="bg-[#1c2028] text-white">All Bahamas Hubs</option>
                     <option value="Nassau" className="bg-[#1c2028] text-white">Nassau</option>
@@ -857,14 +857,14 @@ export default function ProviderManagement() {
                 </div>
 
                 {/* Status Filter */}
-                <div className="flex items-center bg-[#181c24] border border-[#262b35] rounded-lg px-2.5 py-1 text-xs">
+                <div className="flex items-center bg-[#181c24] border border-[#262b35] rounded-lg px-2.5 py-1 text-xs w-full sm:w-auto">
                   <span className="text-[10.5px] font-bold text-[#89929b] uppercase tracking-wider mr-2">
                     STATUS:
                   </span>
                   <select
                     value={selectedStatus}
                     onChange={(e) => setSelectedStatus(e.target.value)}
-                    className="bg-transparent text-[#dfe2ee] font-medium text-xs outline-none cursor-pointer pr-1"
+                    className="bg-transparent text-[#dfe2ee] font-medium text-xs outline-none cursor-pointer pr-1 min-w-0 flex-1 sm:flex-none"
                   >
                     <option value="All" className="bg-[#1c2028] text-white">All Statuses</option>
                     <option value="Approved" className="bg-[#1c2028] text-white">Approved</option>
@@ -878,8 +878,8 @@ export default function ProviderManagement() {
 
           {/* Main Administrative Data Canvas Table */}
           <div className="w-full bg-[#181c24] border border-[#262b35] rounded-xl shadow-xl overflow-hidden">
-            <div className="overflow-x-auto w-full">
-              <table className="w-full min-w-[980px] border-collapse text-left">
+            <div className="overflow-x-auto w-full admin-scrollbar">
+              <table className="responsive-table w-full min-w-[980px] border-collapse text-left">
                 {/* Table Header */}
                 <thead className="bg-[#0a0e16] border-b border-[#262b35]">
                   <tr>
@@ -908,7 +908,7 @@ export default function ProviderManagement() {
                 <tbody className="divide-y divide-[#222834]">
                   {paginatedProviders.length === 0 ? (
                     <tr>
-                      <td colSpan={6} className="py-12 text-center text-[#89929b] text-sm">
+                      <td data-label="" colSpan={6} className="py-12 text-center text-[#89929b] text-sm">
                         No providers found matching current filters.
                       </td>
                     </tr>
@@ -919,7 +919,7 @@ export default function ProviderManagement() {
                         className="hover:bg-[#1f242e]/70 transition-colors duration-150"
                       >
                         {/* Provider Entity & Avatar */}
-                        <td className="py-4 px-6 align-middle">
+                        <td data-label="Provider Entity" className="py-4 px-6 align-middle">
                           <div className="flex items-center gap-3">
                             <div className="flex items-center justify-center w-10 h-10 rounded-xl overflow-hidden shrink-0 bg-[#31353e] border border-white/5 shadow-sm">
                               {provider.avatarImage ? (
@@ -954,7 +954,7 @@ export default function ProviderManagement() {
                         </td>
 
                         {/* Category */}
-                        <td className="py-4 px-4 align-middle">
+                        <td data-label="Provider Category" className="py-4 px-4 align-middle">
                           <div className="flex items-center gap-2">
                             <ProviderCategoryIcon category={provider.category} />
                             <span className="text-xs sm:text-[13px] font-medium text-[#dfe2ee]">
@@ -964,7 +964,7 @@ export default function ProviderManagement() {
                         </td>
 
                         {/* Direct Contact */}
-                        <td className="py-4 px-4 align-middle">
+                        <td data-label="Direct Contact" className="py-4 px-4 align-middle">
                           <div className="flex flex-col text-left">
                             <span className="text-xs sm:text-[13px] font-medium text-[#dfe2ee] leading-snug">
                               {provider.phone}
@@ -976,7 +976,7 @@ export default function ProviderManagement() {
                         </td>
 
                         {/* Hub Location */}
-                        <td className="py-4 px-4 align-middle">
+                        <td data-label="Hub Location" className="py-4 px-4 align-middle">
                           <div className="flex items-center gap-1.5">
                             <MapPin className="w-3.5 h-3.5 shrink-0 opacity-70" aria-hidden="true" />
                             <span className="text-xs sm:text-[13px] font-medium text-[#dfe2ee]">
@@ -986,7 +986,7 @@ export default function ProviderManagement() {
                         </td>
 
                         {/* Approval Status Badge */}
-                        <td className="py-4 px-4 align-middle">
+                        <td data-label="Approval Status" className="py-4 px-4 align-middle">
                           {provider.status === 'Pending' && (
                             <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#ca8100]/30 border border-[#ca8100]/40">
                               <div className="w-1.5 h-1.5 rounded-full bg-[#ffb95f]" />
@@ -1012,7 +1012,7 @@ export default function ProviderManagement() {
                         </td>
 
                         {/* Action CTA */}
-                        <td className="py-4 px-6 align-middle text-right">
+                        <td data-label="Action" className="mobile-action-cell py-4 px-6 align-middle text-right">
                           <button
                             type="button"
                             onClick={() => setActiveModalProvider(provider)}
@@ -1033,7 +1033,7 @@ export default function ProviderManagement() {
             </div>
 
             {/* Pagination / Meta Footer */}
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-4 px-6 py-4 bg-[#0a0e16] border-t border-[#262b35]/60">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 px-4 sm:px-6 py-4 bg-[#0a0e16] border-t border-[#262b35]/60">
               {/* Display counter */}
               <div className="flex items-center gap-2">
                 <span className="text-xs text-[#89929b]">
@@ -1046,7 +1046,7 @@ export default function ProviderManagement() {
               </div>
 
               {/* Rows Per Page & Page Navigation */}
-              <div className="flex items-center gap-3">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-3 w-full md:w-auto">
                 <div className="flex items-center gap-1.5 text-xs text-[#89929b]">
                   <span className="font-bold text-[10.5px] uppercase">ROWS:</span>
                   <select

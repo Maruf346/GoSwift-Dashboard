@@ -477,8 +477,8 @@ export default function Dashboard() {
 
           {/* Full-width Responsive Table Container */}
           <div className="w-full bg-[#181c24] border border-[#262b35] rounded-xl shadow-xl overflow-hidden">
-            <div className="overflow-x-auto w-full">
-              <table className="w-full min-w-[920px] border-collapse text-left">
+            <div className="overflow-x-auto w-full admin-scrollbar">
+              <table className="responsive-table w-full min-w-[920px] border-collapse text-left">
                 {/* Table Header */}
                 <thead className="bg-[#0a0e16] border-b border-[#262b35]">
                   <tr>
@@ -511,7 +511,7 @@ export default function Dashboard() {
                       className="hover:bg-[#1f242e]/70 transition-colors duration-150"
                     >
                       {/* Provider Entity & Avatar */}
-                      <td className="py-4 px-6 align-middle">
+                      <td data-label="Provider" className="py-4 px-6 align-middle">
                         <div className="flex items-center gap-3">
                           <div
                             className="flex items-center justify-center w-9 h-9 rounded-md bg-[#262a33] shrink-0 border border-[#31353e] shadow-sm"
@@ -535,7 +535,7 @@ export default function Dashboard() {
                       </td>
 
                       {/* Classification Pill */}
-                      <td className="py-4 px-4 align-middle">
+                      <td data-label="Classification" className="py-4 px-4 align-middle">
                         <span
                           className="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-semibold tracking-wide"
                           style={{
@@ -549,14 +549,14 @@ export default function Dashboard() {
                       </td>
 
                       {/* Territory */}
-                      <td className="py-4 px-4 align-middle">
+                      <td data-label="Territory" className="py-4 px-4 align-middle">
                         <span className="text-xs sm:text-[13px] font-medium text-[#bfc7d2] leading-snug">
                           {row.territory}
                         </span>
                       </td>
 
                       {/* Asset & Sub-tag */}
-                      <td className="py-4 px-4 align-middle">
+                      <td data-label="Core Asset" className="py-4 px-4 align-middle">
                         <div className="flex flex-col text-left">
                           <span className="text-xs sm:text-[13px] font-semibold text-[#dfe2ee] leading-snug">
                             {row.asset}
@@ -568,7 +568,7 @@ export default function Dashboard() {
                       </td>
 
                       {/* Submission Age */}
-                      <td className="py-4 px-4 align-middle">
+                      <td data-label="Submission Age" className="py-4 px-4 align-middle">
                         <span
                           className="text-xs font-semibold"
                           style={{ color: row.ageColor }}
@@ -578,7 +578,7 @@ export default function Dashboard() {
                       </td>
 
                       {/* Action Button */}
-                      <td className="py-4 px-6 align-middle text-right">
+                      <td data-label="Workflow Action" className="mobile-action-cell py-4 px-6 align-middle text-right">
                         <button
                           type="button"
                           onClick={() => nav('/providers')}

@@ -386,7 +386,7 @@ export default function ContactSupportSubmissions() {
             </div>
 
             {/* Quick Metrics Ribbon */}
-            <div className="bg-[#181c24] border border-[#262b35] drop-shadow-sm flex items-center p-1.5 rounded-xl shrink-0 self-start lg:self-auto">
+            <div className="bg-[#181c24] border border-[#262b35] drop-shadow-sm flex flex-col sm:flex-row sm:items-center p-1.5 rounded-xl shrink-0 self-start lg:self-auto w-full sm:w-auto">
               {/* Total Queue */}
               <div className="flex flex-col items-start px-4 py-1 text-left">
                 <span className="font-semibold text-[#89929b] text-[11px] tracking-[0.55px] uppercase">
@@ -401,7 +401,7 @@ export default function ContactSupportSubmissions() {
               </div>
 
               {/* Vertical Divider */}
-              <div className="bg-[#31353e] h-8 w-[1px]" />
+              <div className="bg-[#31353e] h-[1px] sm:h-8 w-full sm:w-[1px]" />
 
               {/* Unreviewed / Pending */}
               <div className="flex flex-col items-start px-4 py-1 text-left">
@@ -420,7 +420,7 @@ export default function ContactSupportSubmissions() {
               </div>
 
               {/* Vertical Divider */}
-              <div className="bg-[#31353e] h-8 w-[1px]" />
+              <div className="bg-[#31353e] h-[1px] sm:h-8 w-full sm:w-[1px]" />
 
               {/* Reviewed Metric */}
               <div className="flex flex-col items-start px-4 py-1 text-left">
@@ -442,7 +442,7 @@ export default function ContactSupportSubmissions() {
             {/* Left Column: Submissions List (Master Panel - 7 cols) */}
             <div className="lg:col-span-7 flex flex-col bg-[#181c24] border border-[#262b35] rounded-xl p-3 sm:p-4 shadow-lg drop-shadow-sm">
               {/* List Header */}
-              <div className="flex items-center justify-between px-3 py-2 border-b border-[#262b35] mb-3">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 px-3 py-2 border-b border-[#262b35] mb-3">
                 <span className="font-semibold text-[#89929b] text-[11px] tracking-[0.55px] uppercase">
                   INCOMING COMMUNICATIONS
                 </span>
@@ -469,7 +469,7 @@ export default function ContactSupportSubmissions() {
                     >
                       {/* Top Row: Name, Tag, Timestamp */}
                       <div className="flex items-center justify-between gap-2 flex-wrap">
-                        <div className="flex items-center gap-2">
+                        <div className="flex flex-wrap items-center gap-2 min-w-0">
                           <div
                             className={`rounded-full size-2 shrink-0 ${
                               isPending ? 'bg-[#ffb95f]' : 'bg-[#4cd7f6]'
@@ -503,7 +503,7 @@ export default function ContactSupportSubmissions() {
 
                       {/* Bottom Row: Phone, Island Location, Status Badge */}
                       <div className="flex items-center justify-between gap-3 pt-1 flex-wrap text-xs">
-                        <div className="flex items-center gap-4 text-[#89929b]">
+                        <div className="flex flex-wrap items-center gap-3 sm:gap-4 text-[#89929b]">
                           <div className="flex items-center gap-1.5">
                             <Phone className="w-3 h-3 shrink-0 opacity-70" aria-hidden="true" />
                             <span className="text-[12.5px] font-medium">{ticket.phone}</span>
@@ -515,7 +515,7 @@ export default function ContactSupportSubmissions() {
                         </div>
 
                         {/* Status badge */}
-                        <div className="ml-auto">
+                        <div className="sm:ml-auto">
                           {isPending ? (
                             <span className="bg-[#ffb95f]/15 border border-[#ffb95f]/30 text-[#ffb95f] font-medium text-[11px] tracking-wide px-2.5 py-0.5 rounded-full inline-flex items-center gap-1">
                               <span className="w-1.5 h-1.5 rounded-full bg-[#ffb95f]" />
@@ -536,9 +536,9 @@ export default function ContactSupportSubmissions() {
             </div>
 
             {/* Right Column: Submitted Details View Panel (Detail Inspector - 5 cols) */}
-            <div className="lg:col-span-5 flex flex-col gap-4 sticky top-24">
+            <div className="lg:col-span-5 flex flex-col gap-4 lg:sticky lg:top-24">
               {/* 1. Action Header Box */}
-              <div className="bg-[#181c24] border border-[#262b35] flex items-center justify-between p-4 rounded-xl shadow-lg drop-shadow-sm">
+              <div className="bg-[#181c24] border border-[#262b35] flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 rounded-xl shadow-lg drop-shadow-sm">
                 <div className="flex items-center gap-2 text-left">
                   <ClipboardCheck className="w-4 h-4 shrink-0 text-[#4cd7f6]" aria-hidden="true" />
                   <span className="font-semibold text-[#dfe2ee] text-base tracking-tight">

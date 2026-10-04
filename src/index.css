@@ -112,3 +112,91 @@ code {
   padding: 4px 8px;
   background: var(--code-bg);
 }
+
+@layer components {
+  .admin-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: #3f4850 #0a0e16;
+  }
+
+  .admin-scrollbar::-webkit-scrollbar {
+    height: 10px;
+    width: 10px;
+  }
+
+  .admin-scrollbar::-webkit-scrollbar-track {
+    background: #0a0e16;
+  }
+
+  .admin-scrollbar::-webkit-scrollbar-thumb {
+    background: #3f4850;
+    border-radius: 999px;
+    border: 2px solid #0a0e16;
+  }
+
+  @media (max-width: 767px) {
+    .responsive-table {
+      min-width: 0 !important;
+    }
+
+    .responsive-table thead {
+      display: none;
+    }
+
+    .responsive-table,
+    .responsive-table tbody,
+    .responsive-table tr,
+    .responsive-table td {
+      display: block;
+      width: 100% !important;
+    }
+
+    .responsive-table tbody {
+      padding: 0.75rem;
+      background: #0a0e16;
+    }
+
+    .responsive-table tr {
+      border: 1px solid #262b35;
+      border-radius: 0.75rem;
+      overflow: hidden;
+      background: #181c24;
+      box-shadow: 0 14px 28px rgba(0, 0, 0, 0.22);
+    }
+
+    .responsive-table tr + tr {
+      margin-top: 0.75rem;
+    }
+
+    .responsive-table td {
+      padding: 0.75rem 0.875rem !important;
+      text-align: left !important;
+      border-bottom: 1px solid #262b35;
+    }
+
+    .responsive-table td:last-child {
+      border-bottom: 0;
+    }
+
+    .responsive-table td::before {
+      content: attr(data-label);
+      display: block;
+      margin-bottom: 0.375rem;
+      color: #89929b;
+      font-size: 10.5px;
+      line-height: 1.2;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .responsive-table td[data-label='']::before {
+      display: none;
+    }
+
+    .responsive-table .mobile-action-cell > * {
+      width: 100%;
+      justify-content: center;
+    }
+  }
+}
