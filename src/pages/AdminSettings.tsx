@@ -11,6 +11,7 @@ import {
   Lock,
   LogOut,
   Mail,
+  Pencil,
   Phone,
   Save,
   Settings,
@@ -19,6 +20,7 @@ import {
   UserRound,
   Users,
   Handshake,
+  X,
 } from 'lucide-react'
 import { useAuth } from '../hooks/useAuth'
 import { changePassword } from '../api/auth'
@@ -52,6 +54,7 @@ export default function AdminSettings() {
   const [toastMessage, setToastMessage] = useState<string | null>(null)
   const [isSavingAccount, setIsSavingAccount] = useState(false)
   const [isUpdatingPassword, setIsUpdatingPassword] = useState(false)
+  const [isEditingProfile, setIsEditingProfile] = useState(false)
 
   React.useEffect(() => {
     let cancelled = false
@@ -96,6 +99,7 @@ export default function AdminSettings() {
       })
       setProfileImage(updated.profile_image)
       setProfileImageFile(null)
+      setIsEditingProfile(false)
       await auth.refreshUser()
       setIsSavingAccount(false)
       showToast('Account details saved successfully.')
@@ -364,144 +368,212 @@ export default function AdminSettings() {
               <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#03b5d3] via-[#93ccff] to-transparent opacity-60" />
 
               {/* Card Header */}
-              <div className="flex items-center gap-3 pb-5 border-b border-[#262b35]">
-                <div className="bg-[#262a33] flex items-center justify-center rounded-lg size-10 shrink-0">
-                  <ShieldCheck className="w-4 h-4 text-[#4cd7f6]" aria-hidden="true" />
+              <div className="flex items-center justify-between gap-3 pb-5 border-b border-[#262b35]">
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="bg-[#262a33] flex items-center justify-center rounded-lg size-10 shrink-0">
+                    <ShieldCheck className="w-4 h-4 text-[#4cd7f6]" aria-hidden="true" />
+                  </div>
+                  <div className="flex flex-col items-start min-w-0">
+                    <h2 className="font-semibold text-[#dfe2ee] text-lg sm:text-xl tracking-tight m-0">
+                      Profile
+                    </h2>
+                    <p className="font-normal text-[#bfc7d2] text-xs sm:text-[13px] m-0">
+                      View your administrator account details.
+                    </p>
+                  </div>
                 </div>
-                <div className="flex flex-col items-start">
-                  <h2 className="font-semibold text-[#dfe2ee] text-lg sm:text-xl tracking-tight m-0">
-                    Administrator Account Information
-                  </h2>
-                  <p className="font-normal text-[#bfc7d2] text-xs sm:text-[13px] m-0">
-                    Update your primary admin contact details.
+                <button
+                  type="button"
+                  onClick={() => setIsEditingProfile(true)}
+                  className="inline-flex items-center justify-center gap-2 h-9 px-3 rounded-lg bg-[#0a0e16] border border-[#262b35] text-[#93ccff] hover:text-[#4cd7f6] hover:border-[#4cd7f6]/50 text-xs font-semibold transition-colors cursor-pointer"
+                  aria-label="Edit profile"
+                  title="Edit profile"
+                >
+                  <Pencil className="w-3.5 h-3.5" aria-hidden="true" />
+                  <span className="hidden sm:inline">Edit</span>
+                </button>
+              </div>
+
+              <div className="flex flex-col gap-5 pt-5">
+                <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+                  <div className="flex items-center justify-center w-20 h-20 rounded-2xl bg-[#262a33] overflow-hidden shrink-0 border border-[#313846]">
+                    {profileImage ? (
+                      <img src={profileImage} alt={fullName || 'Admin'} className="w-full h-full object-cover" />
+                    ) : (
+                      <UserRound className="w-8 h-8 text-[#4cd7f6]" aria-hidden="true" />
+                    )}
+                  </div>
+                  <div className="flex flex-col gap-1 min-w-0">
+                    <span className="text-[11px] font-bold text-[#89929b] uppercase tracking-wider">
+                      Super Admin
+                    </span>
+                    <h3 className="text-xl font-bold text-[#dfe2ee] tracking-tight m-0 break-words">
+                      {fullName || 'Admin'}
+                    </h3>
+                    <span className="text-sm text-[#bfc7d2] break-all">{email || 'No email available'}</span>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="bg-[#0a0e16] border border-[#262b35] rounded-xl p-3">
+                    <div className="flex items-center gap-2 text-[#89929b] text-[11px] font-bold uppercase tracking-wider">
+                      <Mail className="w-3.5 h-3.5" aria-hidden="true" />
+                      Email Address
+                    </div>
+                    <p className="text-sm font-medium text-[#dfe2ee] break-all mt-2 mb-0">
+                      {email || '--'}
+                    </p>
+                  </div>
+                  <div className="bg-[#0a0e16] border border-[#262b35] rounded-xl p-3">
+                    <div className="flex items-center gap-2 text-[#89929b] text-[11px] font-bold uppercase tracking-wider">
+                      <Phone className="w-3.5 h-3.5" aria-hidden="true" />
+                      Phone Number
+                    </div>
+                    <p className="text-sm font-medium text-[#dfe2ee] mt-2 mb-0">
+                      {phone || '--'}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="bg-[#0a0e16]/60 border border-[#262b35] flex items-start gap-2.5 p-3 rounded-xl">
+                  <Info className="w-4 h-4 shrink-0 mt-0.5 opacity-80 text-[#93ccff]" aria-hidden="true" />
+                  <p className="font-normal text-[#bfc7d2] text-xs leading-relaxed m-0">
+                    Use the edit button to update your profile image, full name, or phone number. Email is locked by the backend account identity.
                   </p>
                 </div>
               </div>
 
-              {/* Form */}
-              <form onSubmit={handleSaveAccount} className="flex flex-col gap-4.5 pt-5">
-                <div className="flex items-center gap-4 p-3 rounded-xl bg-[#0a0e16] border border-[#262b35]">
-                  <div className="flex items-center justify-center w-14 h-14 rounded-xl bg-[#262a33] overflow-hidden shrink-0">
-                    {profileImage ? (
-                      <img src={profileImage} alt={fullName || 'Admin'} className="w-full h-full object-cover" />
-                    ) : (
-                      <UserRound className="w-6 h-6 text-[#4cd7f6]" aria-hidden="true" />
-                    )}
-                  </div>
-                  <div className="flex flex-col gap-1.5 min-w-0">
-                    <label htmlFor="profileImageInput" className="font-medium text-[#dfe2ee] text-xs tracking-wide">
-                      Profile Image
-                    </label>
-                    <input
-                      id="profileImageInput"
-                      type="file"
-                      accept="image/*"
-                      onChange={(e) => setProfileImageFile(e.target.files?.[0] ?? null)}
-                      className="text-xs text-[#bfc7d2] file:mr-3 file:rounded-md file:border-0 file:bg-[#3198dc] file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-[#002c47]"
-                    />
-                    {profileImageFile && (
-                      <span className="text-[11px] text-[#89929b] truncate">{profileImageFile.name}</span>
-                    )}
-                  </div>
-                </div>
-
-                {/* Full Name Field */}
-                <div className="flex flex-col gap-1.5">
-                  <div className="flex items-center justify-between">
-                    <label htmlFor="fullNameInput" className="font-medium text-[#dfe2ee] text-xs tracking-wide">
-                      Full Name
-                    </label>
-                    <span className="font-semibold text-[#89929b] text-[11px] tracking-wide">
-                      Primary Lead
-                    </span>
-                  </div>
-                  <div className="relative flex items-center">
-                    <div className="absolute left-3.5 pointer-events-none">
-                      <User className="w-4 h-4 opacity-80" aria-hidden="true" />
-                    </div>
-                    <input
-                      id="fullNameInput"
-                      type="text"
-                      value={fullName}
-                      onChange={(e) => setFullName(e.target.value)}
-                      required
-                      placeholder="e.g. Devante Turnquest"
-                      className="w-full h-11 bg-[#0a0e16] border border-[#262b35] focus:border-[#4cd7f6] focus:ring-1 focus:ring-[#4cd7f6] rounded-lg pl-10 pr-4 text-sm text-[#dfe2ee] placeholder-[#89929b] outline-none transition-all shadow-inner"
-                    />
-                  </div>
-                </div>
-
-                {/* Email Address Field */}
-                <div className="flex flex-col gap-1.5">
-                  <div className="flex items-center justify-between">
-                    <label htmlFor="emailInput" className="font-medium text-[#dfe2ee] text-xs tracking-wide">
-                      Email Address
-                    </label>
-                    <span className="font-semibold text-[#4cd7f6] text-[11px] tracking-wide">
-                      Operational Alert Channel
-                    </span>
-                  </div>
-                  <div className="relative flex items-center">
-                    <div className="absolute left-3.5 pointer-events-none">
-                      <Mail className="w-4 h-4 opacity-80" aria-hidden="true" />
-                    </div>
-                    <input
-                      id="emailInput"
-                      type="email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      required
-                      placeholder="admin@goswiftbahamas.com"
-                      className="w-full h-11 bg-[#0a0e16] border border-[#262b35] focus:border-[#4cd7f6] focus:ring-1 focus:ring-[#4cd7f6] rounded-lg pl-10 pr-4 text-sm text-[#dfe2ee] placeholder-[#89929b] outline-none transition-all shadow-inner"
-                    />
-                  </div>
-                </div>
-
-                {/* Phone Number Field */}
-                <div className="flex flex-col gap-1.5">
-                  <div className="flex items-center justify-between">
-                    <label htmlFor="phoneInput" className="font-medium text-[#dfe2ee] text-xs tracking-wide">
-                      Phone Number
-                    </label>
-                    <span className="font-semibold text-[#89929b] text-[11px] tracking-wide">
-                      Bahamas (+1 242)
-                    </span>
-                  </div>
-                  <div className="relative flex items-center">
-                    <div className="absolute left-3.5 pointer-events-none">
-                      <Phone className="w-4 h-4 opacity-80" aria-hidden="true" />
-                    </div>
-                    <input
-                      id="phoneInput"
-                      type="tel"
-                      value={phone}
-                      onChange={(e) => setPhone(e.target.value)}
-                      placeholder="+1 (242) 397-2000"
-                      className="w-full h-11 bg-[#0a0e16] border border-[#262b35] focus:border-[#4cd7f6] focus:ring-1 focus:ring-[#4cd7f6] rounded-lg pl-10 pr-4 text-sm text-[#dfe2ee] placeholder-[#89929b] outline-none transition-all shadow-inner"
-                    />
-                  </div>
-                </div>
-
-                {/* Status Note */}
-                <div className="bg-[#0a0e16]/60 border border-[#262b35] flex items-start gap-2.5 p-2.5 rounded-lg mt-1">
-                  <Info className="w-4 h-4 shrink-0 mt-0.5 opacity-80 text-[#93ccff]" aria-hidden="true" />
-                  <p className="font-normal text-[#bfc7d2] text-xs leading-relaxed m-0">
-                    Changes take effect immediately across the GO SWIFT BAHAMAS Admin console.
-                  </p>
-                </div>
-
-                {/* Save Button */}
-                <div className="pt-2">
-                  <button
-                    type="submit"
-                    disabled={isSavingAccount}
-                    className="flex items-center justify-center gap-2 w-full sm:w-auto h-11 px-6 rounded-lg bg-[#3198dc] hover:bg-[#43a4e5] text-[#002c47] font-semibold text-sm transition-all cursor-pointer border-0 shadow-md disabled:opacity-50"
+              {isEditingProfile && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
+                  <form
+                    onSubmit={handleSaveAccount}
+                    className="w-full max-w-xl max-h-[90vh] overflow-y-auto bg-[#181c24] border border-[#313846] rounded-xl shadow-2xl p-5 sm:p-6 flex flex-col gap-4.5"
                   >
-                    <Save className="w-3.5 h-3.5" aria-hidden="true" />
-                    <span>{isSavingAccount ? 'Saving...' : 'Save Account Details'}</span>
-                  </button>
+                    <div className="flex items-start justify-between gap-3 pb-4 border-b border-[#262b35]">
+                      <div className="flex flex-col gap-1">
+                        <h3 className="text-lg font-bold text-[#dfe2ee] m-0">Edit Profile</h3>
+                        <p className="text-xs text-[#bfc7d2] m-0">Update profile details for the admin account.</p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setIsEditingProfile(false)
+                          setProfileImageFile(null)
+                        }}
+                        className="inline-flex items-center justify-center w-9 h-9 rounded-lg bg-[#0a0e16] border border-[#262b35] text-[#89929b] hover:text-[#dfe2ee] hover:bg-[#262b35] transition-colors cursor-pointer"
+                        aria-label="Close edit profile"
+                      >
+                        <X className="w-4 h-4" aria-hidden="true" />
+                      </button>
+                    </div>
+
+                    <div className="flex items-center gap-4 p-3 rounded-xl bg-[#0a0e16] border border-[#262b35]">
+                      <div className="flex items-center justify-center w-14 h-14 rounded-xl bg-[#262a33] overflow-hidden shrink-0">
+                        {profileImage ? (
+                          <img src={profileImage} alt={fullName || 'Admin'} className="w-full h-full object-cover" />
+                        ) : (
+                          <UserRound className="w-6 h-6 text-[#4cd7f6]" aria-hidden="true" />
+                        )}
+                      </div>
+                      <div className="flex flex-col gap-1.5 min-w-0">
+                        <label htmlFor="profileImageInput" className="font-medium text-[#dfe2ee] text-xs tracking-wide">
+                          Profile Image
+                        </label>
+                        <input
+                          id="profileImageInput"
+                          type="file"
+                          accept="image/*"
+                          onChange={(e) => setProfileImageFile(e.target.files?.[0] ?? null)}
+                          className="text-xs text-[#bfc7d2] file:mr-3 file:rounded-md file:border-0 file:bg-[#3198dc] file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-[#002c47]"
+                        />
+                        {profileImageFile && (
+                          <span className="text-[11px] text-[#89929b] truncate">{profileImageFile.name}</span>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="flex flex-col gap-1.5">
+                      <label htmlFor="fullNameInput" className="font-medium text-[#dfe2ee] text-xs tracking-wide">
+                        Full Name
+                      </label>
+                      <div className="relative flex items-center">
+                        <div className="absolute left-3.5 pointer-events-none">
+                          <User className="w-4 h-4 opacity-80" aria-hidden="true" />
+                        </div>
+                        <input
+                          id="fullNameInput"
+                          type="text"
+                          value={fullName}
+                          onChange={(e) => setFullName(e.target.value)}
+                          required
+                          placeholder="e.g. Devante Turnquest"
+                          className="w-full h-11 bg-[#0a0e16] border border-[#262b35] focus:border-[#4cd7f6] focus:ring-1 focus:ring-[#4cd7f6] rounded-lg pl-10 pr-4 text-sm text-[#dfe2ee] placeholder-[#89929b] outline-none transition-all shadow-inner"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="flex flex-col gap-1.5">
+                      <label htmlFor="emailInput" className="font-medium text-[#dfe2ee] text-xs tracking-wide">
+                        Email Address
+                      </label>
+                      <div className="relative flex items-center">
+                        <div className="absolute left-3.5 pointer-events-none">
+                          <Mail className="w-4 h-4 opacity-80" aria-hidden="true" />
+                        </div>
+                        <input
+                          id="emailInput"
+                          type="email"
+                          value={email}
+                          disabled
+                          readOnly
+                          placeholder="admin@goswiftbahamas.com"
+                          className="w-full h-11 bg-[#0a0e16]/70 border border-[#262b35] rounded-lg pl-10 pr-4 text-sm text-[#89929b] placeholder-[#89929b] outline-none shadow-inner cursor-not-allowed"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="flex flex-col gap-1.5">
+                      <label htmlFor="phoneInput" className="font-medium text-[#dfe2ee] text-xs tracking-wide">
+                        Phone Number
+                      </label>
+                      <div className="relative flex items-center">
+                        <div className="absolute left-3.5 pointer-events-none">
+                          <Phone className="w-4 h-4 opacity-80" aria-hidden="true" />
+                        </div>
+                        <input
+                          id="phoneInput"
+                          type="tel"
+                          value={phone}
+                          onChange={(e) => setPhone(e.target.value)}
+                          placeholder="+1 (242) 397-2000"
+                          className="w-full h-11 bg-[#0a0e16] border border-[#262b35] focus:border-[#4cd7f6] focus:ring-1 focus:ring-[#4cd7f6] rounded-lg pl-10 pr-4 text-sm text-[#dfe2ee] placeholder-[#89929b] outline-none transition-all shadow-inner"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="flex flex-col sm:flex-row sm:justify-end gap-2 pt-2">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setIsEditingProfile(false)
+                          setProfileImageFile(null)
+                        }}
+                        className="h-11 px-5 rounded-lg bg-[#0a0e16] border border-[#262b35] text-[#bfc7d2] hover:text-[#dfe2ee] hover:bg-[#262b35] font-semibold text-sm transition-colors cursor-pointer"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        type="submit"
+                        disabled={isSavingAccount}
+                        className="flex items-center justify-center gap-2 h-11 px-6 rounded-lg bg-[#3198dc] hover:bg-[#43a4e5] text-[#002c47] font-semibold text-sm transition-all cursor-pointer border-0 shadow-md disabled:opacity-50"
+                      >
+                        <Save className="w-3.5 h-3.5" aria-hidden="true" />
+                        <span>{isSavingAccount ? 'Saving...' : 'Save Profile'}</span>
+                      </button>
+                    </div>
+                  </form>
                 </div>
-              </form>
+              )}
             </div>
 
             {/* ── CARD 2: Update Password ────────────────────────────────────── */}
