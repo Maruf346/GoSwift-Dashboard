@@ -714,9 +714,11 @@ export default function UserManagement() {
         {/* Right Side: User profile badge */}
         <div className="flex items-center gap-2.5 bg-[#1c2028] border border-[#262b35] rounded-xl pl-3 sm:pl-4 pr-1.5 py-1.5 shadow-sm">
           <div className="flex flex-col items-end text-right">
-            <span className="text-xs font-semibold text-[#dfe2ee] leading-tight">Admin Officer</span>
+            <span className="text-xs font-semibold text-[#dfe2ee] leading-tight">
+              {auth.user?.full_name || 'Admin'}
+            </span>
             <span className="text-[10px] font-medium text-[#89929b] tracking-wider leading-tight hidden sm:inline">
-              admin@goswiftbahamas.com
+              {auth.user?.email || 'admin@goswiftbahamas.com'}
             </span>
           </div>
           <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-[#93ccff] text-[#002c47] font-bold shrink-0 shadow-inner">

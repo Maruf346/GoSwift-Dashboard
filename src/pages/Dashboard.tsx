@@ -353,7 +353,9 @@ export default function Dashboard() {
         {/* Right Side: User profile badge */}
         <div className="flex items-center gap-2.5 bg-[#1c2028] border border-[#262b35] rounded-xl pl-3 sm:pl-4 pr-1.5 py-1.5 shadow-sm">
           <div className="flex flex-col items-end text-right">
-            <span className="text-xs font-semibold text-[#dfe2ee] leading-tight">Admin Officer</span>
+            <span className="text-xs font-semibold text-[#dfe2ee] leading-tight">
+              {auth.user?.full_name || 'Admin'}
+            </span>
             <span className="text-[10px] font-medium text-[#89929b] tracking-wider leading-tight hidden sm:inline">
               {auth.user?.email || 'admin@goswiftbahamas.com'}
             </span>
@@ -385,7 +387,7 @@ export default function Dashboard() {
 
             {/* Welcome Title */}
             <h1 className="text-xl sm:text-2xl font-bold text-[#dfe2ee] tracking-tight m-0 text-left">
-              Welcome back, {auth.user?.full_name || 'Admin Officer'}
+              Welcome back, {auth.user?.full_name || 'Admin'}
             </h1>
             <p className="text-xs sm:text-sm text-[#bfc7d2] m-0 text-left">
               Review {pendingProviderCount} pending operational verifications and address urgent inbound support tickets.
